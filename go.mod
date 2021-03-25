@@ -1,4 +1,4 @@
-module github.com/saferwall/saferwall/web
+module github.com/saferwall/saferwall-api
 
 go 1.15
 
@@ -15,10 +15,9 @@ require (
 	github.com/saferwall/saferwall/pkg/crypto v0.0.1
 	github.com/saferwall/saferwall/pkg/peparser v0.1.0
 	github.com/saferwall/saferwall/pkg/utils v0.0.5
+	github.com/saferwall/saferwall/web v0.0.0-20210216074605-3ce79b3f2bf6
 	github.com/sirupsen/logrus v1.5.0
 	github.com/spf13/viper v1.7.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
-	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
-	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 )

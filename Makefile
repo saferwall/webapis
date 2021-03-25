@@ -55,3 +55,6 @@ dk-release: ## Build and release frontend in a docker container.
 		sudo make docker-release IMG=$(DOCKER_HUB_IMG) VERSION=$(SAFERWALL_VER) \
 			DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
+
+dc-up: 	## Run the docker-compose up.
+	docker-compose up
