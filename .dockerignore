@@ -1,0 +1,6 @@
+*
+!*.go
+*.pb.go
+!*.proto
+!go.mod
+!go.sum
