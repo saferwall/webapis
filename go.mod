@@ -10,7 +10,6 @@ require (
 	github.com/kjk/betterguid v0.0.0-20170621091430-c442874ba63a
 	github.com/labstack/echo/v4 v4.2.1
 	github.com/matcornic/hermes/v2 v2.1.0
-	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/saferwall/pe v1.0.3
