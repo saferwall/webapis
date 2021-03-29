@@ -22,14 +22,14 @@ import (
 	"github.com/couchbase/gocb/v2"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
-	"github.com/minio/minio-go/v6"
+	"github.com/minio/minio-go/v7"
+	"github.com/saferwall/saferwall-api/app"
+	"github.com/saferwall/saferwall-api/app/common/db"
+	"github.com/saferwall/saferwall-api/app/common/utils"
+	"github.com/saferwall/saferwall-api/app/handler/user"
 	"github.com/saferwall/saferwall/pkg/crypto"
-	peparser "github.com/saferwall/saferwall/pkg/peparser"
+	peparser "github.com/saferwall/pe"
 	u "github.com/saferwall/saferwall/pkg/utils"
-	"github.com/saferwall/saferwall/web/app"
-	"github.com/saferwall/saferwall/web/app/common/db"
-	"github.com/saferwall/saferwall/web/app/common/utils"
-	"github.com/saferwall/saferwall/web/app/handler/user"
 	log "github.com/sirupsen/logrus"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -469,7 +469,7 @@ func PostFiles(c echo.Context) error {
 		// Upload the sample to the object storage.
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
-		n, err := app.MinioClient.PutObjectWithContext(ctx, app.SamplesSpaceBucket,
+		n, err := app.MinioClient.PutObject(ctx, app.SamplesSpaceBucket,
 			sha256, bytes.NewReader(fileContents), size,
 			minio.PutObjectOptions{ContentType: "application/octet-stream"})
 		if err != nil {
@@ -566,8 +566,9 @@ func DeleteFiles(c echo.Context) error {
 func Download(c echo.Context) error {
 	// get path param
 	sha256 := strings.ToLower(c.Param("sha256"))
-
-	reader, err := app.MinioClient.GetObject(
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	reader, err := app.MinioClient.GetObject(ctx,
 		app.SamplesSpaceBucket, sha256, minio.GetObjectOptions{})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -686,7 +687,9 @@ func Actions(c echo.Context) error {
 			Sha256:      sha256,
 		})
 	case "download":
-		reader, err := app.MinioClient.GetObject(
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	    defer cancel()
+		reader, err := app.MinioClient.GetObject(ctx,
 			app.SamplesSpaceBucket, sha256, minio.GetObjectOptions{})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())

@@ -11,10 +11,10 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
-	"github.com/saferwall/saferwall/web/app"
-	"github.com/saferwall/saferwall/web/app/middleware"
-	"github.com/saferwall/saferwall/web/app/email"
-	"github.com/saferwall/saferwall/web/app/handler/user"
+	"github.com/saferwall/saferwall-api/app"
+	"github.com/saferwall/saferwall-api/app/email"
+	"github.com/saferwall/saferwall-api/app/handler/user"
+	"github.com/saferwall/saferwall-api/app/middleware"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
 	"golang.org/x/crypto/bcrypt"
@@ -77,7 +77,7 @@ func createJwtCookie(token string) *http.Cookie {
 	cookie.Domain = app.Domain
 	cookie.HttpOnly = true
 	cookie.SameSite = http.SameSiteLaxMode
-	cookie.Secure = true   
+	cookie.Secure = true
 	return cookie
 }
 
@@ -410,7 +410,7 @@ func UpdatePassword(c echo.Context) error {
 	username := c.Param("username")
 	if username != currentUsername {
 		return c.JSON(http.StatusUnauthorized, map[string]string{
-				"verbose_msg": "Not allowed to update someone else's password"})
+			"verbose_msg": "Not allowed to update someone else's password"})
 	}
 
 	// Read the json body
@@ -478,7 +478,7 @@ func UpdateEmail(c echo.Context) error {
 	username := c.Param("username")
 	if username != currentUsername {
 		return c.JSON(http.StatusUnauthorized, map[string]string{
-				"verbose_msg": "Not allowed to update someone else's email"})
+			"verbose_msg": "Not allowed to update someone else's email"})
 	}
 
 	// Read the json body
@@ -529,7 +529,7 @@ func UpdateEmail(c echo.Context) error {
 	}
 
 	// Check new email != current email
-	if newEmail == usr.Email  {
+	if newEmail == usr.Email {
 		return c.JSON(http.StatusOK, map[string]string{
 			"verbose_msg": "New email is the same as current email, nothing to change",
 		})

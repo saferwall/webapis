@@ -1,36 +1,36 @@
-### Config sample, needs to be edited.
+### Config example.
 
 [ui]
-address = "http://localhost:8081"
+address = "http://localhost:8000"
 
 [app]
-address = "<host:port>"
+address = ":8080"
 debug = true
 tmp_samples = "/tmp/samples"
 max_file_size = 64000000 # 64MB
 max_avatar_file_size = 100000 # 100KB
-admin_user = "<admin>"
-admin_pwd = "<password>"
-admin_email = "<admin@company.com>"
+admin_user = "admin"
+admin_pwd = "password"
+admin_email = "admin@saferwall.com>"
 
 [db]
-server = "couchbase://<host>"
-username = "<username>"
-password = "<password>"
+server = "couchbase://localhost"
+username = "Administrator"
+password = "password"
 
 [nsq]
-addr = "localhost:4150"
+address = "localhost:4150"
 
 [minio]
 endpoint = "localhost:9000"
-seckey = "<seckey>"
-accesskey = "<accesskey>"
+seckey = "minio123"
+accesskey = "minio"
 spacename = "samples"
 avatarspace = "images"
 ssl = false
 
 [auth]
-signkey = "<signkey>"
+signkey = "secret"
 
 [smtp]
 server = "smtp.example.com"

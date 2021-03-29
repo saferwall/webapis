@@ -5,16 +5,18 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 
-	nsq "github.com/nsqio/go-nsq"
 	"github.com/matcornic/hermes/v2"
-	minio "github.com/minio/minio-go/v6"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7"
+	nsq "github.com/nsqio/go-nsq"
+	"github.com/saferwall/saferwall-api/app/common/db"
 	"github.com/saferwall/saferwall/pkg/utils"
-	"github.com/saferwall/saferwall/web/app/common/db"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/xeipuuv/gojsonschema"
@@ -28,7 +30,6 @@ type SMTPAuthentication struct {
 	SMTPUser       string
 	SMTPPassword   string
 }
-
 
 var (
 	// RootDir points to the root dir
@@ -84,7 +85,7 @@ var (
 
 	// CommentSchema represent an comment creation.
 	CommentSchema *gojsonschema.Schema
-	
+
 	// SamplesSpaceBucket contains the space name of bucket to save samples.
 	SamplesSpaceBucket string
 
@@ -106,23 +107,11 @@ var (
 
 // loadConfig loads our configration.
 func loadConfig() {
-	viper.AddConfigPath("config") // set the path of your config file
+	viper.AddConfigPath("configs") // set the path of your config file
 
 	// Load the config type depending on env variable.
-	var name string
-	env := os.Getenv("ENVIRONMENT")
-	switch env {
-	case "dev":
-		name = "app.dev"
-	case "prod":
-		name = "app.prod"
-	case "test":
-		name = "app.test"
-	default:
-		log.Fatal("ENVIRONMENT is not set")
-	}
-
-	viper.SetConfigName(name)    // no need to include file extension
+	name := "app"
+	viper.SetConfigName(name) // no need to include file extension
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -177,19 +166,19 @@ func loadSchemas() {
 			return nil
 		}
 		files = append(files, path)
-        return nil
-    })
-    if err != nil {
+		return nil
+	})
+	if err != nil {
 		log.Fatalln("Failed to walk schemas directory, err: ", err)
 	}
-	
+
 	// Iterate though json schemas and load them.
-    for _, file := range files {
+	for _, file := range files {
 		jsonSchema := filepath.Base(file)
 		source := fmt.Sprintf("file:///%s", file)
 		jsonLoader := gojsonschema.NewReferenceLoader(source)
 
-		switch jsonSchema{
+		switch jsonSchema {
 		case "user.json":
 			UserSchema, err = gojsonschema.NewSchema(jsonLoader)
 		case "file.json":
@@ -217,34 +206,40 @@ func loadSchemas() {
 		if err != nil {
 			log.Fatalf("Error while loading %s schema: ", jsonSchema, err)
 		}
-    }
+	}
 
 	log.Infoln("Schemas were loaded")
 }
 
 // initOSClient returns a client for our Object Storage interface.
 func initOSClient() *minio.Client {
-	accessKey := viper.GetString("minio.accesskey")
-	secKey := viper.GetString("minio.seckey")
+	accessKeyID := viper.GetString("minio.accesskey")
+	secretAccessKey := viper.GetString("minio.seckey")
 	endpoint := viper.GetString("minio.endpoint")
 	SamplesSpaceBucket = viper.GetString("minio.spacename")
 	AvatarSpaceBucket = viper.GetString("minio.avatarspace")
-	ssl := viper.GetBool("minio.ssl")
+	useSSL := viper.GetBool("minio.ssl")
 	location := "us-east-1"
 
 	// Initiate a client using DigitalOcean Spaces.
-	client, err := minio.New(endpoint, accessKey, secKey, ssl)
+	opts := minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: useSSL,
+	}
+	minioClient, err := minio.New(endpoint, &opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Infoln("Got Object Storage client instance")
 
-	found, err := client.BucketExists(SamplesSpaceBucket)
+	ctx := context.Background()
+	found, err := minioClient.BucketExists(ctx, SamplesSpaceBucket)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	if !found {
-		err = client.MakeBucket(SamplesSpaceBucket, location)
+		err = minioClient.MakeBucket(ctx, SamplesSpaceBucket,
+			minio.MakeBucketOptions{Region: location})
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -252,12 +247,13 @@ func initOSClient() *minio.Client {
 		log.Printf("Object storage Bucket %s exists already", SamplesSpaceBucket)
 	}
 
-	found, err = client.BucketExists(AvatarSpaceBucket)
+	found, err = minioClient.BucketExists(ctx, AvatarSpaceBucket)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	if !found {
-		err = client.MakeBucket(AvatarSpaceBucket, location)
+		err = minioClient.MakeBucket(ctx, AvatarSpaceBucket,
+			minio.MakeBucketOptions{Region: location})
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -265,7 +261,7 @@ func initOSClient() *minio.Client {
 		log.Printf("Object storage bucket %s exists already", AvatarSpaceBucket)
 	}
 
-	return client
+	return minioClient
 }
 
 // initEmail initialize SMTP email config and setup hermes theme and product info.
@@ -300,14 +296,14 @@ func loadAvatars() {
 	AvatarFileBuff, err = utils.ReadAll(defaultAvatarPath)
 	if err != nil {
 		log.Fatalf("Failed to open read avatar from %s, reason: %s",
-		 defaultAvatarPath, err.Error())
+			defaultAvatarPath, err.Error())
 	}
 
 	sfwAvatarPath := path.Join(dir, "data", "saferwall-avatar.png")
 	SfwAvatarFileDesc, err = os.Open(sfwAvatarPath)
 	if err != nil {
 		log.Fatalf("Failed to open saferwall avatar from %s, reason: %s",
-		sfwAvatarPath, err.Error())
+			sfwAvatarPath, err.Error())
 	}
 
 	log.Println("Load Avatars success")

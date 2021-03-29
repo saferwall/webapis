@@ -5,14 +5,11 @@
 package main
 
 import (
-	"github.com/saferwall/saferwall/web/app"
-	"github.com/saferwall/saferwall/web/app/route"
-	"github.com/spf13/viper"
+	"github.com/saferwall/saferwall-api/app"
+	"github.com/saferwall/saferwall-api/app/route"
 	log "github.com/sirupsen/logrus"
-
+	"github.com/spf13/viper"
 )
-
-
 
 func main() {
 

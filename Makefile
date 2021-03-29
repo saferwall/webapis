@@ -58,3 +58,33 @@ dk-release: ## Build and release frontend in a docker container.
 
 dc-up: 	## Run the docker-compose up.
 	docker-compose up
+
+BUCKET_LIST = files users
+dc-init-db:		## Init couchbase database
+	# Init the cluster.
+	docker-compose exec couchbase \
+		couchbase-cli cluster-init \
+		--cluster localhost \
+		--cluster-username Administrator \
+		--cluster-password password \
+		--cluster-port 8091 \
+		--cluster-name saferwall \
+		--services data,index,query \
+		--cluster-ramsize 512 \
+		--cluster-index-ramsize 256 || true
+
+	# Create require buckets.
+	for bucket in $(BUCKET_LIST) ; do \
+		echo "${GREEN} [*] =============== Creating $$bucket =============== ${RESET}" ; \
+		docker-compose exec couchbase \
+			couchbase-cli bucket-create \
+			--cluster localhost \
+			--username Administrator \
+			--password password \
+			--bucket $$bucket \
+			--bucket-type couchbase \
+			--bucket-ramsize 128 \
+			--max-ttl 500000000 \
+			--durability-min-level persistToMajority \
+			--enable-flush 0 ; \
+	done

@@ -8,13 +8,14 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/go-gomail/gomail"
-	"github.com/matcornic/hermes/v2"
-	"github.com/saferwall/saferwall/web/app"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/mail"
 	"os"
+
+	"github.com/go-gomail/gomail"
+	"github.com/matcornic/hermes/v2"
+	"github.com/saferwall/saferwall-api/app"
+	log "github.com/sirupsen/logrus"
 )
 
 type template interface {

@@ -6,10 +6,10 @@ package route
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/saferwall/saferwall/web/app/handler/auth"
-	"github.com/saferwall/saferwall/web/app/handler/file"
-	"github.com/saferwall/saferwall/web/app/handler/user"
-	m "github.com/saferwall/saferwall/web/app/middleware"
+	"github.com/saferwall/saferwall-api/app/handler/auth"
+	"github.com/saferwall/saferwall-api/app/handler/file"
+	"github.com/saferwall/saferwall-api/app/handler/user"
+	m "github.com/saferwall/saferwall-api/app/middleware"
 )
 
 // New create an echo insance

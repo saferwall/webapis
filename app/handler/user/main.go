@@ -16,11 +16,11 @@ import (
 	"github.com/couchbase/gocb/v2"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
-	"github.com/minio/minio-go/v6"
-	"github.com/saferwall/saferwall/web/app"
-	"github.com/saferwall/saferwall/web/app/common/db"
-	"github.com/saferwall/saferwall/web/app/common/utils"
-	"github.com/saferwall/saferwall/web/app/email"
+	"github.com/minio/minio-go/v7"
+	"github.com/saferwall/saferwall-api/app"
+	"github.com/saferwall/saferwall-api/app/common/db"
+	"github.com/saferwall/saferwall-api/app/common/utils"
+	"github.com/saferwall/saferwall-api/app/email"
 	"github.com/xeipuuv/gojsonschema"
 
 	"bytes"
@@ -29,7 +29,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"github.com/saferwall/saferwall/web/app/middleware"
+	"github.com/saferwall/saferwall-api/app/middleware"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -416,7 +416,7 @@ func CreateAdminUser() {
 	// Upload the sample to the object storage.
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	_, err = app.MinioClient.PutObjectWithContext(ctx, app.AvatarSpaceBucket,
+	_, err = app.MinioClient.PutObject(ctx, app.AvatarSpaceBucket,
 		username, app.SfwAvatarFileDesc, fi.Size(),
 		minio.PutObjectOptions{ContentType: "application/octet-stream"})
 	if err != nil {
@@ -703,7 +703,9 @@ func GetAvatar(c echo.Context) error {
 	}
 
 	// Read it from object storage.
-	reader, err := app.MinioClient.GetObject(
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	reader, err := app.MinioClient.GetObject(ctx,
 		app.AvatarSpaceBucket, username, minio.GetObjectOptions{})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
@@ -783,7 +785,7 @@ func UpdateAvatar(c echo.Context) error {
 	// Upload the sample to the object storage.
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	n, err := app.MinioClient.PutObjectWithContext(ctx, app.AvatarSpaceBucket,
+	n, err := app.MinioClient.PutObject(ctx, app.AvatarSpaceBucket,
 		username, bytes.NewReader(fileContents), size,
 		minio.PutObjectOptions{ContentType: "application/octet-stream"})
 	if err != nil {
