@@ -59,24 +59,28 @@ type Comment struct {
 
 // User represent a user.
 type User struct {
-	Email       string       `json:"email,omitempty"`
-	Username    string       `json:"username,omitempty"`
-	Password    string       `json:"password,omitempty"`
-	Name        string       `json:"name,omitempty"`
-	Location    string       `json:"location,omitempty"`
-	URL         string       `json:"url,omitempty"`
-	Bio         string       `json:"bio,omitempty"`
-	Confirmed   bool         `json:"confirmed,omitempty"`
-	MemberSince *time.Time   `json:"member_since,omitempty"`
-	LastSeen    *time.Time   `json:"last_seen,omitempty"`
-	Admin       bool         `json:"admin,omitempty"`
-	HasAvatar   bool         `json:"has_avatar,omitempty"`
-	Following   []string     `json:"following,omitempty"`
-	Followers   []string     `json:"followers,omitempty"`
-	Likes       []string     `json:"likes,omitempty"`
-	Activities  []Activity   `json:"activities,omitempty"`
-	Submissions []Submission `json:"submissions,omitempty"`
-	Comments    []Comment    `json:"comments,omitempty"`
+	Email          string       `json:"email,omitempty"`
+	Username       string       `json:"username,omitempty"`
+	Password       string       `json:"password,omitempty"`
+	Name           string       `json:"name,omitempty"`
+	Location       string       `json:"location,omitempty"`
+	URL            string       `json:"url,omitempty"`
+	Bio            string       `json:"bio,omitempty"`
+	Confirmed      bool         `json:"confirmed,omitempty"`
+	MemberSince    *time.Time   `json:"member_since,omitempty"`
+	LastSeen       *time.Time   `json:"last_seen,omitempty"`
+	Admin          bool         `json:"admin,omitempty"`
+	HasAvatar      bool         `json:"has_avatar,omitempty"`
+	Following      []string     `json:"following,omitempty"`
+	FollowingCount int          `json:"following_count,omitempty"`
+	Followers      []string     `json:"followers,omitempty"`
+	FollowersCount int          `json:"followers_count,omitempty"`
+	Likes          []string     `json:"likes,omitempty"`
+	LikesCount     int          `json:"likes_count,omitempty"`
+	Activities     []Activity   `json:"activities,omitempty"`
+	Submissions    []Submission `json:"submissions,omitempty"`
+	Comments       []Comment    `json:"comments,omitempty"`
+	CommentsCount  int          `json:"comments_count,omitempty"`
 }
 
 // NewActivity creates a new activity.
@@ -797,7 +801,7 @@ func UpdateAvatar(c echo.Context) error {
 		})
 	}
 
-	log.Infof("Successfully uploaded bytes: %d", n)
+	log.Infof("Successfully uploaded bytes: %v", n)
 
 	// Update user
 	usr.HasAvatar = true
@@ -877,6 +881,7 @@ func Actions(c echo.Context) error {
 	case "follow":
 		if !utils.IsStringInSlice(targetUser.Username, currentUser.Following) {
 			currentUser.Following = append(currentUser.Following, targetUser.Username)
+			currentUser.FollowingCount += 1
 
 			// add new activity
 			activity := currentUser.NewActivity("follow", map[string]string{
@@ -887,15 +892,18 @@ func Actions(c echo.Context) error {
 		}
 		if !utils.IsStringInSlice(currentUser.Username, targetUser.Followers) {
 			targetUser.Followers = append(targetUser.Followers, currentUser.Username)
+			targetUser.FollowersCount += 1
 			targetUser.Save()
 		}
 
 	case "unfollow":
 		if utils.IsStringInSlice(targetUser.Username, currentUser.Following) {
 			currentUser.Following = utils.RemoveStringFromSlice(currentUser.Following, targetUser.Username)
+			currentUser.FollowingCount -= 1
 		}
 		if utils.IsStringInSlice(currentUser.Username, targetUser.Followers) {
 			targetUser.Followers = utils.RemoveStringFromSlice(targetUser.Followers, currentUser.Username)
+			targetUser.FollowersCount -= 1
 		}
 		currentUser.Save()
 		targetUser.Save()

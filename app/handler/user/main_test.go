@@ -43,12 +43,12 @@ func TestPostUsers(t *testing.T) {
 
 	resp, err := MakePostRequest(user)
 	if err != nil {
-		t.Errorf("TestPostUsers() failed, err: %s", err)
+		t.Fatalf("TestPostUsers() failed, err: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 201 {
-		t.Errorf("TestPostUsers() failed, got status != 201: %s", resp.Status)
+		t.Fatalf("TestPostUsers() failed, got status != 201: %s", resp.Status)
 	}
 	var result map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&result)
@@ -59,16 +59,18 @@ func TestPostUsers(t *testing.T) {
 func TestGetUsers(t *testing.T) {
 	resp, err := http.Get(url)
 	if err != nil {
-		t.Errorf("TestGetUsers() failed, err: %s", err)
-	}
-
-	if resp.StatusCode != 200 {
-		t.Errorf("TestPostUsers() failed, got status != 200: %s", resp.Status)
+		t.Fatalf("TestGetUsers() failed, err: %s", err)
 	}
 
 	defer resp.Body.Close()
-
 	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+	log.Println(result)
+
+	if resp.StatusCode != 200 {
+		t.Fatalf("TestPostUsers() failed, got status != 200: %v", resp.Status)
+	}
+
 	json.NewDecoder(resp.Body).Decode(&result)
 	log.Println(result)
 }

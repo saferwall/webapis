@@ -51,17 +51,33 @@
       "description": "Users you follow",
       "type": "array"
     },
+    "following_count": {
+      "description": "Number of followed users",
+      "type": "integer"
+    },
     "followers": {
       "description": "Users who follows you",
       "type": "array"
+    },
+    "followers_count": {
+      "description": "Number of followers",
+      "type": "integer"
     },
     "likes": {
       "description": "Hashes of files/urls a user liked",
       "type": "array"
     },
+    "likes_count": {
+      "description": "Number of liked samples",
+      "type": "integer"
+    },
     "comments": {
       "description": "Comments made by the user",
       "type": "array"
+    },
+    "comments_count": {
+      "description": "Number of comments",
+      "type": "integer"
     },
     "submissions": {
       "description": "The hashes of files a user submitted",

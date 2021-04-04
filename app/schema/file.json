@@ -96,6 +96,10 @@
       ],
       "additionalProperties": false
     },
+    "comments_count": {
+      "description": "Number of comments",
+      "type": "integer"
+    },
     "exif": {
       "description": "ExifTool metadata",
       "type": "object"

@@ -79,6 +79,7 @@ type File struct {
 	MultiAV         map[string]interface{} `json:"multiav,omitempty"`
 	Status          int                    `json:"status,omitempty"`
 	Comments        []Comment              `json:"comments,omitempty"`
+	CommentsCount   int					   `json:"comments_count,omitempty"`
 	PE              *peparser.File         `json:"pe,omitempty"`
 	Histogram       []int                  `json:"histogram,omitempty"`
 	ByteEntropy     []int                  `json:"byte_entropy,omitempty"`
@@ -473,7 +474,7 @@ func PostFiles(c echo.Context) error {
 			sha256, bytes.NewReader(fileContents), size,
 			minio.PutObjectOptions{ContentType: "application/octet-stream"})
 		if err != nil {
-			log.Errorf("PutObjectOptions() failed with: %v", err)
+			log.Errorf("PutObject() failed with: %v", err)
 			return c.JSON(http.StatusInternalServerError, Response{
 				Message:     "PutObject failed",
 				Description: err.Error(),
@@ -481,7 +482,7 @@ func PostFiles(c echo.Context) error {
 				Sha256:      sha256,
 			})
 		}
-		log.Debugf("Successfully uploaded bytes: %d", n)
+		log.Debugf("Successfully uploaded bytes: %v", n)
 
 		// Save to DB
 		now := time.Now().UTC()
@@ -721,6 +722,7 @@ func Actions(c echo.Context) error {
 
 		if !utils.IsStringInSlice(sha256, usr.Likes) {
 			usr.Likes = append(usr.Likes, sha256)
+			usr.LikesCount += 1
 
 			// add new activity
 			activity := usr.NewActivity("like", map[string]string{
@@ -746,6 +748,7 @@ func Actions(c echo.Context) error {
 
 		if utils.IsStringInSlice(sha256, usr.Likes) {
 			usr.Likes = utils.RemoveStringFromSlice(usr.Likes, sha256)
+			usr.LikesCount -= 1
 			usr.Save()
 		}
 
@@ -829,6 +832,7 @@ func PostComment(c echo.Context) error {
 	com.Username = username
 	com.ID = commentID
 	file.Comments = append(file.Comments, com)
+	file.CommentsCount += 1
 	file.Save()
 
 	// Create the same comment to store in user document.
@@ -838,6 +842,7 @@ func PostComment(c echo.Context) error {
 	userCom.Body = com.Body
 	userCom.Sha256 = sha256
 	usr.Comments = append(usr.Comments, userCom)
+	usr.CommentsCount += 1
 	usr.Save()
 
 	// add new activity
@@ -864,6 +869,12 @@ func DeleteComment(c echo.Context) error {
 	claims := currentUser.Claims.(jwt.MapClaims)
 	currentUsername := claims["name"].(string)
 
+	usr, err := user.GetByUsername(currentUsername)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"verbose_msg": "Username does not exist"})
+	}
+
 	// Get comment
 	commentID := c.Param("id")
 	com := file.getByCommentID(commentID)
@@ -879,15 +890,26 @@ func DeleteComment(c echo.Context) error {
 			"verbose_msg": "Not allowed to delete someone else comment"})
 	}
 
-	// Delete comment.
+	// Delete comment from `files` bucket.
 	for i, com := range file.Comments {
 		if com.ID == commentID {
 			file.Comments = append(file.Comments[:i], file.Comments[i+1:]...)
+			file.CommentsCount -= 1
 			file.Save()
 			break
 		}
 	}
 
+	// Delete comment from `users` bucket.
+	for i, com := range usr.Comments {
+		if com.ID == commentID {
+			usr.Comments = append(usr.Comments[:i], usr.Comments[i+1:]...)
+			usr.CommentsCount -= 1
+			usr.Save()
+			break
+		}
+	}
+	
 	return c.JSON(http.StatusOK, map[string]string{
 		"verbose_msg": "Comment was deleted"})
 }

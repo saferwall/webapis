@@ -110,8 +110,20 @@ func loadConfig() {
 	viper.AddConfigPath("configs") // set the path of your config file
 
 	// Load the config type depending on env variable.
-	name := "app"
-	viper.SetConfigName(name) // no need to include file extension
+	var name string
+	env := os.Getenv("ENVIRONMENT")
+	switch env {
+	case "dev":
+		name = "app.dev"
+	case "prod":
+		name = "app.prod"
+	case "test":
+		name = "app.test"
+	default:
+		name = "app"
+	}
+
+	viper.SetConfigName(name)    // no need to include file extension
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Fatal(err)
