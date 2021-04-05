@@ -79,7 +79,7 @@ type File struct {
 	MultiAV         map[string]interface{} `json:"multiav,omitempty"`
 	Status          int                    `json:"status,omitempty"`
 	Comments        []Comment              `json:"comments,omitempty"`
-	CommentsCount   int					   `json:"comments_count,omitempty"`
+	CommentsCount   int					   `json:"comments_count"`
 	PE              *peparser.File         `json:"pe,omitempty"`
 	Histogram       []int                  `json:"histogram,omitempty"`
 	ByteEntropy     []int                  `json:"byte_entropy,omitempty"`

@@ -72,15 +72,15 @@ type User struct {
 	Admin          bool         `json:"admin,omitempty"`
 	HasAvatar      bool         `json:"has_avatar,omitempty"`
 	Following      []string     `json:"following,omitempty"`
-	FollowingCount int          `json:"following_count,omitempty"`
+	FollowingCount int          `json:"following_count"`
 	Followers      []string     `json:"followers,omitempty"`
-	FollowersCount int          `json:"followers_count,omitempty"`
+	FollowersCount int          `json:"followers_count"`
 	Likes          []string     `json:"likes,omitempty"`
-	LikesCount     int          `json:"likes_count,omitempty"`
+	LikesCount     int          `json:"likes_count"`
 	Activities     []Activity   `json:"activities,omitempty"`
-	Submissions    []Submission `json:"submissions,omitempty"`
+	Submissions    []Submission `json:"submissions"`
 	Comments       []Comment    `json:"comments,omitempty"`
-	CommentsCount  int          `json:"comments_count,omitempty"`
+	CommentsCount  int          `json:"comments_count"`
 }
 
 // NewActivity creates a new activity.
@@ -95,7 +95,7 @@ func (u *User) NewActivity(activityType string, content map[string]string) Activ
 
 // UpdatePassword creates a JWT token for email confirmation.
 func (u *User) UpdatePassword(newPassword string) {
-	u.Password = hashAndSalt([]byte(newPassword))
+	u.Password = HashAndSalt([]byte(newPassword))
 
 	// Creates the new user and save it to DB.
 	u.Save()
@@ -141,8 +141,8 @@ func (u *User) GenerateResetPasswordToken() (string, error) {
 	return token.SignedString([]byte(key))
 }
 
-// hashAndSalt hash with a salt a password.
-func hashAndSalt(pwd []byte) string {
+// HashAndSalt hash with a salt a password.
+func HashAndSalt(pwd []byte) string {
 
 	// Use GenerateFromPassword to hash & salt pwd.
 	// MinCost is just an integer constant provided by the bcrypt
@@ -406,7 +406,7 @@ func CreateAdminUser() {
 	t := time.Now().UTC()
 	newUser.MemberSince = &t
 	newUser.Admin = true
-	newUser.Password = hashAndSalt([]byte(password))
+	newUser.Password = HashAndSalt([]byte(password))
 	newUser.Confirmed = true
 	newUser.HasAvatar = true
 	newUser.Save()
@@ -614,7 +614,7 @@ func PostUsers(c echo.Context) error {
 
 	// Update some details
 	t := time.Now().UTC()
-	newUser.Password = hashAndSalt([]byte(newUser.Password))
+	newUser.Password = HashAndSalt([]byte(newUser.Password))
 	newUser.Name = ""
 	newUser.MemberSince = &t
 	newUser.Confirmed = false

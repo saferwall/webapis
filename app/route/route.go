@@ -74,13 +74,17 @@ func New() *echo.Echo {
 	e.PUT("/v1/users/:username/", user.PutUser, m.RequireLogin)
 	e.DELETE("/v1/users/:username/", user.DeleteUser, m.RequireLogin)
 
+	// e.GET("/v1/users/:username/likes", user.GetUser)
+	// e.GET("/v1/users/:username/comments", user.GetUser)
+	// e.GET("/v1/users/:username/submissions", user.GetUser)
+
 	// actions over a user
 	e.POST("/v1/users/:username/actions/", user.Actions, m.RequireLogin, m.RequireJSON)
 
 	// activities show for registered users
 	e.GET("/v1/users/:username/activities/", user.GetActivitiy)
 
-	// activities show for non registered in users
+	// activities show for anonymous users
 	e.GET("/v1/users/activities/", user.GetActivities)
 
 	// handle /admin endpoint
