@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -32,8 +33,11 @@ func httpGet(url string) ([]byte, error) {
 		return body, err
 	}
 
-	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return nil, errors.New("invalid HTTP response status code")
+	}
 
+	defer resp.Body.Close()
 	body, err = ioutil.ReadAll(resp.Body)
 	return body, err
 }
@@ -127,6 +131,8 @@ func main() {
 		}
 	} else {
 		for _, username := range list {
+			log.Printf("Processing %s", username)
+
 			url := prodHost + "/v1/users/" + username
 			jsonBody, err := httpGet(url)
 			if err != nil {
