@@ -237,6 +237,9 @@ func CheckEmailExist(email string) (bool, error) {
 // GetUserByUsernameFields return user by username(optional: selecting fields)
 func GetUserByUsernameFields(fields []string, username string) (User, error) {
 
+	// lower the username.
+	username = strings.ToLower(username)
+
 	// Select only demanded fields
 	var query string
 	if len(fields) > 0 {
@@ -249,10 +252,10 @@ func GetUserByUsernameFields(fields []string, username string) (User, error) {
 				buffer.WriteString(",")
 			}
 		}
-		buffer.WriteString(" FROM `users` WHERE `username`=$username")
+		buffer.WriteString(" FROM `users` USE KEYS $username")
 		query = buffer.String()
 	} else {
-		query = "SELECT users.* FROM `users` WHERE `username`=$username"
+		query = "SELECT users.* FROM `users` USE KEYS $username"
 	}
 
 	// Execute Query
@@ -997,7 +1000,8 @@ func GetActivities(c echo.Context) error {
 		"WHERE f.status == 2"
 
 	// Execute Query
-	results, err := db.Cluster.Query(query, &gocb.QueryOptions{NamedParameters: params})
+	results, err := db.Cluster.Query(query,
+		&gocb.QueryOptions{NamedParameters: params})
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"verbose_msg": err.Error(),
@@ -1022,4 +1026,231 @@ func GetActivities(c echo.Context) error {
 		return c.JSON(http.StatusOK, []map[string]string{})
 	}
 	return c.JSON(http.StatusOK, activities)
+}
+
+// GetLikes returns list of likes samples with metadata.
+func GetLikes(c echo.Context) error {
+
+	// get path param
+	username := c.Param("username")
+
+	// Get user infos.
+	usr, err := GetByUsername(username)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"verbose_msg": "Username does not exist"})
+	}
+
+	// Get all activities from all users.
+	params := make(map[string]interface{}, 1)
+	params["user"] = usr.Username
+	query := `
+		SELECT sha256, submissions[0].filename, 
+		 ml.pe.predicted_class as class, tags,
+		 CONCAT(
+			TOSTRING(
+				 ARRAY_COUNT(array_flatten(array i.infected 
+		    	for i in OBJECT_VALUES(f.multiav.last_scan) 
+		 		when i.infected=true end, 1))
+			), "/", TOSTRING(OBJECT_LENGTH(f.multiav.last_scan))
+		) as multiav
+  		FROM files f
+		USE KEYS [(SELECT raw likes FROM users u USE KEYS $user )[0]]
+		`
+
+	// Execute Query
+	results, err := db.Cluster.Query(query,
+		&gocb.QueryOptions{NamedParameters: params})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"verbose_msg": err.Error(),
+		})
+	}
+	defer results.Close()
+
+	// Interfaces for handling streaming return values
+	var likes []interface{}
+	var row interface{}
+
+	// Stream the values returned from the query into a typed array of structs
+	for results.Next() {
+		err := results.Row(&row)
+		if err != nil {
+			log.Errorf("results.Row() failed with: %v", err)
+		}
+		likes = append(likes, row)
+	}
+
+	if len(likes) == 0 {
+		return c.JSON(http.StatusOK, []map[string]string{})
+	}
+	return c.JSON(http.StatusOK, likes)
+
+}
+
+// GetSubmissions returns list of submissions with metadata.
+func GetSubmissions(c echo.Context) error {
+
+	// get path param
+	username := c.Param("username")
+
+	// Get user infos.
+	usr, err := GetByUsername(username)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"verbose_msg": "Username does not exist"})
+	}
+
+	// Get all activities from all users.
+	params := make(map[string]interface{}, 1)
+	params["user"] = usr.Username
+	query := `
+		SELECT s.*, f.submissions[0].filename,
+		f.ml.pe.predicted_class as class, f.tags,
+		ARRAY_BINARY_SEARCH(ARRAY_SORT(u.likes), s.sha256) > 0 as liked,
+		CONCAT(
+			TOSTRING(
+				ARRAY_COUNT(array_flatten(array i.infected 
+		   		for i in OBJECT_VALUES(f.multiav.last_scan) 
+				when i.infected=true end, 1))
+		), "/", TOSTRING(OBJECT_LENGTH(f.multiav.last_scan))) as multiav 
+		FROM users u 
+		USE KEYS $user 
+		UNNEST u.submissions AS s 
+		JOIN files f ON KEYS s.sha256;
+		`
+
+	// Execute Query
+	results, err := db.Cluster.Query(query,
+		&gocb.QueryOptions{NamedParameters: params})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"verbose_msg": err.Error(),
+		})
+	}
+	defer results.Close()
+
+	// Interfaces for handling streaming return values
+	var likes []interface{}
+	var row interface{}
+
+	// Stream the values returned from the query into a typed array of structs
+	for results.Next() {
+		err := results.Row(&row)
+		if err != nil {
+			log.Errorf("results.Row() failed with: %v", err)
+		}
+		likes = append(likes, row)
+	}
+
+	if len(likes) == 0 {
+		return c.JSON(http.StatusOK, []map[string]string{})
+	}
+	return c.JSON(http.StatusOK, likes)
+}
+
+
+// GetFollowing returns list of followed users by this user with metadata.
+func GetFollowing(c echo.Context) error {
+
+	// get path param
+	username := c.Param("username")
+
+	// Get user infos.
+	usr, err := GetByUsername(username)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"verbose_msg": "Username does not exist"})
+	}
+
+	// Get all activities from all users.
+	params := make(map[string]interface{}, 1)
+	params["user"] = usr.Username
+	query := `
+		SELECT u.member_since, u.username 
+		FROM users u 
+		USE KEYS` + " [(SELECT raw nu.`following` " + 
+		`FROM users nu USE KEYS $user )[0]]
+		`
+
+	// Execute Query
+	results, err := db.Cluster.Query(query,
+		&gocb.QueryOptions{NamedParameters: params})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"verbose_msg": err.Error(),
+		})
+	}
+	defer results.Close()
+
+	// Interfaces for handling streaming return values
+	var likes []interface{}
+	var row interface{}
+
+	// Stream the values returned from the query into a typed array of structs
+	for results.Next() {
+		err := results.Row(&row)
+		if err != nil {
+			log.Errorf("results.Row() failed with: %v", err)
+		}
+		likes = append(likes, row)
+	}
+
+	if len(likes) == 0 {
+		return c.JSON(http.StatusOK, []map[string]string{})
+	}
+	return c.JSON(http.StatusOK, likes)
+}
+
+// GetFollowers returns list of users following this user with metadata.
+func GetFollowers(c echo.Context) error {
+
+	// get path param
+	username := c.Param("username")
+
+	// Get user infos.
+	usr, err := GetByUsername(username)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"verbose_msg": "Username does not exist"})
+	}
+
+	// Get all activities from all users.
+	params := make(map[string]interface{}, 1)
+	params["user"] = usr.Username
+	query := `
+		SELECT u.member_since, u.username,` +
+		"ARRAY_BINARY_SEARCH(ARRAY_SORT(u.`following`), $user) > 0 as followed " +
+		`FROM users u 
+		USE KEYS` + " [(SELECT raw nu.`followers` " + 
+		`FROM users nu USE KEYS $user )[0]];
+		`
+
+	// Execute Query
+	results, err := db.Cluster.Query(query,
+		&gocb.QueryOptions{NamedParameters: params})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"verbose_msg": err.Error(),
+		})
+	}
+	defer results.Close()
+
+	// Interfaces for handling streaming return values
+	var likes []interface{}
+	var row interface{}
+
+	// Stream the values returned from the query into a typed array of structs
+	for results.Next() {
+		err := results.Row(&row)
+		if err != nil {
+			log.Errorf("results.Row() failed with: %v", err)
+		}
+		likes = append(likes, row)
+	}
+
+	if len(likes) == 0 {
+		return c.JSON(http.StatusOK, []map[string]string{})
+	}
+	return c.JSON(http.StatusOK, likes)
 }

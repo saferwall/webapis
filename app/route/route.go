@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/app/handler/auth"
 	"github.com/saferwall/saferwall-api/app/handler/file"
+	"github.com/saferwall/saferwall-api/app/handler/health"
 	"github.com/saferwall/saferwall-api/app/handler/user"
 	m "github.com/saferwall/saferwall-api/app/middleware"
 )
@@ -40,8 +41,15 @@ func New() *echo.Echo {
 	e.PUT("/v1/users/:username/email/", auth.UpdateEmail, m.RequireLogin, m.RequireJSON)
 
 	e.GET("/v1/users/:username/avatar/", user.GetAvatar)
+
 	// To update user avatar
 	e.PUT("/v1/users/:username/avatar/", user.UpdateAvatar, m.RequireLogin)
+
+	// user profile.
+	e.GET("/v1/users/:username/likes/", user.GetLikes)
+	e.GET("/v1/users/:username/submissions/", user.GetSubmissions)
+	e.GET("/v1/users/:username/following/", user.GetFollowing)
+	e.GET("/v1/users/:username/followers/", user.GetFollowers)
 
 	// handle /files endpoint.
 	e.GET("/v1/files/", file.GetFiles, m.RequireLogin, auth.IsAdmin)
@@ -74,10 +82,6 @@ func New() *echo.Echo {
 	e.PUT("/v1/users/:username/", user.PutUser, m.RequireLogin)
 	e.DELETE("/v1/users/:username/", user.DeleteUser, m.RequireLogin)
 
-	// e.GET("/v1/users/:username/likes", user.GetUser)
-	// e.GET("/v1/users/:username/comments", user.GetUser)
-	// e.GET("/v1/users/:username/submissions", user.GetUser)
-
 	// actions over a user
 	e.POST("/v1/users/:username/actions/", user.Actions, m.RequireLogin, m.RequireJSON)
 
@@ -89,6 +93,7 @@ func New() *echo.Echo {
 
 	// handle /admin endpoint
 	e.GET("/admin/", auth.Admin, m.RequireLogin, auth.IsAdmin)
+	e.GET("/v1/health/", health.HealthCheck)
 
 	// ugly hack
 	user.CreateAdminUser()
