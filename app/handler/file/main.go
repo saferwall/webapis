@@ -23,12 +23,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/minio/minio-go/v7"
+	peparser "github.com/saferwall/pe"
 	"github.com/saferwall/saferwall-api/app"
 	"github.com/saferwall/saferwall-api/app/common/db"
 	"github.com/saferwall/saferwall-api/app/common/utils"
 	"github.com/saferwall/saferwall-api/app/handler/user"
 	"github.com/saferwall/saferwall/pkg/crypto"
-	peparser "github.com/saferwall/pe"
 	u "github.com/saferwall/saferwall/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/xeipuuv/gojsonschema"
@@ -79,10 +79,11 @@ type File struct {
 	MultiAV         map[string]interface{} `json:"multiav,omitempty"`
 	Status          int                    `json:"status,omitempty"`
 	Comments        []Comment              `json:"comments,omitempty"`
-	CommentsCount   int					   `json:"comments_count"`
+	CommentsCount   int                    `json:"comments_count"`
 	PE              *peparser.File         `json:"pe,omitempty"`
 	Histogram       []int                  `json:"histogram,omitempty"`
 	ByteEntropy     []int                  `json:"byte_entropy,omitempty"`
+	Ml              map[string]interface{} `json:"ml,omitempty"`
 	Type            string                 `json:"type,omitempty"`
 }
 
@@ -362,7 +363,8 @@ func PutFile(c echo.Context) error {
 // DeleteFile deletes a specific file
 func DeleteFile(c echo.Context) error {
 
-	// get path param
+	// get path param.
+	// Todo: remove submission.
 	sha256 := strings.ToLower(c.Param("sha256"))
 	return c.JSON(http.StatusOK, sha256)
 }
@@ -506,6 +508,7 @@ func PostFiles(c echo.Context) error {
 
 		usr.Submissions = append(usr.Submissions, user.Submission{
 			Timestamp: &now, Sha256: sha256})
+		usr.SubmissionsCount += 1
 		usr.Save()
 
 		// Push it to NSQ
@@ -689,7 +692,7 @@ func Actions(c echo.Context) error {
 		})
 	case "download":
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	    defer cancel()
+		defer cancel()
 		reader, err := app.MinioClient.GetObject(ctx,
 			app.SamplesSpaceBucket, sha256, minio.GetObjectOptions{})
 		if err != nil {
@@ -909,7 +912,7 @@ func DeleteComment(c echo.Context) error {
 			break
 		}
 	}
-	
+
 	return c.JSON(http.StatusOK, map[string]string{
 		"verbose_msg": "Comment was deleted"})
 }

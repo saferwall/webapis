@@ -10,3 +10,6 @@ Makefile
 NOTICE
 README.md
 .env
+storage
+default
+coverage.out

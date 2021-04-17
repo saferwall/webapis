@@ -107,7 +107,8 @@ var (
 
 // loadConfig loads our configration.
 func loadConfig() {
-	viper.AddConfigPath("configs") // set the path of your config file
+	// Set the path of your config file.
+	viper.AddConfigPath("configs")
 
 	// Load the config type depending on env variable.
 	var name string
@@ -115,12 +116,12 @@ func loadConfig() {
 	switch env {
 	case "dev":
 		name = "app.dev"
-	case "prod":
-		name = "app.prod"
 	case "test":
 		name = "app.test"
+	case "prod":
+		name = "app.prod"
 	default:
-		name = "app"
+		name = "app.dev"
 	}
 
 	viper.SetConfigName(name)    // no need to include file extension

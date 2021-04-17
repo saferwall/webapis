@@ -239,6 +239,10 @@
       "description": "Bytes entropy",
       "type": "array"
     },
+    "ml": {
+      "description": "Machine learning classifier results",
+      "type": "object"
+    },
     "type": {
       "description": "File format type",
       "type": "string"

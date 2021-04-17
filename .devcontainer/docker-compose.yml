@@ -117,6 +117,8 @@ services:
     depends_on:
         - web
     restart: on-failure
+    volumes:
+      - samples:/samples
 
   ui:
     image: saferwall/ui:latest

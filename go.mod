@@ -12,10 +12,10 @@ require (
 	github.com/matcornic/hermes/v2 v2.1.0
 	github.com/minio/minio-go/v7 v7.0.10
 	github.com/nsqio/go-nsq v1.0.8
-	github.com/saferwall/pe v1.0.3
-	github.com/saferwall/saferwall/pkg/crypto v0.0.1
-	github.com/saferwall/saferwall/pkg/utils v0.0.5
-	github.com/sirupsen/logrus v1.5.0
+	github.com/saferwall/pe v1.0.4
+	github.com/saferwall/saferwall/pkg/crypto v0.0.2
+	github.com/saferwall/saferwall/pkg/utils v0.0.6
+	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.7.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
