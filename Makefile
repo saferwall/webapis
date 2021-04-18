@@ -62,6 +62,7 @@ dc-up: 	## Run the docker-compose up.
 BUCKET_LIST = files users
 dc-init-db:		## Init couchbase database
 	# Init the cluster.
+	echo "${GREEN} [*] =============== Creating Cluster =============== ${RESET}"
 	docker-compose exec couchbase \
 		couchbase-cli cluster-init \
 		--cluster localhost \
@@ -71,7 +72,25 @@ dc-init-db:		## Init couchbase database
 		--cluster-name saferwall \
 		--services data,index,query \
 		--cluster-ramsize 512 \
-		--cluster-index-ramsize 256 || true
+		--cluster-index-ramsize 256
+
+	echo "${GREEN} [*] =============== Add the node =============== ${RESET}"
+	docker-compose exec couchbase \
+		couchbase-cli server-add \
+		--cluster localhost \
+		--username Administrator \
+		--password password \
+		--server-add localhost \
+		--server-add-username Administrator \
+		--server-add-password password \
+		--services data
+
+	echo "${GREEN} [*] =============== Rebalance the node =============== ${RESET}"
+	docker-compose exec couchbase \
+		couchbase-cli rebalance \
+		--cluster localhost \
+		--username Administrator \
+		--password password
 
 	# Create require buckets.
 	for bucket in $(BUCKET_LIST) ; do \
