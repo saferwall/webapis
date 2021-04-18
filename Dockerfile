@@ -32,7 +32,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo \
 # STEP 2 build a small image
 ############################
 
-FROM scratch
+FROM alpine:3.13
 LABEL maintainer="https://github.com/saferwall"
 LABEL version="0.1.0"
 LABEL description="Saferwall Web API Service"

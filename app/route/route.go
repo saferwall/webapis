@@ -50,6 +50,7 @@ func New() *echo.Echo {
 	e.GET("/v1/users/:username/submissions/", user.GetSubmissions)
 	e.GET("/v1/users/:username/following/", user.GetFollowing)
 	e.GET("/v1/users/:username/followers/", user.GetFollowers)
+	e.GET("/v1/users/:username/comments/", user.GetComments)
 
 	// handle /files endpoint.
 	e.GET("/v1/files/", file.GetFiles, m.RequireLogin, auth.IsAdmin)

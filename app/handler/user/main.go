@@ -1041,21 +1041,21 @@ func GetLikes(c echo.Context) error {
 			"verbose_msg": "Username does not exist"})
 	}
 
-	// Get all activities from all users.
+	// Retreieve all likes from user.
 	params := make(map[string]interface{}, 1)
-	params["user"] = usr.Username
+	params["user"] = strings.ToLower(usr.Username)
 	query := `
 		SELECT sha256, submissions[0].filename, 
 		 ml.pe.predicted_class as class, tags,
 		 CONCAT(
 			TOSTRING(
-				 ARRAY_COUNT(array_flatten(array i.infected 
+				ARRAY_COUNT(array_flatten(array i.infected 
 		    	for i in OBJECT_VALUES(f.multiav.last_scan) 
 		 		when i.infected=true end, 1))
 			), "/", TOSTRING(OBJECT_LENGTH(f.multiav.last_scan))
 		) as multiav
   		FROM files f
-		USE KEYS [(SELECT raw likes FROM users u USE KEYS $user )[0]]
+		USE KEYS [(SELECT raw likes FROM users u USE KEYS $user)[0]];
 		`
 
 	// Execute Query
@@ -1103,7 +1103,7 @@ func GetSubmissions(c echo.Context) error {
 
 	// Get all activities from all users.
 	params := make(map[string]interface{}, 1)
-	params["user"] = usr.Username
+	params["user"] = strings.ToLower(usr.Username)
 	query := `
 		SELECT s.*, f.submissions[0].filename,
 		f.ml.pe.predicted_class as class, f.tags,
@@ -1131,7 +1131,7 @@ func GetSubmissions(c echo.Context) error {
 	defer results.Close()
 
 	// Interfaces for handling streaming return values
-	var likes []interface{}
+	var submissions []interface{}
 	var row interface{}
 
 	// Stream the values returned from the query into a typed array of structs
@@ -1140,15 +1140,14 @@ func GetSubmissions(c echo.Context) error {
 		if err != nil {
 			log.Errorf("results.Row() failed with: %v", err)
 		}
-		likes = append(likes, row)
+		submissions = append(submissions, row)
 	}
 
-	if len(likes) == 0 {
+	if len(submissions) == 0 {
 		return c.JSON(http.StatusOK, []map[string]string{})
 	}
-	return c.JSON(http.StatusOK, likes)
+	return c.JSON(http.StatusOK, submissions)
 }
-
 
 // GetFollowing returns list of followed users by this user with metadata.
 func GetFollowing(c echo.Context) error {
@@ -1165,11 +1164,11 @@ func GetFollowing(c echo.Context) error {
 
 	// Get all activities from all users.
 	params := make(map[string]interface{}, 1)
-	params["user"] = usr.Username
+	params["user"] = strings.ToLower(usr.Username)
 	query := `
 		SELECT u.member_since, u.username 
 		FROM users u 
-		USE KEYS` + " [(SELECT raw nu.`following` " + 
+		USE KEYS` + " [(SELECT raw nu.`following` " +
 		`FROM users nu USE KEYS $user )[0]]
 		`
 
@@ -1184,7 +1183,7 @@ func GetFollowing(c echo.Context) error {
 	defer results.Close()
 
 	// Interfaces for handling streaming return values
-	var likes []interface{}
+	var following []interface{}
 	var row interface{}
 
 	// Stream the values returned from the query into a typed array of structs
@@ -1193,13 +1192,13 @@ func GetFollowing(c echo.Context) error {
 		if err != nil {
 			log.Errorf("results.Row() failed with: %v", err)
 		}
-		likes = append(likes, row)
+		following = append(following, row)
 	}
 
-	if len(likes) == 0 {
+	if len(following) == 0 {
 		return c.JSON(http.StatusOK, []map[string]string{})
 	}
-	return c.JSON(http.StatusOK, likes)
+	return c.JSON(http.StatusOK, following)
 }
 
 // GetFollowers returns list of users following this user with metadata.
@@ -1217,12 +1216,12 @@ func GetFollowers(c echo.Context) error {
 
 	// Get all activities from all users.
 	params := make(map[string]interface{}, 1)
-	params["user"] = usr.Username
+	params["user"] = strings.ToLower(usr.Username)
 	query := `
 		SELECT u.member_since, u.username,` +
 		"ARRAY_BINARY_SEARCH(ARRAY_SORT(u.`following`), $user) > 0 as followed " +
 		`FROM users u 
-		USE KEYS` + " [(SELECT raw nu.`followers` " + 
+		USE KEYS` + " [(SELECT raw nu.`followers` " +
 		`FROM users nu USE KEYS $user )[0]];
 		`
 
@@ -1237,7 +1236,7 @@ func GetFollowers(c echo.Context) error {
 	defer results.Close()
 
 	// Interfaces for handling streaming return values
-	var likes []interface{}
+	var followers []interface{}
 	var row interface{}
 
 	// Stream the values returned from the query into a typed array of structs
@@ -1246,11 +1245,73 @@ func GetFollowers(c echo.Context) error {
 		if err != nil {
 			log.Errorf("results.Row() failed with: %v", err)
 		}
-		likes = append(likes, row)
+		followers = append(followers, row)
 	}
 
-	if len(likes) == 0 {
+	if len(followers) == 0 {
 		return c.JSON(http.StatusOK, []map[string]string{})
 	}
-	return c.JSON(http.StatusOK, likes)
+	return c.JSON(http.StatusOK, followers)
+}
+
+// GetComments returns list comments by user with metadata.
+func GetComments(c echo.Context) error {
+
+	// get path param
+	username := c.Param("username")
+
+	// Get user infos.
+	usr, err := GetByUsername(username)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"verbose_msg": "Username does not exist"})
+	}
+
+	// Get all activities from all users.
+	params := make(map[string]interface{}, 1)
+	params["user"] = strings.ToLower(usr.Username)
+	query := `
+		SELECT c.*, f.submissions[0].filename, 
+			f.ml.pe.predicted_class as class, f.tags, 
+			ARRAY_BINARY_SEARCH(ARRAY_SORT(u.likes), c.sha256) > 0 as liked,
+			CONCAT(
+				TOSTRING(
+					ARRAY_COUNT(array_flatten( array i.infected 
+					for i in OBJECT_VALUES(f.multiav.last_scan) 
+					when i.infected=true end, 1)
+				)
+			), "/", TOSTRING(OBJECT_LENGTH(f.multiav.last_scan))) as multiav 
+		FROM users u 
+		USE KEYS $user
+		UNNEST u.comments AS c 
+		JOIN files f ON KEYS c.sha256;
+	`
+
+	// Execute Query
+	results, err := db.Cluster.Query(query,
+		&gocb.QueryOptions{NamedParameters: params})
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"verbose_msg": err.Error(),
+		})
+	}
+	defer results.Close()
+
+	// Interfaces for handling streaming return values
+	var comments []interface{}
+	var row interface{}
+
+	// Stream the values returned from the query into a typed array of structs
+	for results.Next() {
+		err := results.Row(&row)
+		if err != nil {
+			log.Errorf("results.Row() failed with: %v", err)
+		}
+		comments = append(comments, row)
+	}
+
+	if len(comments) == 0 {
+		return c.JSON(http.StatusOK, []map[string]string{})
+	}
+	return c.JSON(http.StatusOK, comments)
 }
