@@ -876,15 +876,18 @@ func Actions(c echo.Context) error {
 			"verbose_msg": "Target user does not exist"})
 	}
 
-	if currentUser.Username == targetUser.Username {
+	currentUsername := strings.ToLower(currentUser.Username)
+	targetUsername := strings.ToLower(targetUser.Username)
+
+	if currentUsername == targetUsername {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"verbose_msg": "Not allowed to follow yourself"})
 	}
 
 	switch actionType {
 	case "follow":
-		if !utils.IsStringInSlice(targetUser.Username, currentUser.Following) {
-			currentUser.Following = append(currentUser.Following, targetUser.Username)
+		if !utils.IsStringInSlice(targetUsername, currentUser.Following) {
+			currentUser.Following = append(currentUser.Following, targetUsername)
 			currentUser.FollowingCount += 1
 
 			// add new activity
@@ -894,19 +897,21 @@ func Actions(c echo.Context) error {
 			currentUser.Save()
 
 		}
-		if !utils.IsStringInSlice(currentUser.Username, targetUser.Followers) {
-			targetUser.Followers = append(targetUser.Followers, currentUser.Username)
+		if !utils.IsStringInSlice(currentUsername, targetUser.Followers) {
+			targetUser.Followers = append(targetUser.Followers, currentUsername)
 			targetUser.FollowersCount += 1
 			targetUser.Save()
 		}
 
 	case "unfollow":
-		if utils.IsStringInSlice(targetUser.Username, currentUser.Following) {
-			currentUser.Following = utils.RemoveStringFromSlice(currentUser.Following, targetUser.Username)
+		if utils.IsStringInSlice(targetUsername, currentUser.Following) {
+			currentUser.Following = utils.RemoveStringFromSlice(
+				currentUser.Following, targetUsername)
 			currentUser.FollowingCount -= 1
 		}
-		if utils.IsStringInSlice(currentUser.Username, targetUser.Followers) {
-			targetUser.Followers = utils.RemoveStringFromSlice(targetUser.Followers, currentUser.Username)
+		if utils.IsStringInSlice(currentUsername, targetUser.Followers) {
+			targetUser.Followers = utils.RemoveStringFromSlice(
+				targetUser.Followers, currentUsername)
 			targetUser.FollowersCount -= 1
 		}
 		currentUser.Save()
@@ -934,24 +939,28 @@ func GetActivitiy(c echo.Context) error {
 	// Get all activities from all users whom I am following.
 	params := make(map[string]interface{}, 1)
 	params["user"] = username
-	query :=
-		"SELECT t1.*, f.tags, array_count(array_flatten(array i.infected " +
-			"for i in OBJECT_VALUES(f.multiav.last_scan) when i.infected=true end, 1)) as av_count " +
-			"FROM ( " +
-			"SELECT u.`username`, `activity`.* " +
-			"FROM `users` u " +
-			"UNNEST `activities` AS activity " +
-			"WHERE u.`username` IN " +
-			"(SELECT RAW u1.`following` FROM users u1 " +
-			"WHERE u1.username= $user)[0] " +
-			") t1  " +
-			"LEFT JOIN `files` f ON KEYS t1.content.sha256 " +
-			"WHERE f.status == 2 " +
-			"UNION " +
-			"SELECT u.`username`,  `activity`.* " +
-			"FROM `users` u " +
-			"UNNEST `activities` AS activity " +
-			"WHERE activity.`type` == 'follow' AND activity.`content`.`user` == $user"
+	query := `
+		SELECT t1.*, f.tags,
+		ARRAY_COUNT(ARRAY_FLATTEN(array i.infected 
+			for i in OBJECT_VALUES(f.multiav.last_scan)
+			 when i.infected=true end, 1)) as av_count 
+		FROM (
+			SELECT u.username, activity.* 
+			FROM users u 
+			UNNEST activities AS activity 
+			WHERE u.username IN (
+				SELECT RAW ` + "u1.`following` " + `
+				FROM users u1 
+				WHERE u1.username= $user)[0]
+			) t1  
+		LEFT JOIN files f ON KEYS t1.content.sha256 
+		WHERE f.status == 2 
+		UNION 
+		SELECT u.username,  activity.* 
+		FROM users u 
+		UNNEST activities AS activity ` +
+		"WHERE activity.`type` == 'follow' " + 
+		"AND activity.`content`.`user` == $user"
 
 	// Execute Query
 	results, err := db.Cluster.Query(query,
@@ -981,23 +990,27 @@ func GetActivitiy(c echo.Context) error {
 	return c.JSON(http.StatusOK, activities)
 }
 
-// GetActivities represents the feed displayed in the landing page for anonymous users.
+// GetActivities represents the feed displayed in the landing page for
+// anonymous users.
 func GetActivities(c echo.Context) error {
 
 	// Get all activities from all users.
 	params := make(map[string]interface{}, 1)
 	params["user"] = viper.GetString("app.admin_user")
-	query := "SELECT t1.*, f.tags, " +
-		"array_count(array_flatten(array i.infected for i " +
-		"in OBJECT_VALUES(f.multiav.last_scan) when " +
-		"i.infected=true end, 1)) as av_count " +
-		"FROM (SELECT u.`username`, `activity`.* " +
-		"FROM `users` u " +
-		"UNNEST `activities` AS activity " +
-		"WHERE u.`username` != $user AND u.`activities` IS NOT NULL " +
-		"ORDER BY activity.timestamp DESC LIMIT 30 " +
-		") t1 LEFT JOIN `files` f ON KEYS t1.content.sha256 " +
-		"WHERE f.status == 2"
+	query := `
+		SELECT t1.*, f.tags, 
+			ARRAY_COUNT(ARRAY_FLATTEN(array i.infected 
+			for i in OBJECT_VALUES(f.multiav.last_scan)
+			 when i.infected=true end, 1)) as av_count 
+		FROM (
+			SELECT u.username, activity.* 
+			FROM users u 
+			UNNEST activities AS activity 
+			WHERE u.username != $user AND u.activities IS NOT NULL 
+			ORDER BY activity.timestamp DESC LIMIT 30 
+		) t1
+		LEFT JOIN files f ON KEYS t1.content.sha256 
+		WHERE f.status == 2`
 
 	// Execute Query
 	results, err := db.Cluster.Query(query,
@@ -1107,7 +1120,7 @@ func GetSubmissions(c echo.Context) error {
 	query := `
 		SELECT s.*, f.submissions[0].filename,
 		f.ml.pe.predicted_class as class, f.tags,
-		ARRAY_BINARY_SEARCH(ARRAY_SORT(u.likes), s.sha256) > 0 as liked,
+		ARRAY_BINARY_SEARCH(ARRAY_SORT(u.likes), s.sha256) >= 0 as liked,
 		CONCAT(
 			TOSTRING(
 				ARRAY_COUNT(array_flatten(array i.infected 
@@ -1219,7 +1232,7 @@ func GetFollowers(c echo.Context) error {
 	params["user"] = strings.ToLower(usr.Username)
 	query := `
 		SELECT u.member_since, u.username,` +
-		"ARRAY_BINARY_SEARCH(ARRAY_SORT(u.`following`), $user) > 0 as followed " +
+		"ARRAY_BINARY_SEARCH(ARRAY_SORT(u.`following`), $user) >= 0 as followed " +
 		`FROM users u 
 		USE KEYS` + " [(SELECT raw nu.`followers` " +
 		`FROM users nu USE KEYS $user )[0]];
@@ -1273,7 +1286,7 @@ func GetComments(c echo.Context) error {
 	query := `
 		SELECT c.*, f.submissions[0].filename, 
 			f.ml.pe.predicted_class as class, f.tags, 
-			ARRAY_BINARY_SEARCH(ARRAY_SORT(u.likes), c.sha256) > 0 as liked,
+			ARRAY_BINARY_SEARCH(ARRAY_SORT(u.likes), c.sha256) >= 0 as liked,
 			CONCAT(
 				TOSTRING(
 					ARRAY_COUNT(array_flatten( array i.infected 
