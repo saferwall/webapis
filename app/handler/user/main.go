@@ -923,7 +923,8 @@ func Actions(c echo.Context) error {
 	})
 }
 
-// GetActivitiy represents the feed displayed in the landing page for logged in users.
+// GetActivitiy represents the feed displayed in the landing page for
+// logged in users.
 func GetActivitiy(c echo.Context) error {
 
 	// get path param
@@ -940,10 +941,15 @@ func GetActivitiy(c echo.Context) error {
 	params := make(map[string]interface{}, 1)
 	params["user"] = username
 	query := `
-		SELECT t1.*, f.tags,
-		ARRAY_COUNT(ARRAY_FLATTEN(array i.infected 
-			for i in OBJECT_VALUES(f.multiav.last_scan)
-			 when i.infected=true end, 1)) as av_count 
+		SELECT t1.*, f.tags, f.submissions[0].filename, 
+		 f.ml.pe.predicted_class as class,
+		 CONCAT(
+			TOSTRING(
+				ARRAY_COUNT(array_flatten(array i.infected 
+		    	for i in OBJECT_VALUES(f.multiav.last_scan) 
+		 		when i.infected=true end, 1))
+			), "/", TOSTRING(OBJECT_LENGTH(f.multiav.last_scan))
+		) as multiav 
 		FROM (
 			SELECT u.username, activity.* 
 			FROM users u 
@@ -998,7 +1004,7 @@ func GetActivities(c echo.Context) error {
 	params := make(map[string]interface{}, 1)
 	params["user"] = viper.GetString("app.admin_user")
 	query := `
-		SELECT t1.*, f.tags, 
+		SELECT t1.*, f.tags,  
 			ARRAY_COUNT(ARRAY_FLATTEN(array i.infected 
 			for i in OBJECT_VALUES(f.multiav.last_scan)
 			 when i.infected=true end, 1)) as av_count 
@@ -1048,15 +1054,20 @@ func GetLikes(c echo.Context) error {
 	username := c.Param("username")
 
 	// Get user infos.
-	usr, err := GetByUsername(username)
+	_, err := GetByUsername(username)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"verbose_msg": "Username does not exist"})
 	}
 
+	// extract user from token
+	u := c.Get("user").(*jwt.Token)
+	claims := u.Claims.(jwt.MapClaims)
+	loggedUser := claims["name"].(string)
+
 	// Retreieve all likes from user.
 	params := make(map[string]interface{}, 1)
-	params["user"] = strings.ToLower(usr.Username)
+	params["user"] = strings.ToLower(username)
 	query := `
 		SELECT sha256, submissions[0].filename, 
 		 ml.pe.predicted_class as class, tags,
@@ -1108,15 +1119,20 @@ func GetSubmissions(c echo.Context) error {
 	username := c.Param("username")
 
 	// Get user infos.
-	usr, err := GetByUsername(username)
+	_, err := GetByUsername(username)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"verbose_msg": "Username does not exist"})
 	}
 
+	// extract user from token
+	u := c.Get("user").(*jwt.Token)
+	claims := u.Claims.(jwt.MapClaims)
+	username = claims["name"].(string)
+
 	// Get all activities from all users.
 	params := make(map[string]interface{}, 1)
-	params["user"] = strings.ToLower(usr.Username)
+	params["user"] = strings.ToLower(username)
 	query := `
 		SELECT s.*, f.submissions[0].filename,
 		f.ml.pe.predicted_class as class, f.tags,
@@ -1178,11 +1194,12 @@ func GetFollowing(c echo.Context) error {
 	// Get all activities from all users.
 	params := make(map[string]interface{}, 1)
 	params["user"] = strings.ToLower(usr.Username)
-	query := `
+	query :=
+		`
 		SELECT u.member_since, u.username 
 		FROM users u 
-		USE KEYS` + " [(SELECT raw nu.`following` " +
-		`FROM users nu USE KEYS $user )[0]]
+		USE KEYS` + " [(SELECT raw nu.`following` " + `
+		FROM users nu USE KEYS $user )[0]]
 		`
 
 	// Execute Query
