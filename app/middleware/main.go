@@ -71,9 +71,9 @@ func Init(e *echo.Echo) {
 
 	// jwt
 	key := viper.GetString("auth.signkey")
-	RequireLogin = middleware.JWTWithConfig(middleware.JWTConfig{
+	RequireLogin = JWTWithConfig(JWTConfig{
 		SigningKey:  []byte(key),
-		TokenLookup: "cookie:JWTCookie",
+		TokenLookup: "header:Authorization,cookie:JWTCookie",
 	})
 
 	RequireToken = middleware.JWTWithConfig(middleware.JWTConfig{
