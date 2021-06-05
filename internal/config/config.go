@@ -19,6 +19,8 @@ type DatabaseCfg struct {
 	Username string `mapstructure:"username"`
 	// Password used to access the db.
 	Password string `mapstructure:"password"`
+	// Name of the couchbase bucket.
+	BucketName string `mapstructure:"bucket_name"`
 }
 
 // NsqCfg represents NSQ config.
@@ -56,13 +58,13 @@ type Config struct {
 
 // Load returns an application configuration which is populated
 // from the given configuration file.
-func Load(file string) (*Config, error) {
+func Load(path string) (*Config, error) {
 
 	// Create a new config.
 	c := Config{}
 
 	// Adding our TOML config file.
-	viper.AddConfigPath(file)
+	viper.AddConfigPath(path)
 
 	// Load the config type depending on env variable.
 	var name string
@@ -73,7 +75,7 @@ func Load(file string) (*Config, error) {
 	case "dev":
 		name = "dev"
 	case "prod":
-		name = "saferwall.prod"
+		name = "prod"
 	default:
 		name = "local"
 	}
@@ -90,5 +92,9 @@ func Load(file string) (*Config, error) {
 
 	// Unmarshals the config into a Struct.
 	err = viper.Unmarshal(&c)
+	if err != nil {
+		return nil, err
+	}
+
 	return &c, err
 }
