@@ -10,7 +10,7 @@ max_file_size = 64 # Maximum file size to allow for samples in MB.
 max_avatar_file_size = 1 # Maximum avatar size to allow for user profile picture in MB.
 
 [ui]
-address = "http://localhost:8000"
+address = "http://localhost:8000" # DSN for the frontend.
 
 [db]
 server = "couchbase://localhost" # DSN for connecting to the database

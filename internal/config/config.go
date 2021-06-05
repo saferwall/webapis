@@ -25,7 +25,13 @@ type DatabaseCfg struct {
 
 // NsqCfg represents NSQ config.
 type NsqCfg struct {
-	// hte data source name (DSN) for connecting to the nsqd.
+	// the data source name (DSN) for connecting to the nsqd.
+	Address string `mapstructure:"address"`
+}
+
+// UICfg represents frontend config.
+type UICfg struct {
+	// the data source name (DSN) for connecting to the frontend.
 	Address string `mapstructure:"address"`
 }
 
@@ -44,6 +50,8 @@ type Config struct {
 	Address string `mapstructure:"address"`
 	// Log level. Defaults to info.
 	LogLevel string `mapstructure:"log_level"`
+	// The data source name (DSN) for th frontend.
+	FrontendAddress string `mapstructure:"frontend_address"`
 	// Maximum file size to allow for samples.
 	MaxFileSize int64 `mapstructure:"max_file_size"`
 	// Maximum avatar size to allow for user profile picture.
@@ -52,6 +60,8 @@ type Config struct {
 	DB DatabaseCfg `mapstructure:"db"`
 	// NSQ configuration.
 	Nsq NsqCfg `mapstructure:"nsq"`
+	// Frontend Configuration.
+	UI UICfg `mapstructure:"ui"`
 	// Object storage configuration.
 	ObjStorage StorageCfg `mapstructure:"storage"`
 }
