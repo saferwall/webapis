@@ -52,6 +52,8 @@ type Config struct {
 	LogLevel string `mapstructure:"log_level"`
 	// The data source name (DSN) for th frontend.
 	FrontendAddress string `mapstructure:"frontend_address"`
+	// JWT signing key.
+	JWTSigningKey string `mapstructure:"jwt_signkey"`
 	// Maximum file size to allow for samples.
 	MaxFileSize int64 `mapstructure:"max_file_size"`
 	// Maximum avatar size to allow for user profile picture.

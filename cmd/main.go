@@ -1,15 +1,21 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/saferwall/saferwall-api/internal/auth"
 	"github.com/saferwall/saferwall-api/internal/config"
 	"github.com/saferwall/saferwall-api/internal/db"
+	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
+	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -42,6 +48,25 @@ func main() {
 		Addr:    cfg.Address,
 		Handler: buildHandler(logger, dbx, cfg),
 	}
+
+	// Start server.
+	go func() {
+		if err := hs.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error(err)
+			os.Exit(-1)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
+	// Use a buffered channel to avoid missing signals as recommended for signal.Notify
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := hs.Shutdown(ctx); err != nil {
+		logger.Error(err)
+		os.Exit(-1)	}
 
 }
 
@@ -77,18 +102,13 @@ func buildHandler(logger log.Logger, db *dbcontext.DB,
 	// Creates a new group for v1.
 	g := e.Group("/v1")
 
-
+	// Setup JWT Auth handler.
 	authHandler := auth.Handler(cfg.JWTSigningKey)
 
-	album.RegisterHandlers(rg.Group(""),
-		album.NewService(album.NewRepository(db, logger), logger),
+	user.RegisterHandlers(g, user.NewService(
+		user.NewRepository(db, logger), logger),
 		authHandler, logger,
 	)
 
-	auth.RegisterHandlers(rg.Group(""),
-		auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger),
-		logger,
-	)
-
-	return router
+	return e
 }
