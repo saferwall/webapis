@@ -4,7 +4,15 @@
 
 package errors
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+
+	gocb "github.com/couchbase/gocb/v2"
+	ut "github.com/go-playground/universal-translator"
+	validator "github.com/go-playground/validator"
+	"github.com/labstack/echo/v4"
+)
 
 // ErrorResponse is the response that represents an error.
 type ErrorResponse struct {
@@ -16,6 +24,11 @@ type ErrorResponse struct {
 // Error is required by the error interface.
 func (e ErrorResponse) Error() string {
 	return e.Message
+}
+
+// StatusCode is required by routing.HTTPError interface.
+func (e ErrorResponse) StatusCode() int {
+	return e.Status
 }
 
 // InternalServerError creates a new error response representing an internal
@@ -75,5 +88,49 @@ func BadRequest(msg string) ErrorResponse {
 	return ErrorResponse{
 		Status:  http.StatusBadRequest,
 		Message: msg,
+	}
+}
+
+// BuildErrorResponse builds an error response from an error.
+func BuildErrorResponse(err error, trans ut.Translator) ErrorResponse {
+	switch err.(type) {
+	case ErrorResponse:
+		return err.(ErrorResponse)
+	case validator.ValidationErrors:
+		return invalidInput(err, trans)
+	case *echo.HTTPError:
+		switch err.(*echo.HTTPError).Code {
+		case http.StatusNotFound:
+			return NotFound("")
+		default:
+			return ErrorResponse{
+				Status:  err.(*echo.HTTPError).Code,
+				Message: err.Error(),
+			}
+		}
+	}
+	if errors.Is(err, gocb.ErrDocumentNotFound) {
+		return NotFound("")
+	}
+	return InternalServerError("")
+}
+
+// invalidInput creates a new error response representing a data validation
+// error (HTTP 400).
+func invalidInput(err error, trans ut.Translator) ErrorResponse {
+
+	var details []string
+
+	// Translate all error at once.
+	validatorErrs := err.(validator.ValidationErrors)
+
+	for _, e := range validatorErrs {
+		details = append(details, e.Translate(trans))
+	}
+
+	return ErrorResponse{
+		Status:  http.StatusBadRequest,
+		Message: "There is some problem with the data you submitted.",
+		Details: details,
 	}
 }

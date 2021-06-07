@@ -6,6 +6,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	gocb "github.com/couchbase/gocb/v2"
@@ -67,7 +68,7 @@ func Open(server, username, password, bucketName string) (*DB, error) {
 
 // Query executes a N1QL query.
 func (db *DB) Query(ctx context.Context, statement string,
-	 args map[string]interface{}) (*gocb.QueryResult, error) {
+	args map[string]interface{}) (*gocb.QueryResult, error) {
 
 	results, err := db.Cluster.Query(statement, &gocb.QueryOptions{
 		NamedParameters: args, Adhoc: true})
@@ -83,6 +84,10 @@ func (db *DB) Get(ctx context.Context, id string, model interface{}) error {
 
 	// Performs a fetch operation against the collection.
 	getResult, err := db.Collection.Get(id, &gocb.GetOptions{})
+
+	if errors.Is(err, gocb.ErrDocumentNotFound) {
+		return err
+	}
 	if err != nil {
 		return err
 	}
@@ -116,7 +121,7 @@ func (db *DB) Delete(ctx context.Context, id string) error {
 
 // Count retrieves the total number of documents.
 func (db *DB) Count(ctx context.Context, docType string,
-	 val interface{}) error {
+	val interface{}) error {
 
 	//val = nil
 

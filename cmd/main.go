@@ -2,7 +2,6 @@
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
-
 package main
 
 import (
@@ -13,14 +12,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/saferwall/saferwall-api/internal/auth"
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
+	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/saferwall/saferwall-api/internal/config"
 	"github.com/saferwall/saferwall-api/internal/db"
-	dbcontext "github.com/saferwall/saferwall-api/internal/db"
-	"github.com/saferwall/saferwall-api/internal/healthcheck"
-	"github.com/saferwall/saferwall-api/internal/user"
+	"github.com/saferwall/saferwall-api/internal/server"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -29,29 +27,44 @@ var Version = "1.0.0"
 
 func main() {
 
-	// Create root logger tagged with server version
+	// Create root logger tagged with server version.
 	logger := log.New().With(nil, "version", Version)
+
+	if err := run(logger); err != nil {
+		logger.Errorf("failed to run the server: %s", err)
+		os.Exit(-1)
+	}
+}
+
+// run was explicitely created to allow main() to receive an error when server
+// creation fails.
+func run(logger log.Logger) error {
 
 	// Load application configurations
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	cfg, err := config.Load(dir + "./../config")
 	if err != nil {
-		logger.Errorf("failed to load application configuration: %s", err)
-		os.Exit(-1)
+		return err
 	}
 
 	// Connect to the database.
 	dbx, err := db.Open(cfg.DB.Server, cfg.DB.Username,
 		cfg.DB.Password, cfg.DB.BucketName)
 	if err != nil {
-		logger.Errorf("failed to connect to database: %s", err)
-		os.Exit(-1)
+		return err
 	}
+
+	// Create a translator for validation error messages.
+	en := en.New()
+	uni := ut.New(en, en)
+	trans, _ := uni.GetTranslator("en")
+	validate := validator.New()
+	en_translations.RegisterDefaultTranslations(validate, trans)
 
 	// Build HTTP server.
 	hs := &http.Server{
 		Addr:    cfg.Address,
-		Handler: buildHandler(logger, dbx, cfg),
+		Handler: server.BuildHandler(logger, dbx, cfg, Version, trans),
 	}
 
 	// Start server.
@@ -63,8 +76,9 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
-	// Use a buffered channel to avoid missing signals as recommended for signal.Notify
+	// Wait for interrupt signal to gracefully shutdown the server with a
+	// timeout of 10 seconds. Use a buffered channel to avoid missing
+	// signals as recommended for signal.Notify.
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
@@ -75,48 +89,5 @@ func main() {
 		os.Exit(-1)
 	}
 
-}
-
-// buildHandler sets up the HTTP routing and builds an HTTP handler.
-func buildHandler(logger log.Logger, db *dbcontext.DB,
-	cfg *config.Config) http.Handler {
-
-	// Create `echo` instance
-	e := echo.New()
-
-	// Setup middlware.
-	e.Use(middleware.LoggerWithConfig(
-		middleware.LoggerConfig{
-			Format: `{"remote_ip":"${remote_ip}","host":"${host}",` +
-				`"method":"${method}","uri":"${uri}","status":${status},` +
-				`"latency":${latency},"latency_human":"${latency_human}",` +
-				`"bytes_in":${bytes_in},bytes_out":${bytes_out}}` + "\n",
-		}))
-
-	// CORS middlware.
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{cfg.UI.Address},
-		AllowMethods: []string{
-			echo.GET, echo.PUT, echo.POST, echo.DELETE, echo.OPTIONS},
-		AllowCredentials: true,
-	}))
-
-	// Add Trailing slash for consistent URIs.
-	e.Pre(middleware.AddTrailingSlash())
-
-	// Healthcheck endpoint.
-	healthcheck.RegisterHandlers(e, Version)
-
-	// Creates a new group for v1.
-	g := e.Group("/v1")
-
-	// Setup JWT Auth handler.
-	authHandler := auth.Handler(cfg.JWTSigningKey)
-
-	user.RegisterHandlers(g, user.NewService(
-		user.NewRepository(db, logger), logger),
-		authHandler, logger,
-	)
-
-	return e
+	return nil
 }

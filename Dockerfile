@@ -33,16 +33,15 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo \
 ############################
 
 FROM alpine:3.13
-LABEL maintainer="https://github.com/saferwall"
-LABEL version="0.1.0"
-LABEL description="Saferwall Web API Service"
+LABEL maintainer="https://github.com/saferwall/saferwall-api"
+LABEL version="1.0.0"
+LABEL description="Saferwall web API service"
 
 WORKDIR /backend
 
 # Copy the app
 COPY --from=builder /go/bin/server .
 COPY ./data ./data
-COPY ./app/schema ./app/schema
 COPY  ./configs/app.dev.toml ./configs/app.dev.toml
 
 # Run the server.

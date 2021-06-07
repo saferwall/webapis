@@ -49,7 +49,7 @@ func (r repository) Get(ctx context.Context, id string) (entity.User, error) {
 // Create saves a new user record in the database.
 // It returns the ID of the newly inserted user record.
 func (r repository) Create(ctx context.Context, user entity.User) error {
-	return r.db.Create(ctx, "id", &user)
+	return r.db.Create(ctx, user.Username, &user)
 }
 
 // Update saves the changes to a user in the database.
