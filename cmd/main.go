@@ -1,3 +1,8 @@
+// Copyright 2021 Saferwall. All rights reserved.
+// Use of this source code is governed by Apache v2 license
+// license that can be found in the LICENSE file.
+
+
 package main
 
 import (
@@ -51,6 +56,7 @@ func main() {
 
 	// Start server.
 	go func() {
+		logger.Infof("server is running at %s", cfg.Address)
 		if err := hs.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Error(err)
 			os.Exit(-1)
@@ -66,7 +72,8 @@ func main() {
 	defer cancel()
 	if err := hs.Shutdown(ctx); err != nil {
 		logger.Error(err)
-		os.Exit(-1)	}
+		os.Exit(-1)
+	}
 
 }
 
@@ -80,10 +87,10 @@ func buildHandler(logger log.Logger, db *dbcontext.DB,
 	// Setup middlware.
 	e.Use(middleware.LoggerWithConfig(
 		middleware.LoggerConfig{
-			Format: `{"remote_ip":"${remote_ip}","host":"${host}",
-			method":"${method}","uri":"${uri}","status":${status},
-			"latency":${latency},"latency_human":"${latency_human}",
-			"bytes_in":${bytes_in},bytes_out":${bytes_out}}` + "\n",
+			Format: `{"remote_ip":"${remote_ip}","host":"${host}",` +
+				`"method":"${method}","uri":"${uri}","status":${status},` +
+				`"latency":${latency},"latency_human":"${latency_human}",` +
+				`"bytes_in":${bytes_in},bytes_out":${bytes_out}}` + "\n",
 		}))
 
 	// CORS middlware.
@@ -97,6 +104,7 @@ func buildHandler(logger log.Logger, db *dbcontext.DB,
 	// Add Trailing slash for consistent URIs.
 	e.Pre(middleware.AddTrailingSlash())
 
+	// Healthcheck endpoint.
 	healthcheck.RegisterHandlers(e, Version)
 
 	// Creates a new group for v1.

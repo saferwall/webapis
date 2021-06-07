@@ -12,7 +12,7 @@ import (
 
 // RegisterHandlers registers the handlers that perform healthchecks.
 func RegisterHandlers(e *echo.Echo, version string) {
-	e.Match([]string{"GET", "HEAD"}, "/healthcheck", healthcheck(version))
+	e.Match([]string{"GET", "HEAD"}, "/healthcheck/", healthcheck(version))
 }
 
 // healthcheck responds to a healthcheck request.

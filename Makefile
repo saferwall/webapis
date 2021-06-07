@@ -33,9 +33,6 @@ include $(ROOT_DIR)/.env
 include build/docker.mk
 
 
-dk-run:		## Run the docker container
-	sudo docker run -it -p 80:80 --name ml saferwall/$(DOCKER_HUB_IMG)
-
 dk-build: ## Build frontend in a docker container
 	@echo "${GREEN} [*] =============== Build Saferwall ML Pipeline =============== ${RESET}"
 	sudo make docker-build IMG=$(DOCKER_HUB_IMG) \
@@ -55,55 +52,3 @@ dk-release: ## Build and release frontend in a docker container.
 		sudo make docker-release IMG=$(DOCKER_HUB_IMG) VERSION=$(SAFERWALL_VER) \
 			DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
-
-dc-up: 	## Run the docker-compose up.
-	docker-compose up
-
-BUCKET_LIST = files users
-dc-init-db:		## Init couchbase database
-	# Init the cluster.
-	echo "${GREEN} [*] =============== Creating Cluster =============== ${RESET}"
-	docker-compose exec couchbase \
-		couchbase-cli cluster-init \
-		--cluster localhost \
-		--cluster-username Administrator \
-		--cluster-password password \
-		--cluster-port 8091 \
-		--cluster-name saferwall \
-		--services data,index,query \
-		--cluster-ramsize 512 \
-		--cluster-index-ramsize 256
-
-	echo "${GREEN} [*] =============== Add the node =============== ${RESET}"
-	docker-compose exec couchbase \
-		couchbase-cli server-add \
-		--cluster localhost \
-		--username Administrator \
-		--password password \
-		--server-add localhost \
-		--server-add-username Administrator \
-		--server-add-password password \
-		--services data
-
-	echo "${GREEN} [*] =============== Rebalance the node =============== ${RESET}"
-	docker-compose exec couchbase \
-		couchbase-cli rebalance \
-		--cluster localhost \
-		--username Administrator \
-		--password password
-
-	# Create require buckets.
-	for bucket in $(BUCKET_LIST) ; do \
-		echo "${GREEN} [*] =============== Creating $$bucket =============== ${RESET}" ; \
-		docker-compose exec couchbase \
-			couchbase-cli bucket-create \
-			--cluster localhost \
-			--username Administrator \
-			--password password \
-			--bucket $$bucket \
-			--bucket-type couchbase \
-			--bucket-ramsize 128 \
-			--max-ttl 500000000 \
-			--durability-min-level persistToMajority \
-			--enable-flush 0 ; \
-	done
