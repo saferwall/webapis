@@ -6,6 +6,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -18,8 +19,8 @@ type Service interface {
 	// Query(ctx context.Context, offset, limit int) ([]User, error)
 	// Count(ctx context.Context) (int, error)
 	Create(ctx context.Context, input CreateUserRequest) (User, error)
-	// Update(ctx context.Context, id string, input UpdateUserRequest) (User, error)
-	// Delete(ctx context.Context, id string) (User, error)
+	Update(ctx context.Context, id string, input UpdateUserRequest) (User, error)
+	Delete(ctx context.Context, id string) (User, error)
 }
 
 // User represents the data about a user.
@@ -39,16 +40,12 @@ type CreateUserRequest struct {
 	Password string `json:"password" validate:"required,alphanum,min=8,max=30"`
 }
 
-// Validate validates the CreateUserRequest fields.
-// func (m CreateUserRequest) Validate() error {
-// 	err := validate.Struct(m)
-// 	validationErrors := err.(validator.ValidationErrors)
-// 	return validationErrors
-// }
-
 // UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
-	Name string `json:"name"`
+	Name     string `json:"name" validate:"omitempty,min=1,max=32"`
+	Location string `json:"location" validate:"omitempty,alphanumunicode,min=2,max=16"`
+	URL      string `json:"url" validate:"omitempty,url,max=64"`
+	Bio      string `json:"bio" validate:"omitempty,alphanumunicode,min=1,max=256"`
 }
 
 // NewService creates a new user service.
@@ -71,13 +68,51 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 
 	now := time.Now()
 	err := s.repo.Create(ctx, entity.User{
-		Username: req.Username,
-		Email: req.Email,
+		Username:    req.Username,
+		Email:       req.Email,
 		MemberSince: now.Unix(),
-		LastSeen: now.Unix(),
+		LastSeen:    now.Unix(),
 	})
 	if err != nil {
 		return User{}, err
 	}
 	return s.Get(ctx, req.Username)
+}
+
+// Update updates the user with the specified ID.
+func (s service) Update(ctx context.Context, id string, req UpdateUserRequest) (
+	User, error) {
+
+	user, err := s.Get(ctx, id)
+	if err != nil {
+		return user, err
+	}
+
+	data, err := json.Marshal(req)
+	if err != nil {
+		return user, err
+	}
+	err = json.Unmarshal(data, &user)
+	if err != nil {
+		return user, err
+	}
+
+	// check if user.Username == id
+	if err := s.repo.Update(ctx, user.User); err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+// Delete deletes the user with the specified ID.
+func (s service) Delete(ctx context.Context, id string) (User, error) {
+	user, err := s.Get(ctx, id)
+	if err != nil {
+		return User{}, err
+	}
+	if err = s.repo.Delete(ctx, id); err != nil {
+		return User{}, err
+	}
+	return user, nil
 }

@@ -11,13 +11,13 @@ max_avatar_file_size = 1 # Maximum avatar size to allow for user profile picture
 address = "http://localhost:8000" # DSN for the frontend.
 
 [db]
-server = "couchbase://localhost" # DSN for connecting to the database
+server = "couchbase://couchbase" # DSN for connecting to the database
 username = "Administrator" # Username used to access the db.
 password = "password" # Password used to access the db.
 bucket_name = "sfw" # Name of the couchbase bucket.
 
 [nsq]
-address = "nsqd01:4150"
+address = "nsqd:4150"
 
 [storage]
 endpoint = "minio:9000"

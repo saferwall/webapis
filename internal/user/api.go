@@ -17,19 +17,10 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	res := resource{service, logger}
 
+	g.POST("/users/", res.create)
 	g.GET("/users/:username/", res.get)
-	g.POST("/users/:username/", res.create)
-	// g.DELETE("/users/:username/", user.DeleteUser, m.RequireLogin)
-
-	// r.Get("/albums/<id>", res.get)
-	// r.Get("/albums", res.query)
-
-	// r.Use(authHandler)
-
-	// // the following endpoints require a valid JWT
-	// r.Post("/albums", res.create)
-	// r.Put("/albums/<id>", res.update)
-	// r.Delete("/albums/<id>", res.delete)
+	g.PUT("/users/:username/", res.update)
+	g.DELETE("/users/:username/", res.delete)
 }
 
 type resource struct {
@@ -59,4 +50,29 @@ func (r resource) create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, user)
+}
+
+func (r resource) update(c echo.Context) error {
+	var input UpdateUserRequest
+	if err := c.Bind(&input); err != nil {
+		r.logger.With(c.Request().Context()).Info(err)
+		return errors.BadRequest("")
+	}
+
+	user, err := r.service.Update(c.Request().Context(),
+		c.Param("username"), input)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusCreated, user)
+}
+
+func (r resource) delete(c echo.Context) error {
+	user, err := r.service.Delete(c.Request().Context(), c.Param("username"))
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, user)
 }

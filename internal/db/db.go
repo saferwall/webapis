@@ -80,10 +80,10 @@ func (db *DB) Query(ctx context.Context, statement string,
 }
 
 // Get retrieves the document using its key.
-func (db *DB) Get(ctx context.Context, id string, model interface{}) error {
+func (db *DB) Get(ctx context.Context, key string, model interface{}) error {
 
 	// Performs a fetch operation against the collection.
-	getResult, err := db.Collection.Get(id, &gocb.GetOptions{})
+	getResult, err := db.Collection.Get(key, &gocb.GetOptions{})
 
 	if errors.Is(err, gocb.ErrDocumentNotFound) {
 		return err
@@ -102,20 +102,20 @@ func (db *DB) Get(ctx context.Context, id string, model interface{}) error {
 }
 
 // Create saves a new document into the collection.
-func (db *DB) Create(ctx context.Context, id string, val interface{}) error {
-	_, err := db.Collection.Insert(id, val, &gocb.InsertOptions{})
+func (db *DB) Create(ctx context.Context, key string, val interface{}) error {
+	_, err := db.Collection.Insert(key, val, &gocb.InsertOptions{})
 	return err
 }
 
 // Update updates a document in the collection.
-func (db *DB) Update(ctx context.Context, id string, val interface{}) error {
-	_, err := db.Collection.Replace(id, val, &gocb.ReplaceOptions{})
+func (db *DB) Update(ctx context.Context, key string, val interface{}) error {
+	_, err := db.Collection.Replace(key, val, &gocb.ReplaceOptions{})
 	return err
 }
 
 // Delete removes a document from the collection.
-func (db *DB) Delete(ctx context.Context, id string) error {
-	_, err := db.Collection.Remove(id, &gocb.RemoveOptions{})
+func (db *DB) Delete(ctx context.Context, key string) error {
+	_, err := db.Collection.Remove(key, &gocb.RemoveOptions{})
 	return err
 }
 

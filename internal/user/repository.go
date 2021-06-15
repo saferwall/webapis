@@ -6,6 +6,7 @@ package user
 
 import (
 	"context"
+	"strings"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -42,24 +43,28 @@ func NewRepository(db *dbcontext.DB, logger log.Logger) Repository {
 // Get reads the user with the specified ID from the database.
 func (r repository) Get(ctx context.Context, id string) (entity.User, error) {
 	var user entity.User
-	err := r.db.Get(ctx, id, &user)
+	key := strings.ToLower("users::" + id)
+	err := r.db.Get(ctx, key, &user)
 	return user, err
 }
 
 // Create saves a new user record in the database.
 // It returns the ID of the newly inserted user record.
 func (r repository) Create(ctx context.Context, user entity.User) error {
-	return r.db.Create(ctx, user.Username, &user)
+	key := strings.ToLower("users::" + user.Username)
+	return r.db.Create(ctx, key, &user)
 }
 
 // Update saves the changes to a user in the database.
 func (r repository) Update(ctx context.Context, user entity.User) error {
-	return r.db.Update(ctx, "id", &user)
+	key := "users::" + user.Username
+	return r.db.Update(ctx, key, &user)
 }
 
 // Delete deletes a user with the specified ID from the database.
 func (r repository) Delete(ctx context.Context, id string) error {
-	return r.db.Delete(ctx, "id")
+	key := strings.ToLower("users::" + id)
+	return r.db.Delete(ctx, key)
 }
 
 // Count returns the number of the user records in the database.

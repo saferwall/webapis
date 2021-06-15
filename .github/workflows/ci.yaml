@@ -4,11 +4,11 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Build & Test
+    name: Build & Test Go Package
     strategy:
       matrix:
-        go-version: [1.15.x]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        go-version: [1.16.x]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -37,5 +37,23 @@ jobs:
 
       - name: Run Vet & Lint
         run: |
-          go vet .
+          go vet ./...
           golint -set_exit_status=1 .
+
+  build-container:
+      name: Build Container
+      strategy:
+        matrix:
+          os: [ubuntu-latest]
+      runs-on: ${{ matrix.os }}
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+
+        - name: Decrypt Secret
+          run: ./scripts/decrypt_secret.sh
+          env:
+            SECRETS_PASSPHRASE: ${{ secrets.SECRETS_PASSPHRASE }}
+
+        - name: Build Container
+          run: make dk-build

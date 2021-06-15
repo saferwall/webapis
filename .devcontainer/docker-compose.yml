@@ -24,7 +24,6 @@ services:
       # - ~/.kube:/home/districter/.kube
       # - ~/.kube:/root/.kube
     environment:
-      - TZ=
       - SFW_WEB_APP=dev
     cap_add:
       # For debugging with dlv
@@ -98,7 +97,7 @@ services:
   consumer:
     image: saferwall/goconsumer:latest
     environment:
-      ENVIRONMENT: dev
+      SFW_CONSUMER: dev
     depends_on:
       - web
     restart: on-failure
