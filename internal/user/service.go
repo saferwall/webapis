@@ -16,8 +16,8 @@ import (
 // Service encapsulates usecase logic for users.
 type Service interface {
 	Get(ctx context.Context, id string) (User, error)
-	// Query(ctx context.Context, offset, limit int) ([]User, error)
-	// Count(ctx context.Context) (int, error)
+	//Query(ctx context.Context, offset, limit int) ([]User, error)
+	Count(ctx context.Context) (int, error)
 	Create(ctx context.Context, input CreateUserRequest) (User, error)
 	Update(ctx context.Context, id string, input UpdateUserRequest) (User, error)
 	Delete(ctx context.Context, id string) (User, error)
@@ -28,9 +28,15 @@ type User struct {
 	entity.User
 }
 
+// Securer represents security interface.
+type Securer interface {
+	Hash(string) string
+}
+
 type service struct {
 	repo   Repository
 	logger log.Logger
+	sec    Securer
 }
 
 // CreateUserRequest represents a user creation request.
@@ -49,8 +55,8 @@ type UpdateUserRequest struct {
 }
 
 // NewService creates a new user service.
-func NewService(repo Repository, logger log.Logger) Service {
-	return service{repo, logger}
+func NewService(repo Repository, logger log.Logger, sec Securer) Service {
+	return service{repo, logger, sec}
 }
 
 // Get returns the user with the specified user ID.
@@ -69,6 +75,7 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 	now := time.Now()
 	err := s.repo.Create(ctx, entity.User{
 		Username:    req.Username,
+		Password:    s.sec.Hash(req.Password),
 		Email:       req.Email,
 		MemberSince: now.Unix(),
 		LastSeen:    now.Unix(),
@@ -88,6 +95,7 @@ func (s service) Update(ctx context.Context, id string, req UpdateUserRequest) (
 		return user, err
 	}
 
+	// merge the structures.
 	data, err := json.Marshal(req)
 	if err != nil {
 		return user, err
@@ -115,4 +123,9 @@ func (s service) Delete(ctx context.Context, id string) (User, error) {
 		return User{}, err
 	}
 	return user, nil
+}
+
+// Count returns the number of users.
+func (s service) Count(ctx context.Context) (int, error) {
+	return s.repo.Count(ctx)
 }

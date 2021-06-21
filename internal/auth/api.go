@@ -4,36 +4,38 @@
 
 package auth
 
-// import (
-// 	"github.com/labstack/echo/v4"
-// 	"github.com/qiangxue/go-rest-api/internal/errors"
-// 	"github.com/saferwall/saferwall-api/pkg/log"
-// )
+import (
+	"net/http"
 
-// // RegisterHandlers registers handlers for different HTTP requests.
-// func RegisterHandlers(rg *routing.RouteGroup, service Service, logger log.Logger) {
-// 	rg.Post("/login", login(service, logger))
-// }
+	"github.com/labstack/echo/v4"
+	"github.com/saferwall/saferwall-api/internal/errors"
+	"github.com/saferwall/saferwall-api/pkg/log"
+)
 
-// // login returns a handler that handles user login request.
-// func login(service Service, logger log.Logger) routing.Handler {
-// 	return func(c *routing.Context) error {
-// 		var req struct {
-// 			Username string `json:"username"`
-// 			Password string `json:"password"`
-// 		}
+// RegisterHandlers registers handlers for different HTTP requests.
+func RegisterHandlers(g *echo.Group, service Service, logger log.Logger) {
+	g.POST("/auth/login/", login(service, logger))
+}
 
-// 		if err := c.Read(&req); err != nil {
-// 			logger.With(c.Request.Context()).Errorf("invalid request: %v", err)
-// 			return errors.BadRequest("")
-// 		}
+// login returns a handler that handles user login request.
+func login(service Service, logger log.Logger) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var req struct {
+			Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
+			Password string `json:"password" validate:"required,alphanum,min=8,max=30"`
+		}
 
-// 		token, err := service.Login(c.Request.Context(), req.Username, req.Password)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		return c.Write(struct {
-// 			Token string `json:"token"`
-// 		}{token})
-// 	}
-// }
+		if err := c.Bind(&req); err != nil {
+			logger.With(c.Request().Context()).Errorf("invalid request: %v", err)
+			return errors.BadRequest("")
+		}
+
+		token, err := service.Login(c.Request().Context(), req.Username, req.Password)
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, struct {
+			Token string `json:"token"`
+		}{token})
+	}
+}

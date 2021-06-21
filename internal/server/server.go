@@ -1,6 +1,7 @@
 package server
 
 import (
+	"crypto/sha1"
 	"net/http"
 
 	ut "github.com/go-playground/universal-translator"
@@ -12,6 +13,7 @@ import (
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
+	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -31,7 +33,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB,
 	// Create `echo` instance.
 	e := echo.New()
 
-	// Logging middlware.
+	// Logging middleware.
 	e.Use(middleware.LoggerWithConfig(
 		middleware.LoggerConfig{
 			Format: `{"remote_ip":"${remote_ip}","host":"${host}",` +
@@ -40,7 +42,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB,
 				`"bytes_in":${bytes_in},bytes_out":${bytes_out}}` + "\n",
 		}))
 
-	// CORS middlware.
+	// CORS middleware.
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{cfg.UI.Address},
 		AllowMethods: []string{
@@ -53,11 +55,14 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB,
 		DisablePrintStack: true,
 	}))
 
-	// Add Trailing slash for consistent URIs.
-	e.Pre(middleware.AddTrailingSlash())
-
 	// Pass-the-context middleware.
 	e.Use(newCustomContextMiddleware(trans))
+
+	// Add trailing slash for consistent URIs.
+	e.Pre(middleware.AddTrailingSlash())
+
+	// Setup JWT Auth handler.
+	authHandler := auth.Handler(cfg.JWTSigningKey)
 
 	// Register a custom fields validator.
 	e.Validator = &CustomValidator{validator: validator.New()}
@@ -68,19 +73,19 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB,
 	// Setup a custom HTTP error handler.
 	e.HTTPErrorHandler = CustomHTTPErrorHandler
 
-	// Healthcheck endpoint.
-	healthcheck.RegisterHandlers(e, version)
+	// Create a securer for auth.
+	sec := secure.New(sha1.New())
 
 	// Creates a new group for v1.
 	g := e.Group("/v1")
 
-	// Setup JWT Auth handler.
-	authHandler := auth.Handler(cfg.JWTSigningKey)
-
+	// Register the handlers.
+	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, user.NewService(
-		user.NewRepository(db, logger), logger),
-		authHandler, logger,
-	)
+		user.NewRepository(db, logger), logger, sec),
+		authHandler, logger)
+	auth.RegisterHandlers(g, auth.NewService(cfg.JWTSigningKey,
+		cfg.JWTExpiration, logger, sec), logger)
 
 	return e
 }

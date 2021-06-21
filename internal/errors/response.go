@@ -6,6 +6,7 @@ package errors
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	gocb "github.com/couchbase/gocb/v2"
@@ -102,6 +103,9 @@ func BuildErrorResponse(err error, trans ut.Translator) ErrorResponse {
 		switch err.(*echo.HTTPError).Code {
 		case http.StatusNotFound:
 			return NotFound("")
+		case http.StatusBadRequest:
+			msg := fmt.Sprintf("%v", err.(*echo.HTTPError).Message)
+			return BadRequest(msg)
 		default:
 			return ErrorResponse{
 				Status:  err.(*echo.HTTPError).Code,

@@ -5,6 +5,7 @@
 package auth
 
 import (
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -12,7 +13,8 @@ import (
 // Handler returns a JWT-based authentication middleware.
 func Handler(verificationKey string) echo.MiddlewareFunc {
 	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:  []byte(verificationKey),
-		TokenLookup: "header:Authorization,cookie:JWTCookie",
+		SigningKey:   []byte(verificationKey),
+		TokenLookup:  "header:Authorization,cookie:JWTCookie",
 	})
 }
+

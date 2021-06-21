@@ -13,14 +13,14 @@ import (
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
-	authHandler echo.MiddlewareFunc, logger log.Logger) {
+	requireLogin echo.MiddlewareFunc, logger log.Logger) {
 
 	res := resource{service, logger}
 
 	g.POST("/users/", res.create)
 	g.GET("/users/:username/", res.get)
-	g.PUT("/users/:username/", res.update)
-	g.DELETE("/users/:username/", res.delete)
+	g.PUT("/users/:username/", res.update, requireLogin)
+	g.DELETE("/users/:username/", res.delete, requireLogin)
 }
 
 type resource struct {
@@ -33,7 +33,8 @@ func (r resource) get(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
+	user.Email = ""
+	user.Password = ""
 	return c.JSON(http.StatusOK, user)
 }
 
