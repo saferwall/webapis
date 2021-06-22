@@ -79,13 +79,13 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB,
 	// Creates a new group for v1.
 	g := e.Group("/v1")
 
-	// Register the handlers.
+	// Create the services and register the handlers.
+	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec)
+	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger, sec, userSvc)
+
 	healthcheck.RegisterHandlers(e, version)
-	user.RegisterHandlers(g, user.NewService(
-		user.NewRepository(db, logger), logger, sec),
-		authHandler, logger)
-	auth.RegisterHandlers(g, auth.NewService(cfg.JWTSigningKey,
-		cfg.JWTExpiration, logger, sec), logger)
+	user.RegisterHandlers(g, userSvc, authHandler, logger)
+	auth.RegisterHandlers(g, authSvc, logger)
 
 	return e
 }

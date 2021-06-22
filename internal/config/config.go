@@ -54,6 +54,8 @@ type Config struct {
 	FrontendAddress string `mapstructure:"frontend_address"`
 	// JWT signing key.
 	JWTSigningKey string `mapstructure:"jwt_signkey"`
+	// JWT expiration in hours.
+	JWTExpiration int `mapstructure:"jwt_expiration"`
 	// Maximum file size to allow for samples.
 	MaxFileSize int64 `mapstructure:"max_file_size"`
 	// Maximum avatar size to allow for user profile picture.

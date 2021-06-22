@@ -34,9 +34,9 @@ type Securer interface {
 }
 
 type service struct {
+	sec    Securer
 	repo   Repository
 	logger log.Logger
-	sec    Securer
 }
 
 // CreateUserRequest represents a user creation request.
@@ -56,7 +56,7 @@ type UpdateUserRequest struct {
 
 // NewService creates a new user service.
 func NewService(repo Repository, logger log.Logger, sec Securer) Service {
-	return service{repo, logger, sec}
+	return service{sec, repo, logger}
 }
 
 // Get returns the user with the specified user ID.

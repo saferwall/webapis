@@ -6,6 +6,7 @@
 address = ":8080" # The IP:Port. Defaults to 8080.
 log_level = "debug" # Log level. Defaults to info.
 jwt_signkey = "secret" # JWT sign key secret.
+jwt_expiration = 72 # JWT expiration in hours. Defaults to 72 hours (3 days)
 max_file_size = 64 # Maximum file size to allow for samples in MB.
 max_avatar_file_size = 1 # Maximum avatar size to allow for user profile picture in MB.
 
