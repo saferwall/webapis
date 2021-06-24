@@ -92,6 +92,18 @@ func BadRequest(msg string) ErrorResponse {
 	}
 }
 
+// TooLargeEntity creates a new error response representing a an entity larger
+// than limits defined by server (HTTP 413).
+func TooLargeEntity(msg string) ErrorResponse {
+	if msg == "" {
+		msg = "Your request payload is too large."
+	}
+	return ErrorResponse{
+		Status:  http.StatusRequestEntityTooLarge,
+		Message: msg,
+	}
+}
+
 // BuildErrorResponse builds an error response from an error.
 func BuildErrorResponse(err error, trans ut.Translator) ErrorResponse {
 	switch err.(type) {
