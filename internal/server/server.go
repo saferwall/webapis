@@ -12,6 +12,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/config"
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/errors"
+	"github.com/saferwall/saferwall-api/internal/file"
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/user"
@@ -82,10 +83,12 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB,
 	// Create the services and register the handlers.
 	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger, sec, userSvc)
+	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec)
 
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, logger)
 	auth.RegisterHandlers(g, authSvc, logger)
+	file.RegisterHandlers(g, fileSvc, authHandler, logger)
 
 	return e
 }

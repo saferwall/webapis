@@ -6,6 +6,16 @@ This web service uses [Echo](https://echo.labstack.com/) as web application fram
 This sample application provides only several functions as Web APIs.
 Please refer to the 'Service' section about the detail of those functions.
 
+## Improvements compared to the previous implementation
+
+- clean architecture with solid principles.
+- Full test coverage
+- swagger doc
+- Error handling with proper error response generation
+- details
+    - `File{}` not depending on `peparser`.
+
+
 ## References
 
 - [Standard Package Layout](https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1)

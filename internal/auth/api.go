@@ -12,30 +12,42 @@ import (
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
+type resource struct {
+	service Service
+	logger  log.Logger
+}
+
 // RegisterHandlers registers handlers for different HTTP requests.
 func RegisterHandlers(g *echo.Group, service Service, logger log.Logger) {
-	g.POST("/auth/login/", login(service, logger))
+
+	res := resource{service, logger}
+
+	g.POST("/auth/login/", res.login)
+	g.POST("/auth/resend-confirmation/", res.resendConfirmation)
 }
 
 // login returns a handler that handles user login request.
-func login(service Service, logger log.Logger) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var req struct {
-			Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
-			Password string `json:"password" validate:"required,alphanum,min=8,max=30"`
-		}
-
-		if err := c.Bind(&req); err != nil {
-			logger.With(c.Request().Context()).Errorf("invalid request: %v", err)
-			return errors.BadRequest("")
-		}
-
-		token, err := service.Login(c.Request().Context(), req.Username, req.Password)
-		if err != nil {
-			return err
-		}
-		return c.JSON(http.StatusOK, struct {
-			Token string `json:"token"`
-		}{token})
+func (r resource) login(c echo.Context) error {
+	var req struct {
+		Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
+		Password string `json:"password" validate:"required,alphanum,min=8,max=30"`
 	}
+
+	if err := c.Bind(&req); err != nil {
+		r.logger.With(c.Request().Context()).Errorf("invalid request: %v", err)
+		return errors.BadRequest("")
+	}
+
+	token, err := r.service.Login(c.Request().Context(), req.Username, req.Password)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Token string `json:"token"`
+	}{token})
+}
+
+
+func (r resource) resendConfirmation(c echo.Context) error {
+	return nil
 }
