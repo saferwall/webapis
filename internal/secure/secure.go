@@ -5,6 +5,8 @@
 package secure
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"hash"
 	"strconv"
@@ -41,4 +43,11 @@ func (s *Service) Token(str string) string {
 	s.h.Reset()
 	fmt.Fprintf(s.h, "%s%s", str, strconv.Itoa(time.Now().Nanosecond()))
 	return fmt.Sprintf("%x", s.h.Sum(nil))
+}
+
+// HashFile hashes the password using bcrypt.
+func (*Service) HashFile(b []byte) string {
+	h := sha256.New()
+	h.Write(b)
+	return hex.EncodeToString(h.Sum(nil))
 }

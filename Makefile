@@ -33,28 +33,24 @@ include $(ROOT_DIR)/.env
 include build/docker.mk
 
 
-dk-build: ## Build frontend in a docker container
-	@echo "${GREEN} [*] =============== Build Saferwall ML Pipeline =============== ${RESET}"
-	sudo make docker-build IMG=$(DOCKER_HUB_IMG) \
+dk-build: ## Build in a docker container
+	@echo "${GREEN} [*] =============== Docker Build  =============== ${RESET}"
+	make docker-build IMG=$(DOCKER_HUB_IMG) DOCKER_FILE=Dockerfile DOCKER_DIR=. ;
+	@EXIT_CODE=$$?
+	@if test $$EXIT_CODE ! 0; then \
+		make docker-build IMG=$(DOCKER_HUB_IMG) DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
+	fi
+
+dk-release: ## Build and release in a docker container.
+	@echo "${GREEN} [*] =============== Docker Build and Release  =============== ${RESET}"
+	make docker-release IMG=$(DOCKER_HUB_IMG) VERSION=$(SAFERWALL_VER) \
 		DOCKER_FILE=Dockerfile DOCKER_DIR=. ;
 	@EXIT_CODE=$$?
 	@if test $$EXIT_CODE ! 0; then \
-		sudo make docker-build IMG=$(DOCKER_HUB_IMG) \
+		make docker-release IMG=$(DOCKER_HUB_IMG) VERSION=$(SAFERWALL_VER) \
 			DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
 
-dk-release: ## Build and release frontend in a docker container.
-	@echo "${GREEN} [*] =============== Build and Release Frontend =============== ${RESET}"
-	sudo make docker-release IMG=$(DOCKER_HUB_IMG) VERSION=$(SAFERWALL_VER) \
-		DOCKER_FILE=Dockerfile DOCKER_DIR=. ;
-	@EXIT_CODE=$$?
-	@if test $$EXIT_CODE ! 0; then \
-		sudo make docker-release IMG=$(DOCKER_HUB_IMG) VERSION=$(SAFERWALL_VER) \
-			DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
-	fi
-
-COUCHBASE_CONTAINER_NAME = couchbase
-COUCHBASE_CONTAINER_VER = couchbase:enterprise-6.6.0
 couchbase-start:	## Start Couchbase Server docker container.
 	$(eval COUCHBASE_CONTAINER_STATUS := $(shell docker container inspect -f '{{.State.Status}}' $(COUCHBASE_CONTAINER_NAME)))
 ifeq ($(COUCHBASE_CONTAINER_STATUS),running)
@@ -67,10 +63,6 @@ else
 	docker run -d --name $(COUCHBASE_CONTAINER_NAME) -p 8091-8094:8091-8094 -p 11210:11210 $(COUCHBASE_CONTAINER_VER)
 endif
 
-
-COUCHBASE_BUCKETS_LIST = sfw
-COUCHBASE_ADMIN_USER = Administrator
-COUCHBASE_ADMIN_PWD = password
 couchbase-init:		## Init couchbase database by creating the cluster and required buckets.
 	# Init the cluster.
 	echo "${GREEN} [*] =============== Creating Cluster =============== ${RESET}"
