@@ -35,13 +35,24 @@ type UICfg struct {
 	Address string `mapstructure:"address"`
 }
 
+// AWSS3Cfg represents AWS S3 credentials.
+type AWSS3Cfg struct {
+	Region    string `mapstructure:"region"`
+	SecretKey string `mapstructure:"secret_key"`
+	AccessKey string `mapstructure:"access_key"`
+}
+
+// LocalFsCfg represents local file system storage data.
+type LocalFsCfg struct {
+	RootDir string `mapstructure:"root_dir"`
+}
+
 // StorageCfg represents the object storage config.
 type StorageCfg struct {
-	Endpoint  string `mapstructure:"endpoint"`
-	SecKey    string `mapstructure:"seckey"`
-	AccessKey string `mapstructure:"accesskey"`
-	Spacename string `mapstructure:"spacename"`
-	Ssl       bool   `mapstructure:"ssl"`
+	FileContainerName    string     `mapstructure:"files_container_name"`
+	AvatarsContainerName string     `mapstructure:"avatars_container_name"`
+	S3                   AWSS3Cfg   `mapstructure:"s3"`
+	Local                LocalFsCfg `mapstructure:"local"`
 }
 
 // Config represents our application config.
@@ -56,6 +67,8 @@ type Config struct {
 	JWTSigningKey string `mapstructure:"jwt_signkey"`
 	// JWT expiration in hours.
 	JWTExpiration int `mapstructure:"jwt_expiration"`
+	// Deployement kind, possible values: aws, gcp, azure, local.
+	DeploymentKind string `mapstructure:"deployment_kind"`
 	// Maximum file size to allow for samples.
 	MaxFileSize int64 `mapstructure:"max_file_size"`
 	// Maximum avatar size to allow for user profile picture.

@@ -5,15 +5,32 @@
 package storage
 
 import (
-	"github.com/graymeta/stow"
-	// support local storage
-	_ "github.com/graymeta/stow/local"
-	// support s3 storage
-	_ "github.com/graymeta/stow/s3"
+	"errors"
+	"io"
+
+	"github.com/saferwall/saferwall-api/internal/config"
+	"github.com/saferwall/saferwall-api/internal/storage/local"
+	"github.com/saferwall/saferwall-api/internal/storage/s3"
 )
 
-// Dial dials stow storage.
-// See stow.Dial for more information.
-func Dial(kind string, config stow.Config) (stow.Location, error) {
-	return stow.Dial(kind, config)
+var (
+	errDeploymentNotFound = errors.New("deployment not found")
+)
+
+// Uploader abstract uploading files to different cloud locations.
+type Uploader interface {
+	// Upload uploads a file to an object storage.
+	Upload(bucket, key string, file io.Reader, timeout int) error
+}
+
+func New(deployment string, cfg config.StorageCfg) (Uploader, error) {
+
+	switch deployment {
+	case "aws":
+		return s3.New(cfg.S3.Region, cfg.S3.AccessKey, cfg.S3.SecretKey)
+	case "local":
+		return local.New(cfg.Local.RootDir)
+	}
+
+	return nil, errDeploymentNotFound
 }

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"crypto/sha1"
 	"net/http"
 
 	ut "github.com/go-playground/universal-translator"
@@ -15,6 +14,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/file"
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
 	"github.com/saferwall/saferwall-api/internal/secure"
+	"github.com/saferwall/saferwall-api/internal/storage"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -28,8 +28,9 @@ type Server struct {
 }
 
 // BuildHandler sets up the HTTP routing and builds an HTTP handler.
-func BuildHandler(logger log.Logger, db *dbcontext.DB,
-	cfg *config.Config, version string, trans ut.Translator) http.Handler {
+func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
+	cfg *config.Config, version string, trans ut.Translator,
+	upl storage.Uploader) http.Handler {
 
 	// Create `echo` instance.
 	e := echo.New()
@@ -74,16 +75,13 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB,
 	// Setup a custom HTTP error handler.
 	e.HTTPErrorHandler = CustomHTTPErrorHandler
 
-	// Create a securer for auth.
-	sec := secure.New(sha1.New())
-
 	// Creates a new group for v1.
 	g := e.Group("/v1")
 
 	// Create the services and register the handlers.
 	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger, sec, userSvc)
-	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec)
+	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, upl)
 
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, logger)

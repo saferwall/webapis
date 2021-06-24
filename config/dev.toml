@@ -1,10 +1,10 @@
 # Config used for devcontainer development.
-
 # General app config.
 address = ":8080" # The IP:Port. Defaults to 8080.
 log_level = "debug" # Log level. Defaults to info.
 jwt_signkey = "secret" # JWT sign key secret.
 jwt_expiration = 72 # JWT expiration in hours. Defaults to 72 hours (3 days)
+deployment_kind = "local" # Deployement kind, possible values: aws, gcp, azure, local.
 max_file_size = 64 # Maximum file size to allow for samples in MB.
 max_avatar_file_size = 1 # Maximum avatar size to allow for user profile picture in MB.
 
@@ -21,17 +21,17 @@ bucket_name = "sfw" # Name of the couchbase bucket.
 address = "nsqd:4150"
 
 [storage]
-endpoint = "minio:9000"
-seckey = "minio123"
-accesskey = "minio"
-spacename = "samples"
-avatarspace = "images"
-ssl = false
+files_container_name = "samples" # Container name for samples.
+avatars_container_name = "images" # Container name for avatars.
+    [storage.s3]
+    region = "us-east-1" # AWS region.
+    secret_key = "superSecretKey" # AWS Secret Access Key.
+    access_key = "superSecretAccessKey" # AWS Access key ID.
 
 [smtp]
 server = "smtp.example.com"
 port = 465
-user =  "user@example.com"
+user = "user@example.com"
 password = "password"
-identity =  "identity"
-sender =  "sender@example.com"
+identity = "identity"
+sender = "sender@example.com"

@@ -7,16 +7,17 @@ package file
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"io/ioutil"
 	"time"
 
-	"errors"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
-var (
+const (
 	// ErrDocumentNotFound is returned when the doc does not exist in the DB.
-	ErrDocumentNotFound  = errors.New("document not found")
+	ErrDocumentNotFound = "document not found"
 )
 
 // Service encapsulates usecase logic for files.
@@ -39,15 +40,20 @@ type Securer interface {
 	HashFile([]byte) string
 }
 
+type Uploader interface {
+	Upload(bucket, key string, file io.Reader, timeout int) error
+}
+
 // CreateFileRequest represents a file creation request.
 type CreateFileRequest struct {
-	content []byte
+	src io.Reader
 }
 
 type service struct {
 	sec    Securer
 	repo   Repository
 	logger log.Logger
+	upl    Uploader
 }
 
 // UpdateUserRequest represents a File update request.
@@ -74,8 +80,9 @@ type UpdateFileRequest struct {
 }
 
 // NewService creates a new File service.
-func NewService(repo Repository, logger log.Logger, sec Securer) Service {
-	return service{sec, repo, logger}
+func NewService(repo Repository, logger log.Logger, sec Securer,
+	upl Uploader) Service {
+	return service{sec, repo, logger, upl}
 }
 
 // Get returns the File with the specified File ID.
@@ -91,32 +98,36 @@ func (s service) Get(ctx context.Context, id string) (File, error) {
 func (s service) Create(ctx context.Context, req CreateFileRequest) (
 	File, error) {
 
-	hash := s.sec.HashFile(req.content)
+	fileContent, err := ioutil.ReadAll(req.src)
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return File{}, err
+	}
 
-	file, err := s.Get(ctx, hash)
-	if err != nil && err == ErrDocumentNotFound {
+	sha256 := s.sec.HashFile(fileContent)
+	file, err := s.Get(ctx, sha256)
+	if err != nil && err.Error() != ErrDocumentNotFound {
 		return File{}, err
 	}
 
 	// Is this a new file ? if yes, we create a new doc in the db.
+	if err.Error() == ErrDocumentNotFound {
+		err = s.upl.Upload("files", sha256, req.src, 10)
+		if err != nil {
+			return File{}, err
+		}
+		err = s.repo.Create(ctx, entity.File{
+			SHA256: sha256,
+			Type:   "file",
+		})
+		if err != nil {
+			return File{}, err
+		}
+	}
+
 	// If not, we append this new submission to the file doc.
-	if err == ErrDocumentNotFound {
-
-	}
-
-
-	now := time.Now()
-	err := s.repo.Create(ctx, entity.File{
-		Username:    req.Username,
-		Password:    s.sec.Hash(req.Password),
-		Email:       req.Email,
-		MemberSince: now.Unix(),
-		LastSeen:    now.Unix(),
-	})
-	if err != nil {
-		return File{}, err
-	}
-	return s.Get(ctx, req.Username)
+	file.LastScanned = time.Now().Unix()
+	return s.Get(ctx, sha256)
 }
 
 // Update updates the File with the specified ID.

@@ -18,6 +18,12 @@ const (
 	timeout = 5 * time.Second
 )
 
+var (
+	// ErrDocumentNotFound is returned when the doc does not exist in the DB.
+	ErrDocumentNotFound = errors.New("document not found")
+)
+
+
 // DB represents the database connection.
 type DB struct {
 	Bucket     *gocb.Bucket
@@ -86,7 +92,7 @@ func (db *DB) Get(ctx context.Context, key string, model interface{}) error {
 	getResult, err := db.Collection.Get(key, &gocb.GetOptions{})
 
 	if errors.Is(err, gocb.ErrDocumentNotFound) {
-		return err
+		return ErrDocumentNotFound
 	}
 	if err != nil {
 		return err

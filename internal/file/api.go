@@ -5,7 +5,6 @@
 package file
 
 import (
-	"io/ioutil"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -30,7 +29,7 @@ type resource struct {
 }
 
 func (r resource) get(c echo.Context) error {
-	file, err := r.service.Get(c.Request().Context(), c.Param("username"))
+	file, err := r.service.Get(c.Request().Context(), c.Param("sha256"))
 	if err != nil {
 		return err
 	}
@@ -46,8 +45,8 @@ func (r resource) create(c echo.Context) error {
 		return errors.BadRequest("missing file in form request")
 	}
 
-	if f.Size > 60000 {
-		r.logger.With(c.Request().Context()).Info(err)
+	if f.Size > 60000000 {
+		r.logger.With(c.Request().Context()).Info("payload too large")
 		return errors.TooLargeEntity("")
 	}
 
@@ -58,14 +57,7 @@ func (r resource) create(c echo.Context) error {
 	}
 	defer src.Close()
 
-	fileContent, err := ioutil.ReadAll(src)
-	if err != nil {
-		r.logger.With(c.Request().Context()).Error(err)
-		return errors.InternalServerError("")
-	}
-
-	input.content = fileContent
-
+	input.src = src
 	file, err := r.service.Create(c.Request().Context(), input)
 	if err != nil {
 		return err

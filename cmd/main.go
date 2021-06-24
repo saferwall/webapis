@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"crypto/sha1"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,7 +19,9 @@ import (
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/saferwall/saferwall-api/internal/config"
 	"github.com/saferwall/saferwall-api/internal/db"
+	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/server"
+	"github.com/saferwall/saferwall-api/internal/storage"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -40,7 +43,7 @@ func main() {
 // creation fails.
 func run(logger log.Logger) error {
 
-	// Load application configurations
+	// Load application configuration.
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	cfg, err := config.Load(dir + "./../config")
 	if err != nil {
@@ -61,10 +64,20 @@ func run(logger log.Logger) error {
 	validate := validator.New()
 	en_translations.RegisterDefaultTranslations(validate, trans)
 
+	// Create a securer for auth.
+	sec := secure.New(sha1.New())
+
+	// Create an uploader to uplaod file to object storage.
+	uploader, err := storage.New(cfg.DeploymentKind, cfg.ObjStorage)
+	if err != nil {
+		return err
+	}
+
 	// Build HTTP server.
 	hs := &http.Server{
 		Addr:    cfg.Address,
-		Handler: server.BuildHandler(logger, dbx, cfg, Version, trans),
+		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
+			 uploader),
 	}
 
 	// Start server.
