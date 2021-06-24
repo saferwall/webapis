@@ -15,6 +15,5 @@
 # vendor/
 
 # Saferwall ignore list
-.env
 default/
 storage/
