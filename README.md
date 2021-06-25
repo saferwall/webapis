@@ -1,4 +1,4 @@
-# saferwall web apis [![GoDoc](http://godoc.org/github.com/saferwall/saferwall-api?status.svg)](https://pkg.go.dev/github.com/saferwall/saferwall-api) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/saferwall-api)](https://goreportcard.com/report/github.com/saferwall/saferwall-api)
+# saferwall web apis [![GoDoc](http://godoc.org/github.com/saferwall/saferwall-api?status.svg)](https://pkg.go.dev/github.com/saferwall/saferwall-api) [![Report Card](https://goreportcard.com/badge/github.com/saferwall/saferwall-api)](https://goreportcard.com/report/github.com/saferwall/saferwall-api) ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/saferwall/saferwall-api/Build%20&%20Test/main?style=flat-square) [![codecov](https://codecov.io/gh/saferwall/saferwall-api/branch/main/graph/badge.svg?token=KM4B60IL4L)](https://codecov.io/gh/saferwall/saferwall-api)
 
 ## Preface
 This repository powers the web service api used in https://saferwall.com.
