@@ -16,13 +16,15 @@ const (
 	// Duration to wait until memd connections have been established with
 	// the server and are ready.
 	timeout = 5 * time.Second
+
+	// Full document updates overwrite the whole object in the database.
+	FullUpdate = ""
 )
 
 var (
 	// ErrDocumentNotFound is returned when the doc does not exist in the DB.
 	ErrDocumentNotFound = errors.New("document not found")
 )
-
 
 // DB represents the database connection.
 type DB struct {
@@ -114,21 +116,22 @@ func (db *DB) Create(ctx context.Context, key string, val interface{}) error {
 }
 
 // Update updates a document in the collection.
-func (db *DB) Update(ctx context.Context, key string, val interface{}) error {
-	_, err := db.Collection.Replace(key, val, &gocb.ReplaceOptions{})
-	return err
-}
+func (db *DB) Update(ctx context.Context, key string, path string,
+	val interface{}) error {
 
-// SubUpdate updates a sub document in the collection. Sub documents operations
-// may be quicker and more network-efficient than full-document operations.
-func (db *DB) SubUpdate(ctx context.Context, key string, path string,
-	 val interface{}) error {
-
-	mops := []gocb.MutateInSpec{
-		gocb.UpsertSpec(path, val, &gocb.UpsertSpecOptions{}),
+	// When `path` is empty, we performs a sub document in the collection.
+	// Sub documents operations may be quicker and more network-efficient than
+	// full-document operations.
+	if len(path) > 0 {
+		mops := []gocb.MutateInSpec{
+			gocb.UpsertSpec(path, val, &gocb.UpsertSpecOptions{}),
+		}
+		_, err := db.Collection.MutateIn(key, mops,
+			&gocb.MutateInOptions{Timeout: 10050 * time.Millisecond})
+		return err
 	}
-	_, err := db.Collection.MutateIn(key, mops,
-		 &gocb.MutateInOptions{Timeout: 10050 * time.Millisecond,})
+
+	_, err := db.Collection.Replace(key, val, &gocb.ReplaceOptions{})
 	return err
 }
 

@@ -38,7 +38,6 @@ func (r resource) get(c echo.Context) error {
 
 func (r resource) create(c echo.Context) error {
 
-	var input CreateFileRequest
 	f, err := c.FormFile("file")
 	if err != nil {
 		r.logger.With(c.Request().Context()).Info(err)
@@ -57,7 +56,8 @@ func (r resource) create(c echo.Context) error {
 	}
 	defer src.Close()
 
-	input.src = src
+	input := CreateFileRequest{src, f.Filename,
+		c.Request().Header.Get("X-Geoip-Country"),}
 	file, err := r.service.Create(c.Request().Context(), input)
 	if err != nil {
 		return err

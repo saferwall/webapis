@@ -51,14 +51,14 @@ func (r repository) Get(ctx context.Context, id string) (entity.User, error) {
 // Create saves a new user record in the database.
 // It returns the ID of the newly inserted user record.
 func (r repository) Create(ctx context.Context, user entity.User) error {
-	key := strings.ToLower("users::" + user.Username)
+	key := user.GetID()
 	return r.db.Create(ctx, key, &user)
 }
 
 // Update saves the changes to a user in the database.
 func (r repository) Update(ctx context.Context, user entity.User) error {
-	key := "users::" + user.Username
-	return r.db.Update(ctx, key, &user)
+	key := user.GetID()
+	return r.db.Update(ctx, key, dbcontext.FullUpdate, &user)
 }
 
 // Delete deletes a user with the specified ID from the database.

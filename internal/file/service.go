@@ -46,7 +46,9 @@ type Uploader interface {
 
 // CreateFileRequest represents a file creation request.
 type CreateFileRequest struct {
-	src io.Reader
+	src      io.Reader
+	filename string
+	geoip    string
 }
 
 type service struct {
@@ -110,15 +112,28 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		return File{}, err
 	}
 
+	now := time.Now().Unix()
+
 	// Is this a new file ? if yes, we create a new doc in the db.
 	if err.Error() == ErrDocumentNotFound {
 		err = s.upl.Upload("files", sha256, req.src, 10)
 		if err != nil {
 			return File{}, err
 		}
+
+		// Create a new submission.
+		submission := entity.FileSubmission{
+			Date:     now,
+			Filename: req.filename,
+			Source:   "web",
+			Country:  req.geoip,
+		}
+
 		err = s.repo.Create(ctx, entity.File{
-			SHA256: sha256,
-			Type:   "file",
+			SHA256:    sha256,
+			Type:      "file",
+			FirstSeen: now,
+			FileSubmissions: append(file.FileSubmissions, submission),
 		})
 		if err != nil {
 			return File{}, err
@@ -126,7 +141,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 	}
 
 	// If not, we append this new submission to the file doc.
-	file.LastScanned = time.Now().Unix()
+	file.LastScanned = now
 	return s.Get(ctx, sha256)
 }
 

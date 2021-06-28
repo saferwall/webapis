@@ -51,14 +51,18 @@ func (r repository) Get(ctx context.Context, id string) (entity.File, error) {
 // Create saves a new file record in the database.
 // It returns the ID of the newly inserted file record.
 func (r repository) Create(ctx context.Context, file entity.File) error {
-	key := "files::" + file.SHA256
-	return r.db.Create(ctx, key, &file)
+	return r.db.Create(ctx, file.ID(), &file)
 }
 
 // Update saves the changes to a file in the database.
 func (r repository) Update(ctx context.Context, file entity.File) error {
-	key := "files::" + file.SHA256
-	return r.db.Update(ctx, key, &file)
+	return r.db.Update(ctx, file.ID(), dbcontext.FullUpdate, &file)
+}
+
+// SubUpdate performs a sub doc update to a file in the database.
+func (r repository) SubUpdate(ctx context.Context, key, path string,
+	val interface{}) error {
+	return r.db.Update(ctx, key, path, val)
 }
 
 // Delete deletes a file with the specified ID from the database.
