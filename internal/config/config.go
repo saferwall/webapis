@@ -23,10 +23,14 @@ type DatabaseCfg struct {
 	BucketName string `mapstructure:"bucket_name"`
 }
 
-// NsqCfg represents NSQ config.
-type NsqCfg struct {
-	// the data source name (DSN) for connecting to the nsqd.
+// BrokerCfg represents Kafka producer config.
+type BrokerCfg struct {
+	// the data source name (DSN) for connecting to the broker server.
 	Address string `mapstructure:"address"`
+	// Network protocol to use.
+	Network string `mapstructure:"network"`
+	// Topic name to write to.
+	Topic string `mapstructure:"topic"`
 }
 
 // UICfg represents frontend config.
@@ -75,8 +79,8 @@ type Config struct {
 	MaxAvatarSize int64 `mapstructure:"max_avatar_file_size"`
 	// Database configuration.
 	DB DatabaseCfg `mapstructure:"db"`
-	// NSQ configuration.
-	Nsq NsqCfg `mapstructure:"nsq"`
+	// Broker server configuration.
+	Broker BrokerCfg `mapstructure:"kafka"`
 	// Frontend Configuration.
 	UI UICfg `mapstructure:"ui"`
 	// Object storage configuration.

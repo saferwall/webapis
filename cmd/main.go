@@ -19,6 +19,7 @@ import (
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/saferwall/saferwall-api/internal/config"
 	"github.com/saferwall/saferwall-api/internal/db"
+	"github.com/saferwall/saferwall-api/internal/event"
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/server"
 	"github.com/saferwall/saferwall-api/internal/storage"
@@ -73,11 +74,18 @@ func run(logger log.Logger) error {
 		return err
 	}
 
+	// Create a producer to write messages to stream processing framework.
+	producer, err := event.New(cfg.Broker.Network,
+		 cfg.Broker.Topic, cfg.Broker.Address)
+	if err != nil {
+		return err
+	}
+
 	// Build HTTP server.
 	hs := &http.Server{
 		Addr:    cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			 uploader),
+			 uploader, producer),
 	}
 
 	// Start server.

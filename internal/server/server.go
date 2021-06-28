@@ -15,6 +15,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/storage"
+	"github.com/saferwall/saferwall-api/internal/event"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -30,7 +31,7 @@ type Server struct {
 // BuildHandler sets up the HTTP routing and builds an HTTP handler.
 func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	cfg *config.Config, version string, trans ut.Translator,
-	upl storage.Uploader) http.Handler {
+	upl storage.Uploader, producer event.Producer) http.Handler {
 
 	// Create `echo` instance.
 	e := echo.New()
@@ -81,7 +82,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	// Create the services and register the handlers.
 	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger, sec, userSvc)
-	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, upl)
+	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, upl, producer)
 
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, logger)

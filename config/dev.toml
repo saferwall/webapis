@@ -17,8 +17,10 @@ username = "Administrator" # Username used to access the db.
 password = "password" # Password used to access the db.
 bucket_name = "sfw" # Name of the couchbase bucket.
 
-[nsq]
-address = "nsqd:4150"
+[kafka]
+address = "kafka:9092"
+network = "tcp"
+topic = "filescan"
 
 [storage]
 files_container_name = "samples" # Container name for samples.

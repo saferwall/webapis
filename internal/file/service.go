@@ -44,6 +44,11 @@ type Uploader interface {
 	Upload(bucket, key string, file io.Reader, timeout int) error
 }
 
+// Producer represents event stream message producer interface.
+type Producer interface {
+	Produce([]byte) error
+}
+
 // CreateFileRequest represents a file creation request.
 type CreateFileRequest struct {
 	src      io.Reader
@@ -52,10 +57,11 @@ type CreateFileRequest struct {
 }
 
 type service struct {
-	sec    Securer
-	repo   Repository
-	logger log.Logger
-	upl    Uploader
+	sec      Securer
+	repo     Repository
+	logger   log.Logger
+	upl      Uploader
+	producer Producer
 }
 
 // UpdateUserRequest represents a File update request.
@@ -83,8 +89,8 @@ type UpdateFileRequest struct {
 
 // NewService creates a new File service.
 func NewService(repo Repository, logger log.Logger, sec Securer,
-	upl Uploader) Service {
-	return service{sec, repo, logger, upl}
+	upl Uploader, producer Producer) Service {
+	return service{sec, repo, logger, upl, producer}
 }
 
 // Get returns the File with the specified File ID.
@@ -114,8 +120,8 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 	now := time.Now().Unix()
 
-	// Is this a new file ? if yes, we create a new doc in the db.
-	if err.Error() == ErrDocumentNotFound {
+	// When a new file has been uploader, we create a new doc in the db.
+	if err != nil && err.Error() == ErrDocumentNotFound {
 		err = s.upl.Upload("files", sha256, req.src, 10)
 		if err != nil {
 			return File{}, err
@@ -130,12 +136,20 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		err = s.repo.Create(ctx, entity.File{
-			SHA256:    sha256,
-			Type:      "file",
-			FirstSeen: now,
+			SHA256:          sha256,
+			Type:            "file",
+			FirstSeen:       now,
 			FileSubmissions: append(file.FileSubmissions, submission),
 		})
 		if err != nil {
+			s.logger.With(ctx).Error(err)
+			return File{}, err
+		}
+
+		// Push a message to the queue to scan this file.
+		err = s.producer.Produce([]byte(sha256))
+		if err != nil {
+			s.logger.With(ctx).Error(err)
 			return File{}, err
 		}
 	}

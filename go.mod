@@ -13,6 +13,7 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/labstack/echo/v4 v4.3.0
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/segmentio/kafka-go v0.4.16
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	github.com/xhit/go-simple-mail/v2 v2.9.1
