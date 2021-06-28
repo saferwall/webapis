@@ -119,6 +119,19 @@ func (db *DB) Update(ctx context.Context, key string, val interface{}) error {
 	return err
 }
 
+// SubUpdate updates a sub document in the collection. Sub documents operations
+// may be quicker and more network-efficient than full-document operations.
+func (db *DB) SubUpdate(ctx context.Context, key string, path string,
+	 val interface{}) error {
+
+	mops := []gocb.MutateInSpec{
+		gocb.UpsertSpec(path, val, &gocb.UpsertSpecOptions{}),
+	}
+	_, err := db.Collection.MutateIn(key, mops,
+		 &gocb.MutateInOptions{Timeout: 10050 * time.Millisecond,})
+	return err
+}
+
 // Delete removes a document from the collection.
 func (db *DB) Delete(ctx context.Context, key string) error {
 	_, err := db.Collection.Remove(key, &gocb.RemoveOptions{})
