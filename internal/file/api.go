@@ -57,7 +57,7 @@ func (r resource) create(c echo.Context) error {
 	defer src.Close()
 
 	input := CreateFileRequest{src, f.Filename,
-		c.Request().Header.Get("X-Geoip-Country"),}
+		c.Request().Header.Get("X-Geoip-Country")}
 	file, err := r.service.Create(c.Request().Context(), input)
 	if err != nil {
 		return err

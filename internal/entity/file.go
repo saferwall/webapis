@@ -48,3 +48,8 @@ type FileSubmission struct {
 func (f File) ID() string {
 	return "files::" + strings.ToLower(f.SHA256)
 }
+
+// Fields returns list of allowerd fields to be retrieved.
+func (f File) Fields() string {
+	return "files::" + strings.ToLower(f.SHA256)
+}

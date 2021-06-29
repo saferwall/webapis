@@ -31,10 +31,10 @@ type Service interface {
 
 // Identity represents an authenticated user identity.
 type Identity interface {
-	// GetID returns the user ID.
-	GetID() string
-	// GetName returns the user name.
-	GetName() string
+	// ID returns the user ID.
+	ID() string
+	// Name returns the user name.
+	Name() string
 }
 
 // Securer represents security interface.
@@ -86,14 +86,14 @@ func (s service) authenticate(ctx context.Context, username, password string) (
 	if !user.Confirmed {
 		return nil, errUserNotConfirmed
 	}
-	return entity.User{Name: username}, nil
+	return entity.User{Username: username}, nil
 }
 
 // generateJWT generates a JWT that encodes an identity.
 func (s service) generateJWT(identity Identity) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":   identity.GetID(),
-		"name": identity.GetName(),
+		"id":   identity.ID(),
+		"name": identity.Name(),
 		"exp":  time.Now().Add(time.Duration(s.tokenExpiration) * time.Hour).Unix(),
 	}).SignedString([]byte(s.signingKey))
 }

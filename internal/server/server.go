@@ -13,11 +13,16 @@ import (
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/internal/file"
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
+	"github.com/saferwall/saferwall-api/internal/queue"
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/storage"
-	"github.com/saferwall/saferwall-api/internal/queue"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
+)
+
+const (
+	// Returned when request body length is null.
+	errEmptyBody = "You have sent an empty body."
 )
 
 // Server represents our server, it include all dependencies and make it easy
@@ -100,7 +105,7 @@ type CustomValidator struct {
 // Validate performs field validation.
 func (cv *CustomValidator) Validate(i interface{}) error {
 	if err := cv.validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		return err
 	}
 	return nil
 }
@@ -117,6 +122,9 @@ type CustomBinder struct {
 
 // Bind tries to bind request into interface, and if it does then validate it.
 func (cb *CustomBinder) Bind(i interface{}, c echo.Context) error {
+	if c.Request().ContentLength == 0 {
+		return errors.BadRequest(errEmptyBody)
+	}
 	if err := cb.b.Bind(i, c); err != nil && err != echo.ErrUnsupportedMediaType {
 		return err
 	}

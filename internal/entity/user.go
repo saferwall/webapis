@@ -11,7 +11,7 @@ type User struct {
 	Email            string `json:"email,omitempty"`
 	Username         string `json:"username,omitempty"`
 	Password         string `json:"password,omitempty"`
-	Name             string `json:"name,omitempty"`
+	FullName             string `json:"name,omitempty"`
 	Location         string `json:"location,omitempty"`
 	URL              string `json:"url,omitempty"`
 	Bio              string `json:"bio,omitempty"`
@@ -51,12 +51,12 @@ type Submission struct {
 	Timestamp int64  `json:"ts,omitempty"`
 }
 
-// GetID returns the user ID.
-func (u User) GetID() string {
-	return strings.ToLower(u.Username)
+// ID returns a unique ID to identify a User object.
+func (f User) ID() string {
+	return "users::" + strings.ToLower(f.Username)
 }
 
-// GetName returns the user name.
-func (u User) GetName() string {
-	return u.Name
+// Name returns the user name.
+func (u User) Name() string {
+	return u.Username
 }

@@ -9,18 +9,18 @@ import (
 // We can use it to pass some dependencies to the handlers.
 type customContext struct {
 	echo.Context
-	trans ut.Translator
+	trans  ut.Translator
+	fields []string
 }
 
 func (c *customContext) Error(err error) {
 	c.Echo().HTTPErrorHandler(err, c)
 }
 
-
 func newCustomContextMiddleware(trans ut.Translator) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cc := &customContext{c, trans}
+			cc := &customContext{c, trans, nil}
 			if err := next(cc); err != nil {
 				cc.Error(err)
 			}

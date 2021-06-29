@@ -57,7 +57,7 @@ func (r resource) update(c echo.Context) error {
 	var input UpdateUserRequest
 	if err := c.Bind(&input); err != nil {
 		r.logger.With(c.Request().Context()).Info(err)
-		return errors.BadRequest("")
+		return err
 	}
 
 	user, err := r.service.Update(c.Request().Context(),
