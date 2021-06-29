@@ -27,8 +27,6 @@ type DatabaseCfg struct {
 type BrokerCfg struct {
 	// the data source name (DSN) for connecting to the broker server.
 	Address string `mapstructure:"address"`
-	// Network protocol to use.
-	Network string `mapstructure:"network"`
 	// Topic name to write to.
 	Topic string `mapstructure:"topic"`
 }
@@ -80,7 +78,7 @@ type Config struct {
 	// Database configuration.
 	DB DatabaseCfg `mapstructure:"db"`
 	// Broker server configuration.
-	Broker BrokerCfg `mapstructure:"kafka"`
+	Broker BrokerCfg `mapstructure:"nsq"`
 	// Frontend Configuration.
 	UI UICfg `mapstructure:"ui"`
 	// Object storage configuration.

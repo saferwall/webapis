@@ -46,7 +46,7 @@ type Uploader interface {
 
 // Producer represents event stream message producer interface.
 type Producer interface {
-	Produce([]byte) error
+	Produce(string, []byte) error
 }
 
 // CreateFileRequest represents a file creation request.
@@ -147,7 +147,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		// Push a message to the queue to scan this file.
-		err = s.producer.Produce([]byte(sha256))
+		err = s.producer.Produce("filescan", []byte(sha256))
 		if err != nil {
 			s.logger.With(ctx).Error(err)
 			return File{}, err
