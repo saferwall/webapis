@@ -22,8 +22,7 @@ const (
 
 // Service encapsulates usecase logic for files.
 type Service interface {
-	Get(ctx context.Context, id string) (File, error)
-	//Query(ctx context.Context, offset, limit int) ([]File, error)
+	Get(ctx context.Context, id string, fields []string) (File, error)
 	Count(ctx context.Context) (int, error)
 	Create(ctx context.Context, input CreateFileRequest) (File, error)
 	Update(ctx context.Context, id string, input UpdateFileRequest) (File, error)
@@ -94,12 +93,18 @@ func NewService(repo Repository, logger log.Logger, sec Securer,
 }
 
 // Get returns the File with the specified File ID.
-func (s service) Get(ctx context.Context, id string) (File, error) {
-	file, err := s.repo.Get(ctx, id)
+func (s service) Get(ctx context.Context, id string, fields[]string) (File, error) {
+	file, err := s.repo.Get(ctx, id, fields)
 	if err != nil {
 		return File{}, err
 	}
 	return File{file}, nil
+}
+
+// GetWithFields returns a selected set of keys from the File with the specified ID.
+func (s service) GetWithFields(ctx context.Context, id string,
+	field []string) (File, error) {
+	return File{}, nil
 }
 
 // Create creates a new File.
@@ -113,7 +118,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 	}
 
 	sha256 := s.sec.HashFile(fileContent)
-	file, err := s.Get(ctx, sha256)
+	file, err := s.Get(ctx, sha256, nil)
 	if err != nil && err.Error() != ErrDocumentNotFound {
 		return File{}, err
 	}
@@ -128,18 +133,18 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		// Create a new submission.
-		submission := entity.FileSubmission{
+		submission := entity.Submission{
 			Date:     now,
 			Filename: req.filename,
 			Source:   "web",
 			Country:  req.geoip,
 		}
 
-		err = s.repo.Create(ctx, entity.File{
-			SHA256:          sha256,
-			Type:            "file",
-			FirstSeen:       now,
-			FileSubmissions: append(file.FileSubmissions, submission),
+		err = s.repo.Create(ctx, sha256, entity.File{
+			Type:        "file",
+			FirstSeen:   now,
+			LastScanned: now,
+			Submissions: append(file.Submissions, submission),
 		})
 		if err != nil {
 			s.logger.With(ctx).Error(err)
@@ -156,14 +161,14 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 	// If not, we append this new submission to the file doc.
 	file.LastScanned = now
-	return s.Get(ctx, sha256)
+	return s.Get(ctx, sha256, nil)
 }
 
 // Update updates the File with the specified ID.
 func (s service) Update(ctx context.Context, id string, req UpdateFileRequest) (
 	File, error) {
 
-	File, err := s.Get(ctx, id)
+	File, err := s.Get(ctx, id, nil)
 	if err != nil {
 		return File, err
 	}
@@ -179,7 +184,7 @@ func (s service) Update(ctx context.Context, id string, req UpdateFileRequest) (
 	}
 
 	// check if File.Username == id
-	if err := s.repo.Update(ctx, File.File); err != nil {
+	if err := s.repo.Update(ctx, id, File.File); err != nil {
 		return File, err
 	}
 
@@ -188,7 +193,7 @@ func (s service) Update(ctx context.Context, id string, req UpdateFileRequest) (
 
 // Delete deletes the File with the specified ID.
 func (s service) Delete(ctx context.Context, id string) (File, error) {
-	file, err := s.Get(ctx, id)
+	file, err := s.Get(ctx, id, nil)
 	if err != nil {
 		return File{}, err
 	}

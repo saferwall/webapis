@@ -6,6 +6,7 @@ package file
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/errors"
@@ -17,9 +18,12 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	res := resource{service, logger}
 
+	g.GET("/files/", res.get)
 	g.POST("/files/", res.create)
+
 	g.GET("/files/:sha256/", res.get)
 	g.PUT("/files/:sha256/", res.update, requireLogin)
+	g.PATCH("/files/:sha256/", res.patch)
 	g.DELETE("/files/:sha256/", res.delete, requireLogin)
 }
 
@@ -29,7 +33,15 @@ type resource struct {
 }
 
 func (r resource) get(c echo.Context) error {
-	file, err := r.service.Get(c.Request().Context(), c.Param("sha256"))
+
+	// the `fields` query parameter is used to limit the fields
+	// to include in the response.
+	var fields []string
+	if fieldsParam := c.QueryParam("fields"); fieldsParam != "" {
+		fields = strings.Split(fieldsParam, ",")
+	}
+
+	file, err := r.service.Get(c.Request().Context(), c.Param("sha256"), fields)
 	if err != nil {
 		return err
 	}
@@ -80,6 +92,10 @@ func (r resource) update(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, file)
+}
+
+func (r resource) patch(c echo.Context) error {
+	return nil
 }
 
 func (r resource) delete(c echo.Context) error {

@@ -58,7 +58,7 @@ func (r repository) Create(ctx context.Context, user entity.User) error {
 // Update saves the changes to a user in the database.
 func (r repository) Update(ctx context.Context, user entity.User) error {
 	key := user.ID()
-	return r.db.Update(ctx, key, dbcontext.FullUpdate, &user)
+	return r.db.Update(ctx, key, &user)
 }
 
 // Delete deletes a user with the specified ID from the database.

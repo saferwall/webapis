@@ -17,6 +17,7 @@ require (
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
+	github.com/tidwall/gjson v1.8.1
 	github.com/xhit/go-simple-mail/v2 v2.9.1
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2

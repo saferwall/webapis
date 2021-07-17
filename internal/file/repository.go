@@ -6,7 +6,6 @@ package file
 
 import (
 	"context"
-	"strings"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -16,15 +15,17 @@ import (
 // Repository encapsulates the logic to access users from the data source.
 type Repository interface {
 	// Get returns the file with the specified file ID.
-	Get(ctx context.Context, id string) (entity.File, error)
+	Get(ctx context.Context, id string, fields []string) (entity.File, error)
 	// Count returns the number of users.
 	Count(ctx context.Context) (int, error)
 	// Query returns the list of users with the given offset and limit.
 	Query(ctx context.Context, offset, limit int) ([]entity.File, error)
 	// Create saves a new file in the storage.
-	Create(ctx context.Context, file entity.File) error
-	// Update updates the file with given ID in the storage.
-	Update(ctx context.Context, file entity.File) error
+	Create(ctx context.Context, id string, file entity.File) error
+	// Update updates the whole file with given ID in the storage.
+	Update(ctx context.Context, key string, file entity.File) error
+	// Patch patches a sub entry in the file with given ID in the storage.
+	Patch(ctx context.Context, key, path string, val interface{}) error
 	// Delete removes the file with given ID from the storage.
 	Delete(ctx context.Context, id string) error
 }
@@ -41,28 +42,41 @@ func NewRepository(db *dbcontext.DB, logger log.Logger) Repository {
 }
 
 // Get reads the file with the specified ID from the database.
-func (r repository) Get(ctx context.Context, id string) (entity.File, error) {
+func (r repository) Get(ctx context.Context, id string, fields []string) (
+	entity.File, error) {
+
+	var err error
 	var file entity.File
-	key := strings.ToLower("files::" + id)
-	err := r.db.Get(ctx, key, &file)
+
+	key := file.ID(id)
+
+	// if only some fields are wanted from the whole document.
+	if len(fields) > 0 {
+		err = r.db.Lookup(ctx, key, fields, &file)
+	} else {
+		err = r.db.Get(ctx, key, &file)
+	}
+
 	return file, err
 }
 
 // Create saves a new file record in the database.
 // It returns the ID of the newly inserted file record.
-func (r repository) Create(ctx context.Context, file entity.File) error {
-	return r.db.Create(ctx, file.ID(), &file)
+func (r repository) Create(ctx context.Context, key string,
+	file entity.File) error {
+	return r.db.Create(ctx, file.ID(key), &file)
 }
 
 // Update saves the changes to a file in the database.
-func (r repository) Update(ctx context.Context, file entity.File) error {
-	return r.db.Update(ctx, file.ID(), dbcontext.FullUpdate, &file)
+func (r repository) Update(ctx context.Context, key string,
+	file entity.File) error {
+	return r.db.Update(ctx, file.ID(key), &file)
 }
 
-// SubUpdate performs a sub doc update to a file in the database.
-func (r repository) SubUpdate(ctx context.Context, key, path string,
+// Patch performs a sub doc update to a file in the database.
+func (r repository) Patch(ctx context.Context, key, path string,
 	val interface{}) error {
-	return r.db.Update(ctx, key, path, val)
+	return r.db.Patch(ctx, key, path, val)
 }
 
 // Delete deletes a file with the specified ID from the database.

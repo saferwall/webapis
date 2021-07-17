@@ -10,7 +10,6 @@ import (
 type customContext struct {
 	echo.Context
 	trans  ut.Translator
-	fields []string
 }
 
 func (c *customContext) Error(err error) {
@@ -20,7 +19,7 @@ func (c *customContext) Error(err error) {
 func newCustomContextMiddleware(trans ut.Translator) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cc := &customContext{c, trans, nil}
+			cc := &customContext{c, trans}
 			if err := next(cc); err != nil {
 				cc.Error(err)
 			}

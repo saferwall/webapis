@@ -6,7 +6,9 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	gocb "github.com/couchbase/gocb/v2"
@@ -16,9 +18,6 @@ const (
 	// Duration to wait until memd connections have been established with
 	// the server and are ready.
 	timeout = 5 * time.Second
-
-	// Full document updates overwrite the whole object in the database.
-	FullUpdate = ""
 )
 
 var (
@@ -94,7 +93,7 @@ func (db *DB) Get(ctx context.Context, key string, model interface{}) error {
 	getResult, err := db.Collection.Get(key, &gocb.GetOptions{})
 
 	if errors.Is(err, gocb.ErrDocumentNotFound) {
-		return ErrDocumentNotFound
+		return err
 	}
 	if err != nil {
 		return err
@@ -116,22 +115,21 @@ func (db *DB) Create(ctx context.Context, key string, val interface{}) error {
 }
 
 // Update updates a document in the collection.
-func (db *DB) Update(ctx context.Context, key string, path string,
+func (db *DB) Update(ctx context.Context, key string, val interface{}) error {
+	_, err := db.Collection.Replace(key, val, &gocb.ReplaceOptions{})
+	return err
+}
+
+// Patch performs a sub document in the collection. Sub documents operations
+//may be quicker and more network-efficient than full-document operations.
+func (db *DB) Patch(ctx context.Context, key string, path string,
 	val interface{}) error {
 
-	// When `path` is empty, we performs a sub document in the collection.
-	// Sub documents operations may be quicker and more network-efficient than
-	// full-document operations.
-	if len(path) > 0 {
-		mops := []gocb.MutateInSpec{
-			gocb.UpsertSpec(path, val, &gocb.UpsertSpecOptions{}),
-		}
-		_, err := db.Collection.MutateIn(key, mops,
-			&gocb.MutateInOptions{Timeout: 10050 * time.Millisecond})
-		return err
+	mops := []gocb.MutateInSpec{
+		gocb.UpsertSpec(path, val, &gocb.UpsertSpecOptions{}),
 	}
-
-	_, err := db.Collection.Replace(key, val, &gocb.ReplaceOptions{})
+	_, err := db.Collection.MutateIn(key, mops,
+		&gocb.MutateInOptions{Timeout: 10050 * time.Millisecond})
 	return err
 }
 
@@ -163,5 +161,52 @@ func (db *DB) Count(ctx context.Context, docType string,
 		return err
 	}
 
+	return nil
+}
+
+// Lookup query the document for certain path(s); these path(s) are then returned.
+func (db *DB) Lookup(ctx context.Context, key string, paths []string,
+	val interface{}) error {
+
+	ops := []gocb.LookupInSpec{}
+	getSpecOptions := gocb.GetSpecOptions{}
+
+	for _, path := range paths {
+		ops = append(ops, gocb.GetSpec(path, &getSpecOptions))
+	}
+	getResult, err := db.Collection.LookupIn(key, ops, &gocb.LookupInOptions{})
+	if err != nil {
+		return err
+	}
+
+	for i, path := range paths {
+		var content interface{}
+		err = getResult.ContentAt(uint(i), &content)
+		if err != nil {
+			return err
+		}
+
+		m := make(map[string]interface{})
+		keys := strings.Split(path, ".")
+		if len(keys) > 0 {
+			m[keys[len(keys)-1]] = content
+			for idx := len(keys) - 2; idx >= 0; idx-- {
+				mn := make(map[string]interface{})
+				mn[keys[idx]] = m
+				m = mn
+			}
+		} else {
+			m[path] = content
+		}
+
+		x, err := json.Marshal(m)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(x, &val)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
