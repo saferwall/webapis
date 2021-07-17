@@ -46,6 +46,9 @@ func run(logger log.Logger) error {
 
 	// Load application configuration.
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		return err
+	}
 	cfg, err := config.Load(dir + "./../configs")
 	if err != nil {
 		return err

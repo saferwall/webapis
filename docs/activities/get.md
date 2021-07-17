@@ -54,7 +54,6 @@ For an activity with `like` type:
     "member_since": 1626494492
   },
   "follow": true,
-  "liked": false,
   "file": {
     "hash": "01583d41cc2559280eb9a5495d2fb2678f60cb56f88cf32143f5392d499f0b3e",
     "tags": {
@@ -80,6 +79,18 @@ For an activity with `comment` type:
   "author": {
     "username": "MrRobot",
     "member_since": 1626494492
+  },
+  "file": {
+    "hash": "01583d41cc2559280eb9a5495d2fb2678f60cb56f88cf32143f5392d499f0b3e",
+    "tags": {
+      "packer": ["vmprotect"],
+      "pe": ["dll"]
+    },
+    "classification": "Label.MALICIOUS",
+    "name": "malware.exe",
+    "score": {
+      "value": 2,
+      "total": 12
   },
   "follow": true,
   "comment": "#wannacry #ransomware",

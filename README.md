@@ -20,7 +20,69 @@ These packages are used in the project:
 
 The following endpoints are available:
 
-- [Get activities](docs/activities/get.md) : `GET /activities/`
+- `GET /healthcheck` [health check](docs/healthcheck/get.md]).
+- `GET /v1/activities` [returns a paginated list of activities](docs/activities/get.md).
+
+### Authentication
+
+- `POST /v1/auth/login` [authenticates a user and generates a JWT](docs/auth/login.md).
+- `POST /v1/auth/confirm` [confirms an account from email token](docs/auth/confirm.md).
+- `POST /v1/auth/resend-confirmation` [re-send confirmation email](docs/auth/resend-confirmation.md).
+
+### Users resource
+
+- `GET /v1/users`: [get a paginated list of users](docs/users/get.md).
+- `POST /v1/users`: [creates a new user](docs/users/post.md).
+- `PATCH /v1/users`: [update multiple users](docs/users/patch.md).
+- `PUT /v1/users`: [replace multiple users](docs/users/put.md).
+- `DELETE /v1/users`: [deletes multiple users](docs/users/delete.md).
+
+### User resource
+
+- `GET /v1/users/:username`: [get a detailed information of a user](docs/user/get.md).
+- `PATCH /v1/users/:username`: [updates an existing user](docs/user/patch.md).
+- `PUT /v1/users/:username`: [replaces an existing user](docs/user/post.md).
+- `DELETE /v1/users/:username`: [deletes an existing user](docs/user/delete.md).
+- `GET /v1/users/:username/likes`: [get a paginated list of user's likes](docs/user/get.md).
+- `GET /v1/users/:username/submissions`: [get a paginated list of user's submissions](docs/profile/submissions.md).
+- `GET /v1/users/:username/following`: [get a paginated list of user's following](docs/profile/following.md).
+- `GET /v1/users/:username/followers`: [get a paginated list of user's followers](docs/profile/followers.md).
+- `GET /v1/users/:username/comments`: [get a paginated list of user's comments](docs/profile/comments.md).
+
+### Files resource
+
+- `GET /v1/files`: [get a paginated list of files](docs/files/get.md).
+- `POST /v1/files`: [creates a new file](docs/files/post.md).
+- `PATCH /v1/files`: [update multiple files](docs/files/patch.md).
+- `PUT /v1/files`: [replace multiple files](docs/files/put.md).
+- `DELETE /v1/files`: [deletes multiple files](docs/files/delete.md).
+- `GET /v1/files/:sha256`: [get a detailed information of a file](docs/file/get.md).
+- `PATCH /v1/files/:sha256`: [updates an existing file](docs/file/patch.md).
+- `PUT /v1/files/:sha256`: [replaces an existing file](docs/file/post.md).
+- `DELETE /v1/files/:sha256`: [deletes an existing file](docs/file/delete.md).
+- `GET /v1/files/:sha256`: [get a detailed information of a file](docs/file/get.md).
+
+Rules for mapping HTTP methods to CRUD:
+
+```http
+POST   - Create (add record into database)
+GET    - Read (get record from the database)
+PATCH  - Update (edit record in the database)
+PUT    - Replace (replace record in the database)
+DELETE - Delete (remove record from the database)
+```
+
+Rules for HTTP status codes:
+
+```http
+* Create something            - 201 (Created)
+* Read something              - 200 (OK)
+* Update something            - 200 (OK)
+* Delete something            - 200 (OK)
+* Missing request information - 400 (Bad Request)
+* Unauthorized operation      - 401 (Unauthorized)
+* Any other error             - 500 (Internal Server Error)
+```
 
 ## Folder Structure
 
