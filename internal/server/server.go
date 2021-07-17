@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/saferwall/saferwall-api/internal/auth"

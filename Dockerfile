@@ -2,7 +2,7 @@
 # STEP 1 build executable binary
 ################################
 
-FROM golang:1.15-alpine AS builder
+FROM golang:1.16-alpine AS builder
 
 # Install git + SSL ca certificates.
 # Git is required for fetching the dependencies.
@@ -43,7 +43,7 @@ WORKDIR /webapi
 COPY --from=builder /go/bin/server .
 
 # Copy the dev config to be used when developing a svc which depend on the apis.
-COPY  ./config/dev.toml ./config/dev.toml
+COPY  ./configs/dev.toml ./configs/dev.toml
 
 # Run the server.
 ENTRYPOINT ["/webapi/server"]

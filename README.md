@@ -2,9 +2,36 @@
 
 ## Preface
 This repository powers the web service api used in https://saferwall.com.
-This web service uses [Echo](https://echo.labstack.com/) as web application framework, [Couchbase](https://www.couchbase.com/) as NoSQL database and [Zap logger](https://pkg.go.dev/go.uber.org/zap) as logger.
-This sample application provides only several functions as Web APIs.
-Please refer to the 'Service' section about the detail of those functions.
+
+## Vendoring
+
+These packages are used in the project:
+
+- Routing: [Echo](https://echo.labstack.com/)
+- Configuration: [viper](github.com/spf13/viper)
+- Logging: [zap](https://github.com/uber-go/zap)
+- Message queuing: [nsq](github.com/nsqio/go-nsq)
+- JSON Web Tokens [jwt](github.com/golang-jwt/jwt)
+- Couchbase Driver: [gocb](https://github.com/couchbase/gocb)
+- Password Hashing: [bcrypt](https://golang.org/x/crypto/bcrypt)
+- Data Validation: [validator](github.com/go-playground/validator)
+
+## Available Endpoints
+
+The following endpoints are available:
+
+- [Get activities](docs/activities/get.md) : `GET /activities/`
+
+## Folder Structure
+
+This project follows the [Standard Go Project Layout](https://github.com/golang-standards/project-layout)
+
+- **build** - contains packaging and Continuous Integration files.
+- **cmd** - contains the main function.
+- **configs** - contains configuration file templates or default configs.
+- **docs** - contains design and user documents.
+- **internal** - contains project specific packages with dependencies.
+- **pkg** - contains generic packages without project specific dependencies - these can be safely moved to other projects without internal dependencies.
 
 ## Improvements compared to the previous implementation
 
