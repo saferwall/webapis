@@ -11,7 +11,7 @@ type User struct {
 	Email            string `json:"email,omitempty"`
 	Username         string `json:"username,omitempty"`
 	Password         string `json:"password,omitempty"`
-	FullName             string `json:"name,omitempty"`
+	FullName         string `json:"name,omitempty"`
 	Location         string `json:"location,omitempty"`
 	URL              string `json:"url,omitempty"`
 	Bio              string `json:"bio,omitempty"`
@@ -25,30 +25,6 @@ type User struct {
 	LikesCount       int    `json:"likes_count"`
 	SubmissionsCount int    `json:"submissions_count"`
 	CommentsCount    int    `json:"comments_count"`
-}
-
-// Follows keeps track of User followers and following.
-type Follows struct {
-	Type      string `json:"type,omitempty"`
-	Source    string `json:"src,omitempty"`
-	Target    string `json:"target,omitempty"`
-	Timestamp int64  `json:"ts,omitempty"`
-}
-
-// Like represents User likes: either a file or an URL.
-type Like struct {
-	Type      string `json:"type,omitempty"`
-	Hash      string `json:"hash,omitempty"`
-	Timestamp int64  `json:"ts,omitempty"`
-	Username  string `json:"username,omitempty"`
-}
-
-// Submissions represents a User subsmission: either a file or an URL.
-type Submission struct {
-	Type      string `json:"type,omitempty"`
-	Hash      string `json:"hash,omitempty"`
-	Username  string `json:"username,omitempty"`
-	Timestamp int64  `json:"ts,omitempty"`
 }
 
 // ID returns a unique ID to identify a User object.
