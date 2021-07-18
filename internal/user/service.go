@@ -95,7 +95,6 @@ func (s service) Update(ctx context.Context, id string, req UpdateUserRequest) (
 		return user, err
 	}
 
-	// merge the structures.
 	data, err := json.Marshal(req)
 	if err != nil {
 		return user, err

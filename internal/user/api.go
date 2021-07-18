@@ -19,7 +19,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	g.POST("/users/", res.create)
 	g.GET("/users/:username/", res.get)
-	g.PUT("/users/:username/", res.update, requireLogin)
+	g.PATCH("/users/:username/", res.update, requireLogin)
 	g.DELETE("/users/:username/", res.delete, requireLogin)
 }
 

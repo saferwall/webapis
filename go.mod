@@ -11,7 +11,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/google/uuid v1.2.0
 	github.com/kr/pretty v0.2.1 // indirect
-	github.com/labstack/echo/v4 v4.3.0
+	github.com/labstack/echo/v4 v4.4.0
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/nsqio/go-nsq v1.0.8
 	github.com/spf13/viper v1.7.1

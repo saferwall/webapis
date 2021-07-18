@@ -42,6 +42,10 @@ func (r resource) login(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	cookie := JWTCookie(token, "localhost", 72)
+	c.SetCookie(&cookie)
+
 	return c.JSON(http.StatusOK, struct {
 		Token string `json:"token"`
 	}{token})

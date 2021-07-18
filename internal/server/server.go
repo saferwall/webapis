@@ -63,9 +63,6 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 		DisablePrintStack: true,
 	}))
 
-	// Pass-the-context middleware.
-	e.Use(newCustomContextMiddleware(trans))
-
 	// Add trailing slash for consistent URIs.
 	e.Pre(middleware.AddTrailingSlash())
 
@@ -79,7 +76,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	e.Binder = &CustomBinder{b: &echo.DefaultBinder{}}
 
 	// Setup a custom HTTP error handler.
-	e.HTTPErrorHandler = CustomHTTPErrorHandler
+	e.HTTPErrorHandler = CustomHTTPErrorHandler(trans)
 
 	// Creates a new group for v1.
 	g := e.Group("/v1")
@@ -133,17 +130,15 @@ func (cb *CustomBinder) Bind(i interface{}, c echo.Context) error {
 
 // CustomHTTPErrorHandler handles errors encountered during HTTP request
 // processing.
-func CustomHTTPErrorHandler(err error, c echo.Context) {
-	l := c.Logger()
-	cc, ok := c.(*customContext)
-	if !ok {
-		l.Errorf("failed to cast echo context to custom context")
-	}
-	res := errors.BuildErrorResponse(err, cc.trans)
-	if res.StatusCode() == http.StatusInternalServerError {
-		l.Errorf("encountered internal server error: %v", err)
-	}
-	if err = c.JSON(res.StatusCode(), res); err != nil {
-		l.Errorf("failed writing error response: %v", err)
+func CustomHTTPErrorHandler(trans ut.Translator) echo.HTTPErrorHandler {
+	return func(err error, c echo.Context) {
+		l := c.Logger()
+		res := errors.BuildErrorResponse(err, trans)
+		if res.StatusCode() == http.StatusInternalServerError {
+			l.Errorf("encountered internal server error: %v", err)
+		}
+		if err = c.JSON(res.StatusCode(), res); err != nil {
+			l.Errorf("failed writing error response: %v", err)
+		}
 	}
 }

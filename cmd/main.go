@@ -71,7 +71,7 @@ func run(logger log.Logger) error {
 	// Create a securer for auth.
 	sec := secure.New(sha1.New())
 
-	// Create an uploader to uplaod file to object storage.
+	// Create an uploader to upload file to object storage.
 	uploader, err := storage.New(cfg.DeploymentKind, cfg.ObjStorage)
 	if err != nil {
 		return err

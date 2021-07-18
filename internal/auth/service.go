@@ -47,13 +47,13 @@ type service struct {
 	tokenExpiration int
 	logger          log.Logger
 	sec             Securer
-	userService     user.Service
+	userSvc         user.Service
 }
 
 // NewService creates a new authentication service.
 func NewService(signingKey string, tokenExpiration int,
-	logger log.Logger, sec Securer, userService user.Service) Service {
-	return service{signingKey, tokenExpiration, logger, sec, userService}
+	logger log.Logger, sec Securer, userSvc user.Service) Service {
+	return service{signingKey, tokenExpiration, logger, sec, userSvc}
 }
 
 // Login authenticates a user and generates a JWT token if authentication
@@ -76,7 +76,7 @@ func (s service) Login(ctx context.Context, username, password string) (
 func (s service) authenticate(ctx context.Context, username, password string) (
 	Identity, error) {
 
-	user, err := s.userService.Get(ctx, username)
+	user, err := s.userSvc.Get(ctx, username)
 	if err != nil {
 		return nil, errUserNotFound
 	}
