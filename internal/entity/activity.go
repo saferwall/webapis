@@ -4,26 +4,15 @@
 
 package entity
 
-// Follows keeps track of User followers and following.
-type Follows struct {
-	Type      string `json:"type,omitempty"`
-	Source    string `json:"src,omitempty"`
-	Target    string `json:"target,omitempty"`
-	Timestamp int64  `json:"ts,omitempty"`
-}
-
-// Like represents User likes: either a file or an URL.
-type Like struct {
-	Type      string `json:"type,omitempty"`
-	Hash      string `json:"hash,omitempty"`
-	Username  string `json:"username,omitempty"`
-	Timestamp int64  `json:"ts,omitempty"`
-}
-
-// Submissions represents a User subsmission: either a file or an URL.
-type UserSubmission struct {
-	Type      string `json:"type,omitempty"`
-	Hash      string `json:"hash,omitempty"`
-	Username  string `json:"username,omitempty"`
-	Timestamp int64  `json:"ts,omitempty"`
+// Activity keeps track of activities made by users.
+type Activity struct {
+	// Type represents the type of the activity,
+	// possible values: "follow", "comment", "like", "Submit".
+	Type string `json:"type,omitempty"`
+	// Timestamp when this activity happened.
+	Timestamp int64 `json:"ts,omitempty"`
+	// Username represents the user who made this activity.
+	Username string `json:"username,omitempty"`
+	// Target could be a sha256 or a username.
+	Target string `json:"target,omitempty"`
 }

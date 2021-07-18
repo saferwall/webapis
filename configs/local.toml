@@ -21,8 +21,8 @@ password = "password" # Password used to access the db.
 bucket_name = "sfw" # Name of the couchbase bucket.
 
 [nsq]
-address = "localhost:4150"
-topic = "filescan"
+address = "localhost:4150" # The data source name (DSN) for connecting to the broker server (NSQD).
+topic = "filescan" # Topic name to produce to.
 
 [storage]
 files_container_name = "samples" # Container name for samples.

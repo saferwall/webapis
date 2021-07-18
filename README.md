@@ -21,13 +21,22 @@ These packages are used in the project:
 The following endpoints are available:
 
 - `GET /healthcheck` [health check](docs/healthcheck/get.md]).
+
+## Activities
+
 - `GET /v1/activities` [returns a paginated list of activities](docs/activities/get.md).
+- `DELETE /v1/activities` [deletes multiple activities](docs/activities/delete.md).
 
 ### Authentication
 
 - `POST /v1/auth/login` [authenticates a user and generates a JWT](docs/auth/login.md).
 - `POST /v1/auth/confirm` [confirms an account from email token](docs/auth/confirm.md).
 - `POST /v1/auth/resend-confirmation` [re-send confirmation email](docs/auth/resend-confirmation.md).
+- `POST /v1/auth/reset-password` [send an email with a reset password token](docs/auth/reset-password.md).
+- update password given a token
+- update password for logged in users
+- update email
+- update avatar
 
 ### Users resource
 
@@ -49,6 +58,11 @@ The following endpoints are available:
 - `GET /v1/users/:username/followers`: [get a paginated list of user's followers](docs/profile/followers.md).
 - `GET /v1/users/:username/comments`: [get a paginated list of user's comments](docs/profile/comments.md).
 
+### User actions
+
+- `POST /v1/users/:username/follow`: [follow an existing user](docs/actions/follow.md).
+- `POST /v1/users/:username/unfollow`: [unfollow an existing user](docs/actions/unfollow.md).
+
 ### Files resource
 
 - `GET /v1/files`: [get a paginated list of files](docs/files/get.md).
@@ -56,11 +70,32 @@ The following endpoints are available:
 - `PATCH /v1/files`: [update multiple files](docs/files/patch.md).
 - `PUT /v1/files`: [replace multiple files](docs/files/put.md).
 - `DELETE /v1/files`: [deletes multiple files](docs/files/delete.md).
+
+### File resource
+
 - `GET /v1/files/:sha256`: [get a detailed information of a file](docs/file/get.md).
 - `PATCH /v1/files/:sha256`: [updates an existing file](docs/file/patch.md).
 - `PUT /v1/files/:sha256`: [replaces an existing file](docs/file/post.md).
 - `DELETE /v1/files/:sha256`: [deletes an existing file](docs/file/delete.md).
 - `GET /v1/files/:sha256`: [get a detailed information of a file](docs/file/get.md).
+
+### File actions
+
+- `POST /v1/files/:sha256/like`: [likes an existing file](docs/actions/like.md).
+- `POST /v1/files/:sha256/unlike`: [unlike an existing file](docs/actions/unlike.md).
+
+### Comments resource
+
+- `GET /v1/comments` [returns a paginated list of comments](docs/comments/get.md).
+- `POST /v1/comments`: [creates a new comment](docs/users/post.md).
+- `DELETE /v1/comments` [deletes multiple comments](docs/comments/delete.md).
+
+### Comment resource
+
+- `GET /v1/comments/:id`: [get a detailed information of a comment](docs/comment/get.md).
+- `PATCH /v1/comments/:id`: [updates an existing comment](docs/comment/patch.md).
+- `PUT /v1/comments/:id`: [replaces an existing comment](docs/comment/post.md).
+- `DELETE /v1/comments/:id`: [deletes an existing comment](docs/comment/delete.md).
 
 Rules for mapping HTTP methods to CRUD:
 
@@ -101,9 +136,8 @@ This project follows the [Standard Go Project Layout](https://github.com/golang-
 - Full test coverage
 - swagger doc
 - Error handling with proper error response generation
-- details
-    - `File{}` not depending on `peparser`.
-
+- details:
+  - `File{}` not depending on `peparser`.
 
 ## References
 
@@ -113,7 +147,6 @@ This project follows the [Standard Go Project Layout](https://github.com/golang-
 - [Domain Driven Design in Golang - Strategic Design](https://www.damianopetrungaro.com/posts/ddd-using-golang-strategic-design/)
 - [Idiometic Go Web Application Structure](http://josebalius.com/posts/go-app-structure/)
 - [A clean architecture for Web Application in Go lang](https://medium.com/wesionary-team/a-clean-architecture-for-web-application-in-go-lang-4b802dd130bb)
-
 - https://github.com/golang/go/wiki/CodeReviewComments
 - https://golang.org/doc/effective_go
 - https://peter.bourgon.org/go-best-practices-2016/
