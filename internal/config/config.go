@@ -69,7 +69,7 @@ type Config struct {
 	JWTSigningKey string `mapstructure:"jwt_signkey"`
 	// JWT expiration in hours.
 	JWTExpiration int `mapstructure:"jwt_expiration"`
-	// Deployement kind, possible values: aws, gcp, azure, local.
+	// Deployment kind, possible values: aws, gcp, azure, local.
 	DeploymentKind string `mapstructure:"deployment_kind"`
 	// Maximum file size to allow for samples.
 	MaxFileSize int64 `mapstructure:"max_file_size"`
