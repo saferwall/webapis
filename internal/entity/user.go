@@ -8,23 +8,23 @@ import "strings"
 
 // User represent a user.
 type User struct {
-	Email            string   `json:"email,omitempty"`
-	Username         string   `json:"username,omitempty"`
-	Password         string   `json:"password,omitempty"`
-	FullName         string   `json:"name,omitempty"`
-	Location         string   `json:"location,omitempty"`
-	URL              string   `json:"url,omitempty"`
-	Bio              string   `json:"bio,omitempty"`
-	Confirmed        bool     `json:"confirmed,omitempty"`
-	MemberSince      int64    `json:"member_since,omitempty"`
-	LastSeen         int64    `json:"last_seen,omitempty"`
-	Admin            bool     `json:"admin,omitempty"`
-	HasAvatar        bool     `json:"has_avatar,omitempty"`
-	Following        []string `json:"following,omitempty"`
+	Email            string   `json:"email"`
+	Username         string   `json:"username"`
+	Password         string   `json:"password"`
+	FullName         string   `json:"name"`
+	Location         string   `json:"location"`
+	URL              string   `json:"url"`
+	Bio              string   `json:"bio"`
+	Confirmed        bool     `json:"confirmed"`
+	MemberSince      int64    `json:"member_since"`
+	LastSeen         int64    `json:"last_seen"`
+	Admin            bool     `json:"admin"`
+	HasAvatar        bool     `json:"has_avatar"`
+	Following        []string `json:"following"`
 	FollowingCount   int      `json:"following_count"`
-	Followers        []string `json:"followers,omitempty"`
+	Followers        []string `json:"followers"`
 	FollowersCount   int      `json:"followers_count"`
-	Likes            []string `json:"likes,omitempty"`
+	Likes            []string `json:"likes"`
 	LikesCount       int      `json:"likes_count"`
 	SubmissionsCount int      `json:"submissions_count"`
 	CommentsCount    int      `json:"comments_count"`

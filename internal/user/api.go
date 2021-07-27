@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -42,7 +41,7 @@ func (r resource) create(c echo.Context) error {
 	var input CreateUserRequest
 	if err := c.Bind(&input); err != nil {
 		r.logger.With(c.Request().Context()).Info(err)
-		return errors.BadRequest("")
+		return err
 	}
 
 	user, err := r.service.Create(c.Request().Context(), input)
