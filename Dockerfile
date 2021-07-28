@@ -2,7 +2,7 @@
 # STEP 1 build executable binary
 ################################
 
-FROM golang:1.16-alpine AS builder
+FROM golang:1.16-alpine AS build-stage
 
 # Install git + SSL ca certificates.
 # Git is required for fetching the dependencies.
@@ -35,15 +35,26 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo \
 FROM alpine:3.14
 LABEL maintainer="https://github.com/saferwall/saferwall-api"
 LABEL version="1.0.0"
-LABEL description="Saferwall web API service"
+LABEL description="Saferwall web APIs service"
 
-WORKDIR /webapi
+ENV USER saferwall
+ENV GROUP saferwall
 
-# Copy the app/
-COPY --from=builder /go/bin/server .
+# Set the Current Working Directory inside the container.
+WORKDIR /saferwall
 
-# Copy the dev config to be used when developing a svc which depend on the apis.
-COPY  ./configs/dev.toml ./configs/dev.toml
+# Copy our static executable.
+COPY --from=build-stage /go/bin/server .
 
-# Run the server.
-ENTRYPOINT ["/webapi/server"]
+# Copy the config files.
+COPY configs/ conf/
+
+# Create an app user so our program doesn't run as root.
+RUN addgroup -g 102 -S $GROUP \
+	&& adduser -u 101 -S $USER -G $GROUP \
+	&& chown -R $USER:$GROUP /saferwall
+
+# Switch to our user.
+USER saferwall
+
+ENTRYPOINT ["/saferwall/server", "-config", "/saferwall/conf"]
