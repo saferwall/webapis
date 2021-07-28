@@ -1,4 +1,4 @@
-name: Release WebAPIs
+name: Release
 on: workflow_dispatch
 env:
   IMAGE: saferwall/webapis
@@ -17,6 +17,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Generate build version
+        id: prep
+        run: |
+          version=$(cat VERSION)
+          echo "::set-output name=BUILD_VERSION::${version}"
 
       - name: Build and push
         id: docker_build
