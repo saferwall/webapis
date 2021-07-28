@@ -7,10 +7,10 @@ package main
 import (
 	"context"
 	"crypto/sha1"
+	"flag"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"time"
 
 	"github.com/go-playground/locales/en"
@@ -29,7 +29,13 @@ import (
 // Version indicates the current version of the application.
 var Version = "1.0.0"
 
+var flagConfig = flag.String(
+	"config", "./../configs/",
+	"path to the config file")
+
 func main() {
+
+	flag.Parse()
 
 	// Create root logger tagged with server version.
 	logger := log.New().With(nil, "version", Version)
@@ -45,11 +51,7 @@ func main() {
 func run(logger log.Logger) error {
 
 	// Load application configuration.
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		return err
-	}
-	cfg, err := config.Load(dir + "./../configs")
+	cfg, err := config.Load(*flagConfig)
 	if err != nil {
 		return err
 	}
@@ -85,9 +87,9 @@ func run(logger log.Logger) error {
 
 	// Build HTTP server.
 	hs := &http.Server{
-		Addr:    cfg.Address,
+		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			 uploader, producer),
+			uploader, producer),
 	}
 
 	// Start server.
