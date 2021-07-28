@@ -6,6 +6,9 @@ jobs:
   build-container:
     runs-on: ubuntu-20.04
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 

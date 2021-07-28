@@ -74,6 +74,7 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 
 	now := time.Now()
 	err := s.repo.Create(ctx, entity.User{
+		Type:        "user",
 		Username:    req.Username,
 		Password:    s.sec.Hash(req.Password),
 		Email:       req.Email,

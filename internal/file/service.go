@@ -93,7 +93,7 @@ func NewService(repo Repository, logger log.Logger, sec Securer,
 }
 
 // Get returns the File with the specified File ID.
-func (s service) Get(ctx context.Context, id string, fields[]string) (File, error) {
+func (s service) Get(ctx context.Context, id string, fields []string) (File, error) {
 	file, err := s.repo.Get(ctx, id, fields)
 	if err != nil {
 		return File{}, err
@@ -134,10 +134,10 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 		// Create a new submission.
 		submission := entity.Submission{
-			Date:     now,
-			Filename: req.filename,
-			Source:   "web",
-			Country:  req.geoip,
+			Timestamp: now,
+			Filename:  req.filename,
+			Source:    "web",
+			Country:   req.geoip,
 		}
 
 		err = s.repo.Create(ctx, sha256, entity.File{

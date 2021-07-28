@@ -5,7 +5,8 @@
 package entity
 
 type Comment struct {
-	Date     int64  `json:"ts,omitempty"`
-	Body     string `json:"body,omitempty"`
-	Username string `json:"username,omitempty"`
+	Body      string `json:"body"`
+	SHA256    string `json:"sha256"`
+	Timestamp int64  `json:"timestamp"`
+	Username  string `json:"username"`
 }
