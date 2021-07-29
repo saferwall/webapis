@@ -19,7 +19,7 @@ type Service struct {
 // New generates new object storage service.
 func New(root string) (Service, error) {
 	if _, err := os.Stat(root); os.IsNotExist(err) {
-		if err := os.Mkdir(root, 0755); err != nil {
+		if err := os.MkdirAll(root, os.ModePerm); err != nil {
 			return Service{}, err
 		}
 	}
