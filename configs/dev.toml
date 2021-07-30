@@ -28,6 +28,8 @@ avatars_container_name = "images" # Container name for avatars.
     region = "us-east-1" # AWS region.
     secret_key = "superSecretKey" # AWS Secret Access Key.
     access_key = "superSecretAccessKey" # AWS Access key ID.
+    [storage.local]
+    root_dir = "/saferwall/files"    # Full path to the directory where to store the files.
 
 [smtp]
 server = "smtp.example.com"

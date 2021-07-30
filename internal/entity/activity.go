@@ -6,15 +6,17 @@ package entity
 
 // Activity keeps track of activities made by users.
 type Activity struct {
-	// Type represents the type of the activity,
+	// Type represents the document type.
+	Type string `json:"type,omitempty"`
+	// ID represents the activity identifier.
+	ID string `json:"id,omitempty"`
+	// Kind represents the type of the activity,
 	// possible values: "follow", "comment", "like", "Submit".
-	Activity string `json:"activity,omitempty"`
+	Kind string `json:"activity,omitempty"`
 	// Timestamp when this activity happened.
 	Timestamp int64 `json:"timestamp,omitempty"`
 	// Username represents the user who made this activity.
 	Username string `json:"username,omitempty"`
-	// Target could be a sha256 or a username.
+	// Target could be a sha256, username or a comment id.
 	Target string `json:"target,omitempty"`
-	// Type represents the document type.
-	Type string `json:"type,omitempty"`
 }

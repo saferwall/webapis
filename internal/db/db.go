@@ -75,15 +75,30 @@ func Open(server, username, password, bucketName string) (*DB, error) {
 
 // Query executes a N1QL query.
 func (db *DB) Query(ctx context.Context, statement string,
-	args map[string]interface{}) (*gocb.QueryResult, error) {
+	args map[string]interface{}, val* interface{}) error {
 
 	results, err := db.Cluster.Query(statement, &gocb.QueryOptions{
 		NamedParameters: args, Adhoc: true})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return results, nil
+	var rows []interface{}
+	for results.Next() {
+		var row interface{}
+		err := results.Row(&row)
+		if err != nil {
+			return err
+		}
+		rows = append(rows, row)
+	}
+
+	err = results.Err()
+	if err != nil {
+		return err
+	}
+	*val = rows
+	return nil
 }
 
 // Get retrieves the document using its key.
@@ -141,26 +156,33 @@ func (db *DB) Delete(ctx context.Context, key string) error {
 
 // Count retrieves the total number of documents.
 func (db *DB) Count(ctx context.Context, docType string,
-	val interface{}) error {
+	val *int) error {
 
-	//val = nil
-
-	params := make(map[string]interface{}, 2)
-	params["bucketName"] = db.Bucket.Name()
+	params := make(map[string]interface{}, 1)
 	params["docType"] = docType
 
-	statement := `SELECT COUNT(*) FROM $bucketname WHERE type=$docType`
-	results, err := db.Query(ctx, statement, params)
+	statement :=
+		"SELECT COUNT(*) as count FROM `" +
+			db.Bucket.Name() + "` " +
+			"WHERE `type`=$docType"
+
+	results, err := db.Cluster.Query(statement, &gocb.QueryOptions{
+		NamedParameters: params, Adhoc: true})
+	if err != nil {
+		return err
+	}
 	if err != nil {
 		return err
 	}
 
-	var row int
+	row := make(map[string]float64, 1)
 	err = results.One(&row)
 	if err != nil {
 		return err
 	}
 
+	count := int(row["count"])
+	*val = count
 	return nil
 }
 

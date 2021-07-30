@@ -28,7 +28,7 @@ topic = "filescan" # Topic name to produce to.
 files_container_name = "samples" # Container name for samples.
 avatars_container_name = "images" # Container name for avatars.
     [storage.local]
-    root_dir = "/saferwall/files"    # Full path to the directory where to store the files.
+    root_dir = "~/saferwall/files"    # Full path to the directory where to store the files.
 
 [smtp]
 server = "smtp.example.com"

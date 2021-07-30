@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/auth"
 	"github.com/saferwall/saferwall-api/internal/config"
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
@@ -85,11 +86,13 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger, sec, userSvc)
 	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, upl, p)
+	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
 
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, logger)
 	auth.RegisterHandlers(g, authSvc, logger)
 	file.RegisterHandlers(g, fileSvc, authHandler, logger)
+	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 
 	return e
 }

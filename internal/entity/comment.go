@@ -5,8 +5,17 @@
 package entity
 
 type Comment struct {
-	Body      string `json:"body"`
-	SHA256    string `json:"sha256"`
-	Timestamp int64  `json:"timestamp"`
-	Username  string `json:"username"`
+	// Type represents the document type.
+	Type string `json:"type,omitempty"`
+	// ID represents the activity identifier.
+	ID string `json:"id,omitempty"`
+	// Body represents the content of the comment.
+	Body string `json:"body"`
+	// SHA256 references the hash of the file
+	// where the comment has been made.
+	SHA256 string `json:"sha256"`
+	// Timestamp when this activity happened.
+	Timestamp int64 `json:"timestamp"`
+	// Username represents the author of the comment.
+	Username string `json:"username"`
 }
