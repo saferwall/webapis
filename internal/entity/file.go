@@ -45,5 +45,5 @@ type Submission struct {
 
 // ID returns a unique ID to identify a File object.
 func (f File) ID(key string) string {
-	return "files::" + strings.ToLower(key)
+	return strings.ToLower(key)
 }

@@ -23,7 +23,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger) {
 	res := resource{service, logger}
 
 	g.POST("/auth/login/", res.login)
-	g.POST("/auth/resend-confirmation/", res.resendConfirmation)
+	//g.POST("/auth/resend-confirmation/", res.resendConfirmation)
 }
 
 // login returns a handler that handles user login request.

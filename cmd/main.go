@@ -29,9 +29,8 @@ import (
 // Version indicates the current version of the application.
 var Version = "1.0.0"
 
-var flagConfig = flag.String(
-	"config", "./../configs/",
-	"path to the config file")
+var flagConfig = flag.String("config", "./../configs/", "path to the config file")
+var flagN1QLFiles = flag.String("db", "./../db/", "path to the n1ql files")
 
 func main() {
 
@@ -59,6 +58,13 @@ func run(logger log.Logger) error {
 	// Connect to the database.
 	dbx, err := db.Open(cfg.DB.Server, cfg.DB.Username,
 		cfg.DB.Password, cfg.DB.BucketName)
+	if err != nil {
+		return err
+	}
+
+	// N1QL queries are stored separately from go code as the statement are
+	// relatively complexe and large.
+	err = dbx.PrepareQueries(*flagN1QLFiles, cfg.DB.BucketName)
 	if err != nil {
 		return err
 	}

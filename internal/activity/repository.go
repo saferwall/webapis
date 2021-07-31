@@ -6,6 +6,7 @@ package activity
 
 import (
 	"context"
+	"fmt"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -95,16 +96,19 @@ func (r repository) Count(ctx context.Context) (int, error) {
 func (r repository) Query(ctx context.Context, offset, limit int) (
 	[]interface{}, error) {
 	statement :=
-		`
+	`
 	SELECT {
 		"type": activity.kind,
 		"author": {
 			"username": activity.username,
 			"member_since": (
-				SELECT RAW u.member_since FROM` + " `sfw` " + `u
-				 USE KEYS activity.username)[0]},
+				SELECT RAW u.member_since FROM` + " `sfw` " +
+				 `u USE KEYS activity.username)[0]},
 		"comment": f.body,
-		"file": {
+		"timestamp": activity.timestamp}.*,
+		(CASE WHEN activity.kind = "follow" THEN
+		{"target": activity.target } ELSE
+		{"file": {
 			"hash": f.sha256,
 			"tags": f.tags,
 			"filename": f.submissions[0].filename,
@@ -113,16 +117,13 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 				array_flatten(array i.infected
 				for i in OBJECT_VALUES(f.multiav.last_scan)
 				when i.infected=true end, 1))), "/",
-				TOSTRING(OBJECT_LENGTH(f.multiav.last_scan)))},
-		"timestamp": activity.timestamp}.*,
-		(CASE WHEN activity.kind = "follow" THEN
-		{"target": activity.target } END).*
+				TOSTRING(OBJECT_LENGTH(f.multiav.last_scan)))}} END).*
 	  FROM` + " `sfw` " + `activity
 	  LEFT JOIN` + " `sfw` " + `f ON KEYS activity.target
 	  WHERE activity.type = 'activity'
-	  ORDER BY activity.timestamp
-	  OFFSET 0 LIMIT 100
-	`
+	  ORDER BY activity.timestamp DESC
+	  OFFSET ` + fmt.Sprintf("%d", offset) + " LIMIT " + fmt.Sprintf("%d", limit)
+
 	var activities interface{}
 	err := r.db.Query(ctx, statement, nil, &activities)
 	if err != nil {

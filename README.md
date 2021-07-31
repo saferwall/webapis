@@ -57,6 +57,7 @@ The following endpoints are available:
 - `GET /v1/users/:username/following`: [get a paginated list of user's following](docs/profile/following.md).
 - `GET /v1/users/:username/followers`: [get a paginated list of user's followers](docs/profile/followers.md).
 - `GET /v1/users/:username/comments`: [get a paginated list of user's comments](docs/profile/comments.md).
+- `GET /v1/users/:username/activities`: [get a paginated list of user's activities](docs/profile/activities.md).
 
 ### User actions
 

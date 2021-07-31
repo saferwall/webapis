@@ -18,13 +18,13 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	res := resource{service, logger}
 
-	g.GET("/files/", res.get)
-	g.POST("/files/", res.create)
+	// g.GET("/files/", res.get)
+	// g.POST("/files/", res.create)
 
 	g.GET("/files/:sha256/", res.get)
-	g.PUT("/files/:sha256/", res.update, requireLogin)
-	g.PATCH("/files/:sha256/", res.patch)
-	g.DELETE("/files/:sha256/", res.delete, requireLogin)
+	// g.PUT("/files/:sha256/", res.update, requireLogin)
+	// g.PATCH("/files/:sha256/", res.patch)
+	// g.DELETE("/files/:sha256/", res.delete, requireLogin)
 }
 
 type resource struct {

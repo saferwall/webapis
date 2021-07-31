@@ -30,6 +30,7 @@ type DB struct {
 	Bucket     *gocb.Bucket
 	Cluster    *gocb.Cluster
 	Collection *gocb.Collection
+	N1QLQuery  N1QLQuery
 }
 
 // Open opens a connection to the database.
@@ -75,7 +76,7 @@ func Open(server, username, password, bucketName string) (*DB, error) {
 
 // Query executes a N1QL query.
 func (db *DB) Query(ctx context.Context, statement string,
-	args map[string]interface{}, val* interface{}) error {
+	args map[string]interface{}, val *interface{}) error {
 
 	results, err := db.Cluster.Query(statement, &gocb.QueryOptions{
 		NamedParameters: args, Adhoc: true})

@@ -9,6 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/pkg/log"
+	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
@@ -17,9 +18,15 @@ func RegisterHandlers(g *echo.Group, service Service,
 	res := resource{service, logger}
 
 	g.POST("/users/", res.create)
-	g.GET("/users/:username/", res.get)
-	g.PATCH("/users/:username/", res.update, requireLogin)
-	g.DELETE("/users/:username/", res.delete, requireLogin)
+	//g.GET("/users/:username/", res.get)
+	//g.PATCH("/users/:username/", res.update, requireLogin)
+	//g.DELETE("/users/:username/", res.delete, requireLogin)
+
+	g.GET("/users/activities/", res.activities)
+	// g.GET("/users/:username/submissions", res.activities)
+	// g.GET("/users/:username/likes", res.activities)
+	// g.GET("/users/:username/following", res.activities)
+	//g.GET("/users/:username/followers", res.activities)
 }
 
 type resource struct {
@@ -48,7 +55,8 @@ func (r resource) create(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
+	user.Email = ""
+	user.Password = ""
 	return c.JSON(http.StatusCreated, user)
 }
 
@@ -64,7 +72,8 @@ func (r resource) update(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
+	user.Email = ""
+	user.Password = ""
 	return c.JSON(http.StatusCreated, user)
 }
 
@@ -73,6 +82,22 @@ func (r resource) delete(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
+	user.Email = ""
+	user.Password = ""
 	return c.JSON(http.StatusOK, user)
+}
+
+func (r resource) activities(c echo.Context) error {
+	ctx := c.Request().Context()
+	count, err := r.service.Count(ctx)
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	activities, err := r.service.Activities(ctx, "", pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = activities
+	return c.JSON(http.StatusOK, pages)
 }

@@ -27,6 +27,19 @@ type Repository interface {
 	Update(ctx context.Context, User entity.User) error
 	// Delete removes the user with given ID from the storage.
 	Delete(ctx context.Context, id string) error
+
+	Activities(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Likes(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Followers(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Following(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Submissions(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Comments(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
 }
 
 // repository persists users in database.
@@ -43,7 +56,7 @@ func NewRepository(db *dbcontext.DB, logger log.Logger) Repository {
 // Get reads the user with the specified ID from the database.
 func (r repository) Get(ctx context.Context, id string) (entity.User, error) {
 	var user entity.User
-	key := strings.ToLower("users::" + id)
+	key := strings.ToLower(id)
 	err := r.db.Get(ctx, key, &user)
 	return user, err
 }
@@ -63,7 +76,7 @@ func (r repository) Update(ctx context.Context, user entity.User) error {
 
 // Delete deletes a user with the specified ID from the database.
 func (r repository) Delete(ctx context.Context, id string) error {
-	key := strings.ToLower("users::" + id)
+	key := strings.ToLower(id)
 	return r.db.Delete(ctx, key)
 }
 
@@ -71,7 +84,7 @@ func (r repository) Delete(ctx context.Context, id string) error {
 func (r repository) Count(ctx context.Context) (int, error) {
 	var count int
 
-	err := r.db.Count(ctx, "users", &count)
+	err := r.db.Count(ctx, "user", &count)
 	return count, err
 }
 
@@ -87,4 +100,117 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 	// 	Limit(int64(limit)).
 	// 	All(&users)
 	return users, nil
+}
+
+func (r repository) Activities(ctx context.Context, id string, offset,
+	limit int) ([]interface{}, error) {
+
+	var activities interface{}
+	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
+
+	if id == "" {
+		// For an anonymous user.
+		err := r.db.Query(ctx, r.db.N1QLQuery.AnoUserActivities, params, &activities)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// For a logged-in user.
+		params["user"] = id
+
+		err := r.db.Query(ctx, r.db.N1QLQuery.UserActivities, params, &activities)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return activities.([]interface{}), nil
+
+}
+
+func (r repository) Likes(ctx context.Context, id string, offset,
+	limit int) ([]interface{}, error) {
+
+	var likes interface{}
+
+	// For a logged-in user.
+	params := make(map[string]interface{}, 1)
+	params["user"] = id
+
+	err := r.db.Query(ctx, r.db.N1QLQuery.UserActivities, params, &likes)
+	if err != nil {
+		return nil, err
+	}
+
+	return likes.([]interface{}), nil
+}
+
+func (r repository) Followers(ctx context.Context, id string, offset,
+	limit int) ([]interface{}, error) {
+
+	var likes interface{}
+
+	// For a logged-in user.
+	params := make(map[string]interface{}, 1)
+	params["user"] = id
+
+	err := r.db.Query(ctx, r.db.N1QLQuery.UserActivities, params, &likes)
+	if err != nil {
+		return nil, err
+	}
+
+	return likes.([]interface{}), nil
+}
+
+func (r repository) Following(ctx context.Context, id string, offset,
+	limit int) ([]interface{}, error) {
+
+	var likes interface{}
+
+	// For a logged-in user.
+	params := make(map[string]interface{}, 1)
+	params["user"] = id
+
+	err := r.db.Query(ctx, r.db.N1QLQuery.UserActivities, params, &likes)
+	if err != nil {
+		return nil, err
+	}
+
+	return likes.([]interface{}), nil
+}
+
+func (r repository) Submissions(ctx context.Context, id string, offset,
+	limit int) ([]interface{}, error) {
+
+	var likes interface{}
+
+	// For a logged-in user.
+	params := make(map[string]interface{}, 1)
+	params["user"] = id
+
+	err := r.db.Query(ctx, r.db.N1QLQuery.UserActivities, params, &likes)
+	if err != nil {
+		return nil, err
+	}
+
+	return likes.([]interface{}), nil
+}
+
+func (r repository) Comments(ctx context.Context, id string, offset,
+	limit int) ([]interface{}, error) {
+
+	var likes interface{}
+
+	// For a logged-in user.
+	params := make(map[string]interface{}, 1)
+	params["user"] = id
+
+	err := r.db.Query(ctx, r.db.N1QLQuery.UserActivities, params, &likes)
+	if err != nil {
+		return nil, err
+	}
+
+	return likes.([]interface{}), nil
 }

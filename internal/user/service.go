@@ -16,11 +16,23 @@ import (
 // Service encapsulates usecase logic for users.
 type Service interface {
 	Get(ctx context.Context, id string) (User, error)
-	//Query(ctx context.Context, offset, limit int) ([]User, error)
+	Query(ctx context.Context, offset, limit int) ([]User, error)
 	Count(ctx context.Context) (int, error)
 	Create(ctx context.Context, input CreateUserRequest) (User, error)
 	Update(ctx context.Context, id string, input UpdateUserRequest) (User, error)
 	Delete(ctx context.Context, id string) (User, error)
+	Activities(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Likes(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Followers(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Following(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Submissions(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+	Comments(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
 }
 
 // User represents the data about a user.
@@ -128,4 +140,79 @@ func (s service) Delete(ctx context.Context, id string) (User, error) {
 // Count returns the number of users.
 func (s service) Count(ctx context.Context) (int, error) {
 	return s.repo.Count(ctx)
+}
+
+// Query returns the users with the specified offset and limit.
+func (s service) Query(ctx context.Context, offset, limit int) (
+	[]User, error) {
+
+	items, err := s.repo.Query(ctx, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	result := []User{}
+	for _, item := range items {
+		result = append(result, User{item})
+	}
+	return result, nil
+}
+
+func (s service) Activities(ctx context.Context, id string, offset, limit int) (
+	[]interface{}, error) {
+
+	result, err := s.repo.Activities(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s service) Following(ctx context.Context, id string, offset, limit int) (
+	[]interface{}, error) {
+
+	result, err := s.repo.Following(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s service) Followers(ctx context.Context, id string, offset, limit int) (
+	[]interface{}, error) {
+
+	result, err := s.repo.Followers(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s service) Likes(ctx context.Context, id string, offset, limit int) (
+	[]interface{}, error) {
+
+	result, err := s.repo.Likes(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s service) Submissions(ctx context.Context, id string, offset, limit int) (
+	[]interface{}, error) {
+
+	result, err := s.repo.Submissions(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s service) Comments(ctx context.Context, id string, offset, limit int) (
+	[]interface{}, error) {
+
+	result, err := s.repo.Comments(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

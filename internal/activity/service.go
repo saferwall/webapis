@@ -131,5 +131,4 @@ func (s service) Query(ctx context.Context, offset, limit int) (
 		return nil, err
 	}
 	return result, nil
-
 }

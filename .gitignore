@@ -14,5 +14,6 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# Saferwall ignore list
+# Saferwall ignore list.
 main
+cmd/__debug_bin
