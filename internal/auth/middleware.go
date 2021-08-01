@@ -56,24 +56,43 @@ func successHandler(c echo.Context) {
 		token.Claims.(jwt.MapClaims)["id"].(string),
 		token.Claims.(jwt.MapClaims)["name"].(string),
 	)
-	c.SetRequest( c.Request().WithContext(ctx))
+	c.SetRequest(c.Request().WithContext(ctx))
 }
 
-type contextKey int
+// IsAuthenticated middleware checks if a user is authenticated.
+// If not, it calls the next handler HTTP.
+// If yes, it validates the JWT token and returns an error if token is invalid.
+func IsAuthenticated(authHandler echo.MiddlewareFunc) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// check first if token was handed by a cookie.
+			authScheme := "Bearer"
+			_, err := c.Cookie("JWTCookie")
+			if err == nil {
+				return authHandler(next)(c)
+			}
 
-const (
-	userKey contextKey = iota
-)
+			// if not, check in Authorization header.
+			auth := c.Request().Header.Get("Authorization")
+			l := len(authScheme)
+			if len(auth) > l+1 && auth[:l] == authScheme {
+				return authHandler(next)(c)
+			}
+
+			return next(c)
+		}
+	}
+}
 
 // WithUser returns a context that contains the user identity from the given JWT.
 func WithUser(ctx context.Context, id, name string) context.Context {
-	return context.WithValue(ctx, userKey, entity.User{Username: id, FullName: name})
+	return context.WithValue(ctx, entity.UserKey, entity.User{Username: id, FullName: name})
 }
 
 // CurrentUser returns the user identity from the given context.
 // Nil is returned if no user identity is found in the context.
 func CurrentUser(ctx context.Context) Identity {
-	if user, ok := ctx.Value(userKey).(entity.User); ok {
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		return user
 	}
 	return nil

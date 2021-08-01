@@ -8,12 +8,14 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
-	requireLogin echo.MiddlewareFunc, logger log.Logger) {
+	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
+	logger log.Logger) {
 
 	res := resource{service, logger}
 
@@ -22,11 +24,12 @@ func RegisterHandlers(g *echo.Group, service Service,
 	//g.PATCH("/users/:username/", res.update, requireLogin)
 	//g.DELETE("/users/:username/", res.delete, requireLogin)
 
-	g.GET("/users/activities/", res.activities)
-	// g.GET("/users/:username/submissions", res.activities)
-	// g.GET("/users/:username/likes", res.activities)
-	// g.GET("/users/:username/following", res.activities)
-	//g.GET("/users/:username/followers", res.activities)
+	g.GET("/users/activities/", res.activities, optionalLogin)
+	// g.GET("/users/:username/likes", res.likes, requireLogin)
+	// g.GET("/users/:username/following", res.following, requireLogin)
+	//g.GET("/users/:username/followers", res.followers, requireLogin)
+	// g.GET("/users/:username/submissions", res.submissions)
+	// g.GET("/users/:username/comments", res.comments)
 }
 
 type resource struct {
@@ -89,12 +92,16 @@ func (r resource) delete(c echo.Context) error {
 
 func (r resource) activities(c echo.Context) error {
 	ctx := c.Request().Context()
+	var id string
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		id = user.ID()
+	}
 	count, err := r.service.Count(ctx)
 	if err != nil {
 		return err
 	}
 	pages := pagination.NewFromRequest(c.Request(), count)
-	activities, err := r.service.Activities(ctx, "", pages.Offset(), pages.Limit())
+	activities, err := r.service.Activities(ctx, id, pages.Offset(), pages.Limit())
 	if err != nil {
 		return err
 	}

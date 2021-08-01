@@ -30,7 +30,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger) {
 func (r resource) login(c echo.Context) error {
 	var req struct {
 		Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
-		Password string `json:"password" validate:"required,alphanum,min=8,max=30"`
+		Password string `json:"password" validate:"required,min=8,max=30"`
 	}
 
 	if err := c.Bind(&req); err != nil {

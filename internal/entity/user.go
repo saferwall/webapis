@@ -33,10 +33,18 @@ type User struct {
 
 // ID returns a unique ID to identify a User object.
 func (f User) ID() string {
-	return "users::" + strings.ToLower(f.Username)
+	return strings.ToLower(f.Username)
 }
 
 // Name returns the user name.
 func (u User) Name() string {
 	return u.Username
 }
+
+// contextKey defines a custom time to get/set values from a context.
+type contextKey int
+
+const (
+	// UserKey identifies the current user during the request life.
+	UserKey contextKey = iota
+)

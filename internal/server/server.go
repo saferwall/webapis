@@ -69,6 +69,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 
 	// Setup JWT Auth handler.
 	authHandler := auth.Handler(cfg.JWTSigningKey)
+	optAuthHandler := auth.IsAuthenticated(authHandler)
 
 	// Register a custom fields validator.
 	e.Validator = &CustomValidator{validator: validator.New()}
@@ -89,7 +90,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
 
 	healthcheck.RegisterHandlers(e, version)
-	user.RegisterHandlers(g, userSvc, authHandler, logger)
+	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger)
 	auth.RegisterHandlers(g, authSvc, logger)
 	file.RegisterHandlers(g, fileSvc, authHandler, logger)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)

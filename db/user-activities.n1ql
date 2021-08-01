@@ -13,6 +13,7 @@ SELECT
           activity.username
       ) [0]
     },
+    "follow": true,
     "comment": f.body,
     "timestamp": activity.timestamp
   }.*,
