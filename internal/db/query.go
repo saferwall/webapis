@@ -13,7 +13,9 @@ import (
 
 type N1QLQuery struct {
 	UserActivities    string
+	UserLikes         string
 	AnoUserActivities string
+	AnoUserLikes      string
 }
 
 // walk returns list of files in directory.
@@ -59,6 +61,10 @@ func (db *DB) PrepareQueries(filePath, bucketName string) error {
 			db.N1QLQuery.UserActivities = query
 		case "ano-user-activities.n1ql":
 			db.N1QLQuery.AnoUserActivities = query
+		case "ano-user-likes.n1ql":
+			db.N1QLQuery.AnoUserLikes = query
+		case "user-likes.n1ql":
+			db.N1QLQuery.UserLikes = query
 		}
 	}
 

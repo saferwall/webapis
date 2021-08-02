@@ -20,16 +20,16 @@ func RegisterHandlers(g *echo.Group, service Service,
 	res := resource{service, logger}
 
 	g.POST("/users/", res.create)
-	//g.GET("/users/:username/", res.get)
+	g.GET("/users/:username/", res.get)
 	//g.PATCH("/users/:username/", res.update, requireLogin)
 	//g.DELETE("/users/:username/", res.delete, requireLogin)
 
 	g.GET("/users/activities/", res.activities, optionalLogin)
-	// g.GET("/users/:username/likes", res.likes, requireLogin)
-	// g.GET("/users/:username/following", res.following, requireLogin)
-	//g.GET("/users/:username/followers", res.followers, requireLogin)
-	// g.GET("/users/:username/submissions", res.submissions)
-	// g.GET("/users/:username/comments", res.comments)
+	g.GET("/users/:username/likes/", res.likes, optionalLogin)
+	// g.GET("/users/:username/following/", res.following, requireLogin)
+	//g.GET("/users/:username/followers/", res.followers, requireLogin)
+	// g.GET("/users/:username/submissions/", res.submissions)
+	// g.GET("/users/:username/comments/", res.comments)
 }
 
 type resource struct {
@@ -102,6 +102,22 @@ func (r resource) activities(c echo.Context) error {
 	}
 	pages := pagination.NewFromRequest(c.Request(), count)
 	activities, err := r.service.Activities(ctx, id, pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = activities
+	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) likes(c echo.Context) error {
+	ctx := c.Request().Context()
+	count, err := r.service.Count(ctx)
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	activities, err := r.service.Likes(
+		ctx, c.Param("username"), pages.Offset(), pages.Limit())
 	if err != nil {
 		return err
 	}

@@ -134,16 +134,29 @@ func (r repository) Likes(ctx context.Context, id string, offset,
 	limit int) ([]interface{}, error) {
 
 	var likes interface{}
-
-	// For a logged-in user.
+	var currentUser, query string
 	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
 	params["user"] = id
 
-	err := r.db.Query(ctx, r.db.N1QLQuery.UserActivities, params, &likes)
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		currentUser = user.ID()
+	}
+
+	if currentUser == "" {
+		// For an anonymous user.
+		query = r.db.N1QLQuery.AnoUserLikes
+	} else {
+		// For a logged-in user.
+		params["loggedInUser"] = currentUser
+		query = r.db.N1QLQuery.UserLikes
+	}
+
+	err := r.db.Query(ctx, query, params, &likes)
 	if err != nil {
 		return nil, err
 	}
-
 	return likes.([]interface{}), nil
 }
 

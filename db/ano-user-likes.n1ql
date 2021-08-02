@@ -1,0 +1,40 @@
+/* N1QL query to retrieve likes for an anonymous user. */
+SELECT
+  t.*
+FROM (
+  SELECT
+    {
+      "liked": false,
+      "date":  (
+          SELECT
+            RAW act.timestamp
+          FROM
+            `bucket_name` act
+          WHERE act.type = "activity" AND act.kind = "like" AND act.username = $user
+      ) [0],
+      "file": {
+        "hash": f.sha256,
+        "tags": f.tags,
+        "filename": f.submissions [0].filename,
+        "class": f.ml.pe.predicted_class,
+        "multiav": {
+          "value": ARRAY_COUNT(
+            ARRAY_FLATTEN(
+              ARRAY i.infected FOR i IN OBJECT_VALUES(f.multiav.last_scan) WHEN i.infected = TRUE END,
+              1
+            )
+          ),
+          "count": OBJECT_LENGTH(f.multiav.last_scan)
+        }
+      }
+    }.*
+  FROM
+    `bucket_name` users
+  USE KEYS $user
+  LEFT JOIN `bucket_name` f ON KEYS users.likes
+  OFFSET $offset
+  LIMIT
+    $limit
+) AS t
+ORDER BY
+  t.date DESC

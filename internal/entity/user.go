@@ -9,9 +9,9 @@ import "strings"
 // User represent a user.
 type User struct {
 	Type             string   `json:"type"`
-	Email            string   `json:"email"`
+	Email            string   `json:"email,omitempty"`
 	Username         string   `json:"username"`
-	Password         string   `json:"password"`
+	Password         string   `json:"password,omitempty"`
 	FullName         string   `json:"name"`
 	Location         string   `json:"location"`
 	URL              string   `json:"url"`
