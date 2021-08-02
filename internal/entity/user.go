@@ -37,8 +37,8 @@ func (f User) ID() string {
 }
 
 // Name returns the user name.
-func (u User) Name() string {
-	return u.Username
+func (u User) IsAdmin() bool {
+	return u.Admin
 }
 
 // contextKey defines a custom time to get/set values from a context.

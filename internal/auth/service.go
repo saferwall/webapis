@@ -33,8 +33,8 @@ type Service interface {
 type Identity interface {
 	// ID returns the user ID.
 	ID() string
-	// Name returns the user name.
-	Name() string
+	// IsAdmin return true if the user have admin priviliges.
+	IsAdmin() bool
 }
 
 // Securer represents security interface.
@@ -92,8 +92,8 @@ func (s service) authenticate(ctx context.Context, username, password string) (
 // generateJWT generates a JWT that encodes an identity.
 func (s service) generateJWT(identity Identity) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":   identity.ID(),
-		"name": identity.Name(),
-		"exp":  time.Now().Add(time.Duration(s.tokenExpiration) * time.Hour).Unix(),
+		"id":      identity.ID(),
+		"isAdmin": identity.IsAdmin(),
+		"exp":     time.Now().Add(time.Duration(s.tokenExpiration) * time.Hour).Unix(),
 	}).SignedString([]byte(s.signingKey))
 }

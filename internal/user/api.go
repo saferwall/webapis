@@ -9,6 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
+	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
@@ -21,13 +22,13 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	g.POST("/users/", res.create)
 	g.GET("/users/:username/", res.get)
-	//g.PATCH("/users/:username/", res.update, requireLogin)
-	//g.DELETE("/users/:username/", res.delete, requireLogin)
+	g.PATCH("/users/:username/", res.update, requireLogin)
+	g.DELETE("/users/:username/", res.delete, requireLogin)
 
 	g.GET("/users/activities/", res.activities, optionalLogin)
 	g.GET("/users/:username/likes/", res.likes, optionalLogin)
 	// g.GET("/users/:username/following/", res.following, requireLogin)
-	//g.GET("/users/:username/followers/", res.followers, requireLogin)
+	// g.GET("/users/:username/followers/", res.followers, requireLogin)
 	// g.GET("/users/:username/submissions/", res.submissions)
 	// g.GET("/users/:username/comments/", res.comments)
 }
@@ -65,12 +66,24 @@ func (r resource) create(c echo.Context) error {
 
 func (r resource) update(c echo.Context) error {
 	var input UpdateUserRequest
+	var curUser string
+
+	ctx := c.Request().Context()
+
 	if err := c.Bind(&input); err != nil {
-		r.logger.With(c.Request().Context()).Info(err)
+		r.logger.With(ctx).Info(err)
 		return err
 	}
 
-	user, err := r.service.Update(c.Request().Context(),
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		curUser = user.ID()
+	}
+
+	if curUser != c.Param("username") {
+		return errors.BadRequest("")
+	}
+
+	user, err := r.service.Update(ctx,
 		c.Param("username"), input)
 	if err != nil {
 		return err
@@ -81,6 +94,19 @@ func (r resource) update(c echo.Context) error {
 }
 
 func (r resource) delete(c echo.Context) error {
+
+	var isAdmin bool
+
+	ctx := c.Request().Context()
+
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		isAdmin = user.IsAdmin()
+	}
+
+	if !isAdmin {
+		return errors.Forbidden("")
+	}
+
 	user, err := r.service.Delete(c.Request().Context(), c.Param("username"))
 	if err != nil {
 		return err

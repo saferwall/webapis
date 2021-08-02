@@ -54,7 +54,7 @@ func successHandler(c echo.Context) {
 	ctx := WithUser(
 		c.Request().Context(),
 		token.Claims.(jwt.MapClaims)["id"].(string),
-		token.Claims.(jwt.MapClaims)["name"].(string),
+		token.Claims.(jwt.MapClaims)["isAdmin"].(bool),
 	)
 	c.SetRequest(c.Request().WithContext(ctx))
 }
@@ -85,8 +85,11 @@ func IsAuthenticated(authHandler echo.MiddlewareFunc) echo.MiddlewareFunc {
 }
 
 // WithUser returns a context that contains the user identity from the given JWT.
-func WithUser(ctx context.Context, id, name string) context.Context {
-	return context.WithValue(ctx, entity.UserKey, entity.User{Username: id, FullName: name})
+func WithUser(ctx context.Context, id string, isAdmin bool) context.Context {
+	return context.WithValue(
+		ctx, entity.UserKey, entity.User{
+			Username: id,
+			Admin:    isAdmin})
 }
 
 // CurrentUser returns the user identity from the given context.
