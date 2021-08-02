@@ -11,11 +11,24 @@ import (
 	"strings"
 )
 
-type N1QLQuery struct {
-	UserActivities    string
-	UserLikes         string
-	AnoUserActivities string
-	AnoUserLikes      string
+type n1qlQuery int
+
+const (
+	UserActivities n1qlQuery = iota
+	AnoUserActivities
+	CountUserActivities
+	CountAnoUserActivities
+	UserLikes
+	AnoUserLikes
+)
+
+var fileQueryMap = map[string]n1qlQuery{
+	"user-activities.n1ql":           UserActivities,
+	"count-user-activities.n1ql":     CountUserActivities,
+	"count-ano-user-activities.n1ql": CountAnoUserActivities,
+	"ano-user-activities.n1ql":       AnoUserActivities,
+	"ano-user-likes":                 AnoUserLikes,
+	"user-likes.n1ql":                UserLikes,
 }
 
 // walk returns list of files in directory.
@@ -45,6 +58,7 @@ func (db *DB) PrepareQueries(filePath, bucketName string) error {
 		return err
 	}
 
+	db.N1QLQuery = make(map[n1qlQuery]string)
 	for _, f := range n1qlFiles {
 		c, err := ioutil.ReadFile(f)
 		if err != nil {
@@ -56,16 +70,8 @@ func (db *DB) PrepareQueries(filePath, bucketName string) error {
 		query = strings.ReplaceAll(query, "bucket_name", bucketName)
 
 		name := filepath.Base(f)
-		switch name {
-		case "user-activities.n1ql":
-			db.N1QLQuery.UserActivities = query
-		case "ano-user-activities.n1ql":
-			db.N1QLQuery.AnoUserActivities = query
-		case "ano-user-likes.n1ql":
-			db.N1QLQuery.AnoUserLikes = query
-		case "user-likes.n1ql":
-			db.N1QLQuery.UserLikes = query
-		}
+		key := fileQueryMap[name]
+		db.N1QLQuery[key] = query
 	}
 
 	return nil

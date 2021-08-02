@@ -96,7 +96,7 @@ func (r resource) activities(c echo.Context) error {
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		id = user.ID()
 	}
-	count, err := r.service.Count(ctx)
+	count, err := r.service.CountActivities(ctx)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func (r resource) activities(c echo.Context) error {
 
 func (r resource) likes(c echo.Context) error {
 	ctx := c.Request().Context()
-	count, err := r.service.Count(ctx)
+	count, err := r.service.CountLikes(ctx, c.Param("username"))
 	if err != nil {
 		return err
 	}

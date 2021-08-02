@@ -30,7 +30,7 @@ type DB struct {
 	Bucket     *gocb.Bucket
 	Cluster    *gocb.Cluster
 	Collection *gocb.Collection
-	N1QLQuery  N1QLQuery
+	N1QLQuery  map[n1qlQuery]string
 }
 
 // Open opens a connection to the database.
@@ -156,33 +156,22 @@ func (db *DB) Delete(ctx context.Context, key string) error {
 }
 
 // Count retrieves the total number of documents.
-func (db *DB) Count(ctx context.Context, docType string,
-	val *int) error {
-
-	params := make(map[string]interface{}, 1)
-	params["docType"] = docType
-
-	statement :=
-		"SELECT COUNT(*) as count FROM `" +
-			db.Bucket.Name() + "` " +
-			"WHERE `type`=$docType"
+func (db *DB) Count(ctx context.Context, statement string,
+	args map[string]interface{}, val *int) error {
 
 	results, err := db.Cluster.Query(statement, &gocb.QueryOptions{
-		NamedParameters: params, Adhoc: true})
-	if err != nil {
-		return err
-	}
+		NamedParameters: args, Adhoc: true})
 	if err != nil {
 		return err
 	}
 
-	row := make(map[string]float64, 1)
+	var row float64
 	err = results.One(&row)
 	if err != nil {
 		return err
 	}
 
-	count := int(row["count"])
+	count := int(row)
 	*val = count
 	return nil
 }

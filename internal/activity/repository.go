@@ -86,8 +86,14 @@ func (r repository) Delete(ctx context.Context, id string) error {
 // Count returns the number of the activity records in the database.
 func (r repository) Count(ctx context.Context) (int, error) {
 	var count int
+	params := make(map[string]interface{}, 1)
+	params["docType"] = "activity"
 
-	err := r.db.Count(ctx, "file", &count)
+	statement :=
+		"SELECT COUNT(*) as count FROM `" + r.db.Bucket.Name() + "` " +
+			"WHERE `type`=$docType"
+
+	err := r.db.Count(ctx, statement, params, &count)
 	return count, err
 }
 
@@ -96,14 +102,14 @@ func (r repository) Count(ctx context.Context) (int, error) {
 func (r repository) Query(ctx context.Context, offset, limit int) (
 	[]interface{}, error) {
 	statement :=
-	`
+		`
 	SELECT {
 		"type": activity.kind,
 		"author": {
 			"username": activity.username,
 			"member_since": (
 				SELECT RAW u.member_since FROM` + " `sfw` " +
-				 `u USE KEYS activity.username)[0]},
+			`u USE KEYS activity.username)[0]},
 		"comment": f.body,
 		"timestamp": activity.timestamp}.*,
 		(CASE WHEN activity.kind = "follow" THEN

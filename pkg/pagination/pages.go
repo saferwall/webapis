@@ -108,10 +108,10 @@ func (p *Pages) BuildLinkHeader(baseURL string, defaultPerPage int) string {
 	return header
 }
 
-// BuildLinks returns the first, prev, next, and last links corresponding to the pagination.
-// A link could be an empty string if it is not needed.
-// For example, if the pagination is at the first page, then both first and prev links
-// will be empty.
+// BuildLinks returns the first, prev, next, and last links corresponding
+// to the pagination. A link could be an empty string if it is not needed.
+// For example, if the pagination is at the first page, then both first and
+// prev links will be empty.
 func (p *Pages) BuildLinks(baseURL string, defaultPerPage int) [4]string {
 	var links [4]string
 	pageCount := p.PageCount

@@ -33,6 +33,8 @@ type Service interface {
 		[]interface{}, error)
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
+	CountActivities(ctx context.Context) (int, error)
+	CountLikes(ctx context.Context, id string) (int, error)
 }
 
 // User represents the data about a user.
@@ -215,4 +217,21 @@ func (s service) Comments(ctx context.Context, id string, offset, limit int) (
 		return nil, err
 	}
 	return result, nil
+}
+
+
+func (s service) CountActivities(ctx context.Context) (int, error) {
+	count, err := s.repo.CountActivities(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return count, err
+}
+
+func (s service) CountLikes(ctx context.Context, id string) (int, error) {
+	user, err := s.Get(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return user.LikesCount, err
 }

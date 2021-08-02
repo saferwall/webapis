@@ -89,7 +89,14 @@ func (r repository) Delete(ctx context.Context, id string) error {
 func (r repository) Count(ctx context.Context) (int, error) {
 	var count int
 
-	err := r.db.Count(ctx, "files", &count)
+	params := make(map[string]interface{}, 1)
+	params["docType"] = "file"
+
+	statement :=
+		"SELECT COUNT(*) AS count FROM `" + r.db.Bucket.Name() + "` " +
+			"WHERE `type`=$docType"
+
+	err := r.db.Count(ctx, statement, params, &count)
 	return count, err
 }
 

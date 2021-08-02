@@ -1,0 +1,1 @@
+SELECT RAW COUNT(*) FROM `bucket_name` s WHERE s.type = "activity"
