@@ -33,6 +33,7 @@ func (r resource) login(c echo.Context) error {
 		Password string `json:"password" validate:"required,min=8,max=30"`
 	}
 
+	r.logger.Info(c.Request().Host)
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(c.Request().Context()).Errorf("invalid request: %v", err)
 		return errors.BadRequest("")

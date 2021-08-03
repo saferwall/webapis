@@ -1,0 +1,9 @@
+/* N1QL query to get all existing users. */
+SELECT
+  `bucket_name`.*
+FROM
+  `bucket_name`
+WHERE
+  type = $docType OFFSET $offset
+LIMIT
+  $limit

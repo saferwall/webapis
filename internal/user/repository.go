@@ -6,6 +6,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
@@ -90,7 +91,7 @@ func (r repository) Count(ctx context.Context) (int, error) {
 	params["docType"] = "user"
 
 	statement :=
-		"SELECT COUNT(*) AS count FROM `" + r.db.Bucket.Name() + "` " +
+		"SELECT RAW COUNT(*) AS count FROM `" + r.db.Bucket.Name() + "` " +
 			"WHERE `type`=$docType"
 
 	err := r.db.Count(ctx, statement, params, &count)
@@ -101,13 +102,27 @@ func (r repository) Count(ctx context.Context) (int, error) {
 // from the database.
 func (r repository) Query(ctx context.Context, offset, limit int) (
 	[]entity.User, error) {
-	var users []entity.User
-	// err := r.db.With(ctx).
-	// 	Select().
-	// 	OrderBy("id").
-	// 	Offset(int64(offset)).
-	// 	Limit(int64(limit)).
-	// 	All(&users)
+	var res interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["docType"] = "user"
+	params["offset"] = offset
+	params["limit"] = limit
+
+	statement := r.db.N1QLQuery[dbcontext.GetUsers]
+	err := r.db.Query(ctx, statement, params, &res)
+	if err != nil {
+		return []entity.User{}, err
+	}
+	users := []entity.User{}
+	for _, u := range res.([]interface{}) {
+		user := entity.User{}
+		b, _ := json.Marshal(u)
+		json.Unmarshal(b, &user)
+		user.Email = ""
+		user.Password = ""
+		users = append(users, user)
+	}
 	return users, nil
 }
 
@@ -142,7 +157,7 @@ func (r repository) Activities(ctx context.Context, id string, offset,
 func (r repository) Likes(ctx context.Context, id string, offset,
 	limit int) ([]interface{}, error) {
 
-	var likes interface{}
+	var results interface{}
 	var currentUser, query string
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
@@ -162,79 +177,130 @@ func (r repository) Likes(ctx context.Context, id string, offset,
 		query = r.db.N1QLQuery[dbcontext.UserLikes]
 	}
 
-	err := r.db.Query(ctx, query, params, &likes)
+	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
 	}
-	return likes.([]interface{}), nil
+	return results.([]interface{}), nil
 }
 
 func (r repository) Followers(ctx context.Context, id string, offset,
 	limit int) ([]interface{}, error) {
 
-	var likes interface{}
-
-	// For a logged-in user.
+	var results interface{}
+	var currentUser, query string
 	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
 	params["user"] = id
 
-	err := r.db.Query(ctx, "", params, &likes)
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		currentUser = user.ID()
+	}
+
+	if currentUser == "" {
+		// For an anonymous user.
+		query = r.db.N1QLQuery[dbcontext.AnoUserLikes]
+	} else {
+		// For a logged-in user.
+		params["loggedInUser"] = currentUser
+		query = r.db.N1QLQuery[dbcontext.UserLikes]
+	}
+
+	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
 	}
-
-	return likes.([]interface{}), nil
+	return results.([]interface{}), nil
 }
 
 func (r repository) Following(ctx context.Context, id string, offset,
 	limit int) ([]interface{}, error) {
 
-	var likes interface{}
-
-	// For a logged-in user.
+	var results interface{}
+	var currentUser, query string
 	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
 	params["user"] = id
 
-	err := r.db.Query(ctx, "", params, &likes)
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		currentUser = user.ID()
+	}
+
+	if currentUser == "" {
+		// For an anonymous user.
+		query = r.db.N1QLQuery[dbcontext.AnoUserLikes]
+	} else {
+		// For a logged-in user.
+		params["loggedInUser"] = currentUser
+		query = r.db.N1QLQuery[dbcontext.UserLikes]
+	}
+
+	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
 	}
-
-	return likes.([]interface{}), nil
+	return results.([]interface{}), nil
 }
 
 func (r repository) Submissions(ctx context.Context, id string, offset,
 	limit int) ([]interface{}, error) {
-
-	var likes interface{}
-
-	// For a logged-in user.
+	var results interface{}
+	var currentUser, query string
 	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
 	params["user"] = id
 
-	err := r.db.Query(ctx, "", params, &likes)
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		currentUser = user.ID()
+	}
+
+	if currentUser == "" {
+		// For an anonymous user.
+		query = r.db.N1QLQuery[dbcontext.AnoUserLikes]
+	} else {
+		// For a logged-in user.
+		params["loggedInUser"] = currentUser
+		query = r.db.N1QLQuery[dbcontext.UserLikes]
+	}
+
+	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
 	}
-
-	return likes.([]interface{}), nil
+	return results.([]interface{}), nil
 }
 
 func (r repository) Comments(ctx context.Context, id string, offset,
 	limit int) ([]interface{}, error) {
 
-	var likes interface{}
-
-	// For a logged-in user.
+	var results interface{}
+	var currentUser, query string
 	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
 	params["user"] = id
 
-	err := r.db.Query(ctx, "", params, &likes)
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		currentUser = user.ID()
+	}
+
+	if currentUser == "" {
+		// For an anonymous user.
+		query = r.db.N1QLQuery[dbcontext.AnoUserLikes]
+	} else {
+		// For a logged-in user.
+		params["loggedInUser"] = currentUser
+		query = r.db.N1QLQuery[dbcontext.UserLikes]
+	}
+
+	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
 	}
-
-	return likes.([]interface{}), nil
+	return results.([]interface{}), nil
 }
 
 func (r repository) CountActivities(ctx context.Context) (int, error) {

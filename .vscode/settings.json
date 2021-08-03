@@ -1,6 +1,7 @@
 {
     "files.exclude": {
-        "coverage.out": true
+        "coverage.out": true,
+        "main": true
     },
     "sql-formatter.dialect": "n1q1",
     "editor.rulers": [

@@ -25,12 +25,14 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PATCH("/users/:username/", res.update, requireLogin)
 	g.DELETE("/users/:username/", res.delete, requireLogin)
 
+	g.GET("/users/", res.getUsers)
+
 	g.GET("/users/activities/", res.activities, optionalLogin)
 	g.GET("/users/:username/likes/", res.likes, optionalLogin)
-	// g.GET("/users/:username/following/", res.following, requireLogin)
-	// g.GET("/users/:username/followers/", res.followers, requireLogin)
-	// g.GET("/users/:username/submissions/", res.submissions)
-	// g.GET("/users/:username/comments/", res.comments)
+	g.GET("/users/:username/following/", res.following, optionalLogin)
+	g.GET("/users/:username/followers/", res.followers, optionalLogin)
+	g.GET("/users/:username/submissions/", res.submissions, optionalLogin)
+	g.GET("/users/:username/comments/", res.comments, optionalLogin)
 }
 
 type resource struct {
@@ -96,13 +98,10 @@ func (r resource) update(c echo.Context) error {
 func (r resource) delete(c echo.Context) error {
 
 	var isAdmin bool
-
 	ctx := c.Request().Context()
-
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		isAdmin = user.IsAdmin()
 	}
-
 	if !isAdmin {
 		return errors.Forbidden("")
 	}
@@ -114,6 +113,29 @@ func (r resource) delete(c echo.Context) error {
 	user.Email = ""
 	user.Password = ""
 	return c.JSON(http.StatusOK, user)
+}
+
+func (r resource) getUsers(c echo.Context) error {
+	var isAdmin bool
+	ctx := c.Request().Context()
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		isAdmin = user.IsAdmin()
+	}
+	if !isAdmin {
+		return errors.Forbidden("")
+	}
+
+	count, err := r.service.Count(ctx)
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	users, err := r.service.Query(ctx, pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = users
+	return c.JSON(http.StatusOK, pages)
 }
 
 func (r resource) activities(c echo.Context) error {
@@ -148,5 +170,69 @@ func (r resource) likes(c echo.Context) error {
 		return err
 	}
 	pages.Items = activities
+	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) following(c echo.Context) error {
+	ctx := c.Request().Context()
+	count, err := r.service.CountFollowing(ctx, c.Param("username"))
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	following, err := r.service.Following(
+		ctx, c.Param("username"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = following
+	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) followers(c echo.Context) error {
+	ctx := c.Request().Context()
+	count, err := r.service.CountFollowers(ctx, c.Param("username"))
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	followers, err := r.service.Followers(
+		ctx, c.Param("username"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = followers
+	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) submissions(c echo.Context) error {
+	ctx := c.Request().Context()
+	count, err := r.service.CountSubmissions(ctx, c.Param("username"))
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	submissions, err := r.service.Submissions(
+		ctx, c.Param("username"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = submissions
+	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) comments(c echo.Context) error {
+	ctx := c.Request().Context()
+	count, err := r.service.CountComments(ctx, c.Param("username"))
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	comments, err := r.service.Comments(
+		ctx, c.Param("username"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = comments
 	return c.JSON(http.StatusOK, pages)
 }

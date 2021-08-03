@@ -35,6 +35,10 @@ type Service interface {
 		[]interface{}, error)
 	CountActivities(ctx context.Context) (int, error)
 	CountLikes(ctx context.Context, id string) (int, error)
+	CountFollowing(ctx context.Context, id string) (int, error)
+	CountFollowers(ctx context.Context, id string) (int, error)
+	CountComments(ctx context.Context, id string) (int, error)
+	CountSubmissions(ctx context.Context, id string) (int, error)
 }
 
 // User represents the data about a user.
@@ -219,7 +223,6 @@ func (s service) Comments(ctx context.Context, id string, offset, limit int) (
 	return result, nil
 }
 
-
 func (s service) CountActivities(ctx context.Context) (int, error) {
 	count, err := s.repo.CountActivities(ctx)
 	if err != nil {
@@ -234,4 +237,36 @@ func (s service) CountLikes(ctx context.Context, id string) (int, error) {
 		return 0, err
 	}
 	return user.LikesCount, err
+}
+
+func (s service) CountFollowing(ctx context.Context, id string) (int, error) {
+	user, err := s.Get(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return user.FollowingCount, err
+}
+
+func (s service) CountFollowers(ctx context.Context, id string) (int, error) {
+	user, err := s.Get(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return user.FollowersCount, err
+}
+
+func (s service) CountComments(ctx context.Context, id string) (int, error) {
+	user, err := s.Get(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return user.CommentsCount, err
+}
+
+func (s service) CountSubmissions(ctx context.Context, id string) (int, error) {
+	user, err := s.Get(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return user.SubmissionsCount, err
 }

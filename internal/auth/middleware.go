@@ -109,7 +109,7 @@ func JWTCookie(token string, domain string, expiration int) http.Cookie {
 	cookie.Expires = time.Now().Add(time.Hour * time.Duration(expiration))
 	cookie.Path = "/"
 	cookie.Domain = domain
-	// cookie.HttpOnly = false
+	cookie.HttpOnly = false
 	// cookie.SameSite = http.SameSiteLaxMode
 	// cookie.Secure = false
 	return cookie
