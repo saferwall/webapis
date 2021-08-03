@@ -8,13 +8,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
-	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/saferwall/saferwall-api/internal/entity"
+)
+
+const (
+	jwtCookieName = "JWTCookie"
 )
 
 // Handler returns a JWT-based authentication middleware.
@@ -67,7 +69,7 @@ func IsAuthenticated(authHandler echo.MiddlewareFunc) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			// check first if token was handed by a cookie.
 			authScheme := "Bearer"
-			_, err := c.Cookie("JWTCookie")
+			_, err := c.Cookie(jwtCookieName)
 			if err == nil {
 				return authHandler(next)(c)
 			}
@@ -99,18 +101,4 @@ func CurrentUser(ctx context.Context) Identity {
 		return user
 	}
 	return nil
-}
-
-// JWTCookie creates a cookie to store the JWT token.
-func JWTCookie(token string, domain string, expiration int) http.Cookie {
-	cookie := http.Cookie{}
-	cookie.Name = "JWTCookie"
-	cookie.Value = token
-	cookie.Expires = time.Now().Add(time.Hour * time.Duration(expiration))
-	cookie.Path = "/"
-	cookie.Domain = domain
-	cookie.HttpOnly = false
-	// cookie.SameSite = http.SameSiteLaxMode
-	// cookie.Secure = false
-	return cookie
 }
