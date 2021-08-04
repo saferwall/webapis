@@ -29,8 +29,15 @@ func New(root string) (Service, error) {
 // Upload upload an object to s3.
 func (s Service) Upload(bucket, key string, file io.Reader, timeout int) error {
 
+	dest := filepath.Join(s.root, bucket)
+	if _, err := os.Stat(dest); os.IsNotExist(err) {
+		if err := os.MkdirAll(dest, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
 	// Create new file.
-	dest := filepath.Join(s.root, bucket, key)
+	dest = filepath.Join(dest, key)
 	new, err := os.Create(dest)
 	if err != nil {
 		return err

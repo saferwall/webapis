@@ -19,7 +19,7 @@ bucket_name = "sfw" # Name of the couchbase bucket.
 
 [nsq]
 address = "nsqd:4150" # The data source name (DSN) for connecting to the broker server (NSQD).
-topic = "filescan" # Topic name to produce to.
+topic = "topic-filescan" # Topic name to produce to.
 
 [storage]
 files_container_name = "samples" # Container name for samples.

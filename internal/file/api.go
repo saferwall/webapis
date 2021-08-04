@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -19,12 +20,12 @@ func RegisterHandlers(g *echo.Group, service Service,
 	res := resource{service, logger}
 
 	// g.GET("/files/", res.get)
-	// g.POST("/files/", res.create)
+	g.POST("/files/", res.create, requireLogin)
 
 	g.GET("/files/:sha256/", res.get)
-	// g.PUT("/files/:sha256/", res.update, requireLogin)
-	// g.PATCH("/files/:sha256/", res.patch)
-	// g.DELETE("/files/:sha256/", res.delete, requireLogin)
+	g.PUT("/files/:sha256/", res.update, requireLogin)
+	g.PATCH("/files/:sha256/", res.patch, requireLogin)
+	g.DELETE("/files/:sha256/", res.delete, requireLogin)
 }
 
 type resource struct {
@@ -79,6 +80,16 @@ func (r resource) create(c echo.Context) error {
 }
 
 func (r resource) update(c echo.Context) error {
+
+	var isAdmin bool
+	ctx := c.Request().Context()
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		isAdmin = user.IsAdmin()
+	}
+	if !isAdmin {
+		return errors.Forbidden("")
+	}
+
 	var input UpdateFileRequest
 	if err := c.Bind(&input); err != nil {
 		r.logger.With(c.Request().Context()).Info(err)
@@ -95,10 +106,30 @@ func (r resource) update(c echo.Context) error {
 }
 
 func (r resource) patch(c echo.Context) error {
+	var isAdmin bool
+	ctx := c.Request().Context()
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		isAdmin = user.IsAdmin()
+	}
+	if !isAdmin {
+		return errors.Forbidden("")
+	}
+
 	return nil
+
 }
 
 func (r resource) delete(c echo.Context) error {
+
+	var isAdmin bool
+	ctx := c.Request().Context()
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		isAdmin = user.IsAdmin()
+	}
+	if !isAdmin {
+		return errors.Forbidden("")
+	}
+
 	file, err := r.service.Delete(c.Request().Context(), c.Param("sha256"))
 	if err != nil {
 		return err

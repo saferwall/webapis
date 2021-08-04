@@ -5,6 +5,7 @@
 package file
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -15,7 +16,7 @@ import (
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
-const (
+var (
 	// ErrDocumentNotFound is returned when the doc does not exist in the DB.
 	ErrDocumentNotFound = "document not found"
 )
@@ -61,6 +62,7 @@ type service struct {
 	logger   log.Logger
 	upl      Uploader
 	producer Producer
+	topic    string
 }
 
 // UpdateUserRequest represents a File update request.
@@ -88,8 +90,8 @@ type UpdateFileRequest struct {
 
 // NewService creates a new File service.
 func NewService(repo Repository, logger log.Logger, sec Securer,
-	upl Uploader, producer Producer) Service {
-	return service{sec, repo, logger, upl, producer}
+	upl Uploader, producer Producer, topic string) Service {
+	return service{sec, repo, logger, upl, producer, topic}
 }
 
 // Get returns the File with the specified File ID.
@@ -101,11 +103,6 @@ func (s service) Get(ctx context.Context, id string, fields []string) (File, err
 	return File{file}, nil
 }
 
-// GetWithFields returns a selected set of keys from the File with the specified ID.
-func (s service) GetWithFields(ctx context.Context, id string,
-	field []string) (File, error) {
-	return File{}, nil
-}
 
 // Create creates a new File.
 func (s service) Create(ctx context.Context, req CreateFileRequest) (
@@ -127,7 +124,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 	// When a new file has been uploader, we create a new doc in the db.
 	if err != nil && err.Error() == ErrDocumentNotFound {
-		err = s.upl.Upload("files", sha256, req.src, 10)
+		err = s.upl.Upload("sfw", sha256, bytes.NewReader(fileContent), 10)
 		if err != nil {
 			return File{}, err
 		}
@@ -152,16 +149,19 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		// Push a message to the queue to scan this file.
-		err = s.producer.Produce("filescan", []byte(sha256))
+		err = s.producer.Produce(s.topic, []byte(sha256))
 		if err != nil {
 			s.logger.With(ctx).Error(err)
 			return File{}, err
 		}
-	}
 
-	// If not, we append this new submission to the file doc.
-	file.LastScanned = now
-	return s.Get(ctx, sha256, nil)
+		return s.Get(ctx, sha256, nil)
+
+	} else {
+		// If not, we append this new submission to the file doc.
+		file.LastScanned = now
+		return file, nil
+	}
 }
 
 // Update updates the File with the specified ID.

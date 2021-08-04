@@ -109,7 +109,7 @@ func (db *DB) Get(ctx context.Context, key string, model interface{}) error {
 	getResult, err := db.Collection.Get(key, &gocb.GetOptions{})
 
 	if errors.Is(err, gocb.ErrDocumentNotFound) {
-		return err
+		return ErrDocumentNotFound
 	}
 	if err != nil {
 		return err
