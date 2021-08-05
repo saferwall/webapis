@@ -1,4 +1,4 @@
-/* N1QL query to get all existing users. */
+/* N1QL query to get all existing document of a given type. */
 SELECT
   `bucket_name`.*
 FROM

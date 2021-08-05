@@ -28,6 +28,7 @@ type Service interface {
 	Create(ctx context.Context, input CreateFileRequest) (File, error)
 	Update(ctx context.Context, id string, input UpdateFileRequest) (File, error)
 	Delete(ctx context.Context, id string) (File, error)
+	Query(ctx context.Context, offset, limit int) ([]File, error)
 }
 
 // File represents the data about a File.
@@ -63,6 +64,7 @@ type service struct {
 	upl      Uploader
 	producer Producer
 	topic    string
+	bucket   string
 }
 
 // UpdateUserRequest represents a File update request.
@@ -90,8 +92,8 @@ type UpdateFileRequest struct {
 
 // NewService creates a new File service.
 func NewService(repo Repository, logger log.Logger, sec Securer,
-	upl Uploader, producer Producer, topic string) Service {
-	return service{sec, repo, logger, upl, producer, topic}
+	upl Uploader, producer Producer, topic, bucket string) Service {
+	return service{sec, repo, logger, upl, producer, topic, bucket}
 }
 
 // Get returns the File with the specified File ID.
@@ -102,7 +104,6 @@ func (s service) Get(ctx context.Context, id string, fields []string) (File, err
 	}
 	return File{file}, nil
 }
-
 
 // Create creates a new File.
 func (s service) Create(ctx context.Context, req CreateFileRequest) (
@@ -124,7 +125,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 	// When a new file has been uploader, we create a new doc in the db.
 	if err != nil && err.Error() == ErrDocumentNotFound {
-		err = s.upl.Upload("sfw", sha256, bytes.NewReader(fileContent), 10)
+		err = s.upl.Upload(s.bucket, sha256, bytes.NewReader(fileContent), 10)
 		if err != nil {
 			return File{}, err
 		}
@@ -206,4 +207,19 @@ func (s service) Delete(ctx context.Context, id string) (File, error) {
 // Count returns the number of users.
 func (s service) Count(ctx context.Context) (int, error) {
 	return s.repo.Count(ctx)
+}
+
+// Query returns the files with the specified offset and limit.
+func (s service) Query(ctx context.Context, offset, limit int) (
+	[]File, error) {
+
+	items, err := s.repo.Query(ctx, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	result := []File{}
+	for _, item := range items {
+		result = append(result, File{item})
+	}
+	return result, nil
 }

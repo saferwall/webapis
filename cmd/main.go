@@ -80,7 +80,7 @@ func run(logger log.Logger) error {
 	sec := secure.New(sha1.New())
 
 	// Create an uploader to upload file to object storage.
-	uploader, err := storage.New(cfg.DeploymentKind, cfg.ObjStorage)
+	uploader, err := storage.New(cfg.ObjStorage)
 	if err != nil {
 		return err
 	}

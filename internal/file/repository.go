@@ -6,19 +6,20 @@ package file
 
 import (
 	"context"
+	"encoding/json"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
-// Repository encapsulates the logic to access users from the data source.
+// Repository encapsulates the logic to access files from the data source.
 type Repository interface {
 	// Get returns the file with the specified file ID.
 	Get(ctx context.Context, id string, fields []string) (entity.File, error)
-	// Count returns the number of users.
+	// Count returns the number of files.
 	Count(ctx context.Context) (int, error)
-	// Query returns the list of users with the given offset and limit.
+	// Query returns the list of files with the given offset and limit.
 	Query(ctx context.Context, offset, limit int) ([]entity.File, error)
 	// Create saves a new file in the storage.
 	Create(ctx context.Context, id string, file entity.File) error
@@ -30,7 +31,7 @@ type Repository interface {
 	Delete(ctx context.Context, id string) error
 }
 
-// repository persists users in database.
+// repository persists files in database.
 type repository struct {
 	db     *dbcontext.DB
 	logger log.Logger
@@ -104,12 +105,24 @@ func (r repository) Count(ctx context.Context) (int, error) {
 // from the database.
 func (r repository) Query(ctx context.Context, offset, limit int) (
 	[]entity.File, error) {
-	var users []entity.File
-	// err := r.db.With(ctx).
-	// 	Select().
-	// 	OrderBy("id").
-	// 	Offset(int64(offset)).
-	// 	Limit(int64(limit)).
-	// 	All(&users)
-	return users, nil
+	var res interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["docType"] = "file"
+	params["offset"] = offset
+	params["limit"] = limit
+
+	statement := r.db.N1QLQuery[dbcontext.GetAllDocType]
+	err := r.db.Query(ctx, statement, params, &res)
+	if err != nil {
+		return []entity.File{}, err
+	}
+	files := []entity.File{}
+	for _, u := range res.([]interface{}) {
+		file := entity.File{}
+		b, _ := json.Marshal(u)
+		json.Unmarshal(b, &file)
+		files = append(files, file)
+	}
+	return files, nil
 }

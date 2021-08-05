@@ -51,10 +51,16 @@ type LocalFsCfg struct {
 
 // StorageCfg represents the object storage config.
 type StorageCfg struct {
-	FileContainerName    string     `mapstructure:"files_container_name"`
-	AvatarsContainerName string     `mapstructure:"avatars_container_name"`
-	S3                   AWSS3Cfg   `mapstructure:"s3"`
-	Local                LocalFsCfg `mapstructure:"local"`
+	// Deployment kind, possible values: aws, gcp, azure, local.
+	DeploymentKind string `mapstructure:"deployment_kind"`
+	// FileContainerName represents the name of the container for samples.
+	FileContainerName string `mapstructure:"files_container_name"`
+	// AvatarsContainerName represents the name of the container for avatars.
+	AvatarsContainerName string `mapstructure:"avatars_container_name"`
+	// S3 represents AWS S3 object storage connection details.
+	S3 AWSS3Cfg `mapstructure:"s3"`
+	// Local represents local file system config.
+	Local LocalFsCfg `mapstructure:"local"`
 }
 
 // Config represents our application config.
@@ -69,8 +75,6 @@ type Config struct {
 	JWTSigningKey string `mapstructure:"jwt_signkey"`
 	// JWT expiration in hours.
 	JWTExpiration int `mapstructure:"jwt_expiration"`
-	// Deployment kind, possible values: aws, gcp, azure, local.
-	DeploymentKind string `mapstructure:"deployment_kind"`
 	// Maximum file size to allow for samples.
 	MaxFileSize int64 `mapstructure:"max_file_size"`
 	// Maximum avatar size to allow for user profile picture.

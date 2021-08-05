@@ -1,5 +1,8 @@
 name: Release
-on: workflow_dispatch
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
 env:
   IMAGE: saferwall/webapis
 jobs:

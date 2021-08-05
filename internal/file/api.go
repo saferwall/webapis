@@ -12,6 +12,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
+	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
@@ -19,7 +20,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	res := resource{service, logger}
 
-	// g.GET("/files/", res.get)
+	g.GET("/files/", res.getFiles)
 	g.POST("/files/", res.create, requireLogin)
 
 	g.GET("/files/:sha256/", res.get)
@@ -75,7 +76,6 @@ func (r resource) create(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	return c.JSON(http.StatusCreated, file)
 }
 
@@ -101,7 +101,6 @@ func (r resource) update(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	return c.JSON(http.StatusCreated, file)
 }
 
@@ -114,9 +113,7 @@ func (r resource) patch(c echo.Context) error {
 	if !isAdmin {
 		return errors.Forbidden("")
 	}
-
 	return nil
-
 }
 
 func (r resource) delete(c echo.Context) error {
@@ -134,6 +131,28 @@ func (r resource) delete(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	return c.JSON(http.StatusOK, file)
+}
+
+func (r resource) getFiles(c echo.Context) error {
+	var isAdmin bool
+	ctx := c.Request().Context()
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		isAdmin = user.IsAdmin()
+	}
+	if !isAdmin {
+		return errors.Forbidden("")
+	}
+
+	count, err := r.service.Count(ctx)
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	files, err := r.service.Query(ctx, pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = files
+	return c.JSON(http.StatusOK, pages)
 }

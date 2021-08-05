@@ -20,7 +20,7 @@ const (
 	CountAnoUserActivities
 	UserLikes
 	AnoUserLikes
-	GetUsers
+	GetAllDocType
 )
 
 var fileQueryMap = map[string]n1qlQuery{
@@ -30,7 +30,7 @@ var fileQueryMap = map[string]n1qlQuery{
 	"ano-user-activities.n1ql":       AnoUserActivities,
 	"ano-user-likes.n1ql":            AnoUserLikes,
 	"user-likes.n1ql":                UserLikes,
-	"get-users.n1ql":                 GetUsers,
+	"get-all-doc-type.n1ql":          GetAllDocType,
 }
 
 // walk returns list of files in directory.

@@ -18,7 +18,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	res := resource{service, logger}
 
-	g.GET("/activities/:id", res.get)
+	g.GET("/activities/:id/", res.get)
 	g.GET("/activities/", res.query)
 
 }

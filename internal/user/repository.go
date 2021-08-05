@@ -109,7 +109,7 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 	params["offset"] = offset
 	params["limit"] = limit
 
-	statement := r.db.N1QLQuery[dbcontext.GetUsers]
+	statement := r.db.N1QLQuery[dbcontext.GetAllDocType]
 	err := r.db.Query(ctx, statement, params, &res)
 	if err != nil {
 		return []entity.User{}, err

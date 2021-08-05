@@ -85,8 +85,10 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 
 	// Create the services and register the handlers.
 	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec)
-	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger, sec, userSvc)
-	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, upl, p, cfg.Broker.Topic)
+	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
+		sec, userSvc)
+	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, upl,
+		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName)
 	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
 
 	healthcheck.RegisterHandlers(e, version)

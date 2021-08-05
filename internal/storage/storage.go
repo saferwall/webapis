@@ -23,9 +23,9 @@ type Uploader interface {
 	Upload(bucket, key string, file io.Reader, timeout int) error
 }
 
-func New(deployment string, cfg config.StorageCfg) (Uploader, error) {
+func New(cfg config.StorageCfg) (Uploader, error) {
 
-	switch deployment {
+	switch cfg.DeploymentKind {
 	case "aws":
 		return s3.New(cfg.S3.Region, cfg.S3.AccessKey, cfg.S3.SecretKey)
 	case "local":
