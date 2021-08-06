@@ -21,7 +21,7 @@ address = "nsqd:4150" # The data source name (DSN) for connecting to the broker 
 topic = "topic-filescan" # Topic name to produce to.
 
 [storage]
-deployment_kind = "local" # Deployement kind, possible values: aws, gcp, azure, local.
+deployment_kind = "minio" # Deployement kind, possible values: aws, minio, local.
 files_container_name = "samples" # Container name for samples.
 avatars_container_name = "images" # Container name for avatars.
     # Only one storage type has to be provided. `deployment_kind` controls
@@ -30,6 +30,11 @@ avatars_container_name = "images" # Container name for avatars.
     region = "us-east-1" # AWS region.
     secret_key = "superSecretKey" # AWS Secret Access Key.
     access_key = "superSecretAccessKey" # AWS Access key ID.
+    [storage.minio]
+    endpoint = "minio:9000" # MinIO endpoint.
+    region = "us-east-1" # Region.
+    access_key = "minio" # Access key ID.
+    secret_key = "minio123" # Secret Access Key.
     [storage.local]
     root_dir = "/saferwall"    # Full path to the directory where to store the files.
 

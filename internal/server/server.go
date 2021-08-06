@@ -37,7 +37,7 @@ type Server struct {
 // BuildHandler sets up the HTTP routing and builds an HTTP handler.
 func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	cfg *config.Config, version string, trans ut.Translator,
-	upl storage.Uploader, p queue.Producer) http.Handler {
+	updown storage.UploadDownloader, p queue.Producer) http.Handler {
 
 	// Create `echo` instance.
 	e := echo.New()
@@ -87,7 +87,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
 		sec, userSvc)
-	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, upl,
+	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, updown,
 		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName)
 	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
 

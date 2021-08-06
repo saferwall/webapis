@@ -5,6 +5,7 @@
 package local
 
 import (
+	"context"
 	"io"
 	"os"
 	"path/filepath"
@@ -27,17 +28,12 @@ func New(root string) (Service, error) {
 }
 
 // Upload upload an object to s3.
-func (s Service) Upload(bucket, key string, file io.Reader, timeout int) error {
+func (s Service) Upload(ctx context.Context, bucket, key string,
+	file io.Reader) error {
 
-	dest := filepath.Join(s.root, bucket)
-	if _, err := os.Stat(dest); os.IsNotExist(err) {
-		if err := os.MkdirAll(dest, os.ModePerm); err != nil {
-			return err
-		}
-	}
+	dest := filepath.Join(s.root, bucket, key)
 
 	// Create new file.
-	dest = filepath.Join(dest, key)
 	new, err := os.Create(dest)
 	if err != nil {
 		return err
@@ -49,5 +45,37 @@ func (s Service) Upload(bucket, key string, file io.Reader, timeout int) error {
 		return err
 	}
 
+	return nil
+}
+
+// Download downloads an object from the local file system.
+func (s Service) Download(ctx context.Context, bucket, key string,
+	dst io.Writer) error {
+
+	// Create new file.
+	name := filepath.Join(s.root, bucket, key)
+	src, err := os.Open(name)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	// Perform the copy.
+	if _, err := io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// MakeBucket creates a new folder in the local file system that acts like
+// a bucket or a container in a object storage.
+func (s Service) MakeBucket(ctx context.Context, bucketName, location string) error {
+	dest := filepath.Join(s.root, bucketName)
+	if _, err := os.Stat(dest); os.IsNotExist(err) {
+		if err := os.MkdirAll(dest, os.ModePerm); err != nil {
+			return err
+		}
+	}
 	return nil
 }

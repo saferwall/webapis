@@ -80,7 +80,7 @@ func run(logger log.Logger) error {
 	sec := secure.New(sha1.New())
 
 	// Create an uploader to upload file to object storage.
-	uploader, err := storage.New(cfg.ObjStorage)
+	updown, err := storage.New(cfg.ObjStorage)
 	if err != nil {
 		return err
 	}
@@ -95,7 +95,7 @@ func run(logger log.Logger) error {
 	hs := &http.Server{
 		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			uploader, producer),
+			updown, producer),
 	}
 
 	// Start server.

@@ -19,6 +19,8 @@ import (
 var (
 	// ErrDocumentNotFound is returned when the doc does not exist in the DB.
 	ErrDocumentNotFound = "document not found"
+	// file upload timeout in seconds.
+	fileUploadTimeout = time.Duration(time.Second * 30)
 )
 
 // Service encapsulates usecase logic for files.
@@ -41,8 +43,9 @@ type Securer interface {
 	HashFile([]byte) string
 }
 
-type Uploader interface {
-	Upload(bucket, key string, file io.Reader, timeout int) error
+type UploadDownloader interface {
+	Upload(ctx context.Context, bucket, key string, file io.Reader) error
+	Download(ctx context.Context, bucket, key string, file io.Writer) error
 }
 
 // Producer represents event stream message producer interface.
@@ -61,7 +64,7 @@ type service struct {
 	sec      Securer
 	repo     Repository
 	logger   log.Logger
-	upl      Uploader
+	objsto   UploadDownloader
 	producer Producer
 	topic    string
 	bucket   string
@@ -92,8 +95,8 @@ type UpdateFileRequest struct {
 
 // NewService creates a new File service.
 func NewService(repo Repository, logger log.Logger, sec Securer,
-	upl Uploader, producer Producer, topic, bucket string) Service {
-	return service{sec, repo, logger, upl, producer, topic, bucket}
+	updown UploadDownloader, producer Producer, topic, bucket string) Service {
+	return service{sec, repo, logger, updown, producer, topic, bucket}
 }
 
 // Get returns the File with the specified File ID.
@@ -125,7 +128,17 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 	// When a new file has been uploader, we create a new doc in the db.
 	if err != nil && err.Error() == ErrDocumentNotFound {
-		err = s.upl.Upload(s.bucket, sha256, bytes.NewReader(fileContent), 10)
+
+		// Create a context with a timeout that will abort the upload if it takes
+		// more than the passed in timeout.
+		uploadCtx, cancelFn := context.WithTimeout(context.Background(), fileUploadTimeout)
+
+		// Ensure the context is canceled to prevent leaking.
+		// See context package for more information, https://golang.org/pkg/context/
+		defer cancelFn()
+
+		err = s.objsto.Upload(uploadCtx, s.bucket, sha256,
+			bytes.NewReader(fileContent))
 		if err != nil {
 			return File{}, err
 		}

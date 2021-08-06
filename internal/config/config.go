@@ -44,6 +44,14 @@ type AWSS3Cfg struct {
 	AccessKey string `mapstructure:"access_key"`
 }
 
+// MinioCfg represents Minio credentials.
+type MinioCfg struct {
+	Endpoint  string `mapstructure:"endpoint"`
+	SecretKey string `mapstructure:"secret_key"`
+	AccessKey string `mapstructure:"access_key"`
+	Region    string `mapstructure:"region"`
+}
+
 // LocalFsCfg represents local file system storage data.
 type LocalFsCfg struct {
 	RootDir string `mapstructure:"root_dir"`
@@ -59,6 +67,8 @@ type StorageCfg struct {
 	AvatarsContainerName string `mapstructure:"avatars_container_name"`
 	// S3 represents AWS S3 object storage connection details.
 	S3 AWSS3Cfg `mapstructure:"s3"`
+	// S3 represents MinIO object storage connection details.
+	Minio MinioCfg `mapstructure:"minio"`
 	// Local represents local file system config.
 	Local LocalFsCfg `mapstructure:"local"`
 }
@@ -101,7 +111,7 @@ func Load(path string) (*Config, error) {
 
 	// Load the config type depending on env variable.
 	var name string
-	env := os.Getenv("SFW_WEB_APP")
+	env := os.Getenv("SFW_WEBAPIS_DEPLOYMENT_KIND")
 	switch env {
 	case "local":
 		name = "local"
