@@ -1,4 +1,5 @@
 /* N1QL query to retrieve activities for a logged-in user. */
+
 SELECT
   {
     "type": activity.kind,

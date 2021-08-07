@@ -24,7 +24,7 @@ type File struct {
 	FirstSeen     int64                  `json:"first_seen,omitempty"`
 	LastScanned   int64                  `json:"last_scanned,omitempty"`
 	Submissions   []Submission           `json:"submissions,omitempty"`
-	Strings       []interface{}          `json:"strings,omitempty"`
+	Strings       interface{}            `json:"strings,omitempty"`
 	MultiAV       map[string]interface{} `json:"multiav,omitempty"`
 	PE            interface{}            `json:"pe,omitempty"`
 	Histogram     []int                  `json:"histogram,omitempty"`

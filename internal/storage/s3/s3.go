@@ -12,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
@@ -118,7 +117,7 @@ func (s Service) MakeBucket(ctx context.Context, bucketName, location string) er
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
-			case s3.ErrCodeBucketAlreadyExists:
+			case awss3.ErrCodeBucketAlreadyExists:
 				return aerr
 			case awss3.ErrCodeBucketAlreadyOwnedByYou:
 				return nil

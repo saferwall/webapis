@@ -9,7 +9,6 @@ import (
 	"context"
 	"io"
 
-	"github.com/minio/minio-go/v7"
 	miniogo "github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -79,7 +78,7 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 // cancellations and timeouts.
 func (s Service) MakeBucket(ctx context.Context, bucketName, location string) error {
 	err := s.client.MakeBucket(ctx, bucketName,
-		minio.MakeBucketOptions{Region: location})
+		miniogo.MakeBucketOptions{Region: location})
 	if err != nil {
 		// Check to see if we already own this bucket
 		// (which happens if you run this twice)
