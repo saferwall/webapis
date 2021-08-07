@@ -289,11 +289,11 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 
 	if currentUser == "" {
 		// For an anonymous user.
-		query = r.db.N1QLQuery[dbcontext.AnoUserLikes]
+		query = r.db.N1QLQuery[dbcontext.AnoUserComments]
 	} else {
 		// For a logged-in user.
 		params["loggedInUser"] = currentUser
-		query = r.db.N1QLQuery[dbcontext.UserLikes]
+		query = r.db.N1QLQuery[dbcontext.UserComments]
 	}
 
 	err := r.db.Query(ctx, query, params, &results)
