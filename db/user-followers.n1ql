@@ -8,7 +8,7 @@ SELECT RAW {
                 SELECT
                 RAW `followers`
                 FROM
-                `sfw`
+                `bucket_name`
                 USE KEYS $loggedInUser
                 ) [0]), META(p).id) >= 0
 }

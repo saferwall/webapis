@@ -1,0 +1,44 @@
+/* N1QL query to retrieve user submissions for a logged-in user. */
+
+SELECT
+  {
+      "liked": ARRAY_BINARY_SEARCH(
+        ARRAY_SORT(
+          (
+            SELECT RAW
+              n.`target`
+            FROM
+              `bucket_name` n
+            WHERE n.`type` = "activity"
+                AND n.`kind` = "submit"
+                AND n.`username` = $loggedInUser
+          )
+        ),
+        f.sha256
+      ) >= 0,
+      "timestamp": a.timestamp,
+      "file": {
+        "hash": f.sha256,
+        "tags": f.tags,
+        "filename": f.submissions [0].filename,
+        "class": f.ml.pe.predicted_class,
+        "multiav": {
+          "value": ARRAY_COUNT(
+            ARRAY_FLATTEN(
+              ARRAY i.infected
+               FOR i IN OBJECT_VALUES(f.multiav.last_scan)
+                WHEN i.infected = TRUE END, 1
+            )
+          ),
+          "count": OBJECT_LENGTH(f.multiav.last_scan)
+        }
+      }
+}.*
+FROM
+  `bucket_name` a
+  LEFT JOIN `bucket_name` f ON KEYS a.target
+WHERE
+  a.`type` = 'activity' AND a.`username` = $user AND a.`kind` = "submit"
+OFFSET $offset
+LIMIT
+  $limit

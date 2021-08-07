@@ -22,10 +22,12 @@ const (
 	UserComments
 	UserFollowing
 	UserFollowers
+	UserSubmissions
 	AnoUserLikes
 	AnoUserComments
 	AnoUserFollowing
 	AnoUserFollowers
+	AnoUserSubmissions
 	GetAllDocType
 )
 
@@ -35,11 +37,13 @@ var fileQueryMap = map[string]n1qlQuery{
 	"user-following.n1ql":            UserFollowing,
 	"user-followers.n1ql":            UserFollowers,
 	"user-activities.n1ql":           UserActivities,
+	"user-submissions.n1ql":          UserSubmissions,
 	"ano-user-likes.n1ql":            AnoUserLikes,
 	"ano-user-comments.n1ql":         AnoUserComments,
 	"ano-user-following.n1ql":        AnoUserFollowing,
 	"ano-user-followers.n1ql":        AnoUserFollowers,
 	"ano-user-activities.n1ql":       AnoUserActivities,
+	"ano-user-submissions.n1ql":      AnoUserSubmissions,
 	"get-all-doc-type.n1ql":          GetAllDocType,
 	"count-user-activities.n1ql":     CountUserActivities,
 	"count-ano-user-activities.n1ql": CountAnoUserActivities,

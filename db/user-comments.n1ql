@@ -32,7 +32,7 @@ SELECT
       }
 }.*
 FROM
-  `sfw` c
+  `bucket_name` c
   LEFT JOIN `bucket_name` f ON KEYS c.sha256
 WHERE
   c.`type` = 'comment' AND c.`username` = $user
