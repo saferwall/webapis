@@ -200,11 +200,11 @@ func (r repository) Followers(ctx context.Context, id string, offset,
 
 	if currentUser == "" {
 		// For an anonymous user.
-		query = r.db.N1QLQuery[dbcontext.AnoUserLikes]
+		query = r.db.N1QLQuery[dbcontext.AnoUserFollowers]
 	} else {
 		// For a logged-in user.
 		params["loggedInUser"] = currentUser
-		query = r.db.N1QLQuery[dbcontext.UserLikes]
+		query = r.db.N1QLQuery[dbcontext.UserFollowers]
 	}
 
 	err := r.db.Query(ctx, query, params, &results)

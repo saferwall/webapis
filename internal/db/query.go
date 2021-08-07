@@ -19,22 +19,26 @@ const (
 	CountUserActivities
 	CountAnoUserActivities
 	UserLikes
-	AnoUserLikes
 	UserFollowing
+	UserFollowers
+	AnoUserLikes
 	AnoUserFollowing
+	AnoUserFollowers
 	GetAllDocType
 )
 
 var fileQueryMap = map[string]n1qlQuery{
+	"user-likes.n1ql":                UserLikes,
+	"user-following.n1ql":            UserFollowing,
+	"user-followers.n1ql":            UserFollowers,
 	"user-activities.n1ql":           UserActivities,
+	"ano-user-likes.n1ql":            AnoUserLikes,
+	"ano-user-following.n1ql":        AnoUserFollowing,
+	"ano-user-followers.n1ql":        AnoUserFollowers,
+	"ano-user-activities.n1ql":       AnoUserActivities,
+	"get-all-doc-type.n1ql":          GetAllDocType,
 	"count-user-activities.n1ql":     CountUserActivities,
 	"count-ano-user-activities.n1ql": CountAnoUserActivities,
-	"ano-user-activities.n1ql":       AnoUserActivities,
-	"ano-user-likes.n1ql":            AnoUserLikes,
-	"user-likes.n1ql":                UserLikes,
-	"ano-user-following.n1ql":        AnoUserFollowing,
-	"user-following.n1ql":            UserFollowing,
-	"get-all-doc-type.n1ql":          GetAllDocType,
 }
 
 // walk returns list of files in directory.

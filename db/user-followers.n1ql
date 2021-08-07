@@ -1,0 +1,21 @@
+/* N1QL query to retrieve user followers for a logged-in user. */
+
+SELECT RAW {
+    "id": META(p).id,
+    "user": p.`username`,
+    "member_since": p.`member_since`,
+    "follow":  ARRAY_BINARY_SEARCH(ARRAY_SORT((
+                SELECT
+                RAW `followers`
+                FROM
+                `sfw`
+                USE KEYS $loggedInUser
+                ) [0]), META(p).id) >= 0
+}
+FROM
+    `bucket_name` p
+USE KEYS [(
+    SELECT RAW u.`followers` FROM `bucket_name` u USE KEYS $user)[0]]
+OFFSET $offset
+LIMIT
+  $limit

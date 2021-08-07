@@ -1,0 +1,19 @@
+/* N1QL query to retrieve user followers for an anonymous user. */
+
+SELECT RAW {
+  "user": p.`username`,
+  "member_since": p.`member_since`,
+  "follow": false
+}
+FROM
+  `bucket_name` p
+USE KEYS [(
+    SELECT
+      RAW u.`followers`
+    FROM
+      `bucket_name` u
+    USE KEYS $user
+    )[0]]
+OFFSET $offset
+LIMIT
+  $limit
