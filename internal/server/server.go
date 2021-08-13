@@ -64,8 +64,14 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 		DisablePrintStack: true,
 	}))
 
+	// Rate limiter middleware.
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
+
+
 	// Add trailing slash for consistent URIs.
 	e.Pre(middleware.AddTrailingSlash())
+
+
 
 	// Setup JWT Auth handler.
 	authHandler := auth.Handler(cfg.JWTSigningKey)
