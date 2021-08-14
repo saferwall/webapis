@@ -26,9 +26,10 @@ type Repository interface {
 	Create(ctx context.Context, User entity.User) error
 	// Update updates the user with given ID in the storage.
 	Update(ctx context.Context, User entity.User) error
+	// Patch patches a sub entry in the user with given ID in the storage.
+	Patch(ctx context.Context, key, path string, val interface{}) error
 	// Delete removes the user with given ID from the storage.
 	Delete(ctx context.Context, id string) error
-
 	Activities(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	Likes(ctx context.Context, id string, offset, limit int) (
@@ -75,6 +76,12 @@ func (r repository) Create(ctx context.Context, user entity.User) error {
 func (r repository) Update(ctx context.Context, user entity.User) error {
 	key := user.ID()
 	return r.db.Update(ctx, key, &user)
+}
+
+// Patch performs a sub doc update to a user in the database.
+func (r repository) Patch(ctx context.Context, key, path string,
+	val interface{}) error {
+	return r.db.Patch(ctx, key, path, val)
 }
 
 // Delete deletes a user with the specified ID from the database.

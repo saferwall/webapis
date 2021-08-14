@@ -27,6 +27,10 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PUT("/files/:sha256/", res.update, requireLogin)
 	g.PATCH("/files/:sha256/", res.patch, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, requireLogin)
+
+	g.POST("/files/:sha256/like/", res.like, requireLogin)
+	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
+
 }
 
 type resource struct {
@@ -155,4 +159,28 @@ func (r resource) getFiles(c echo.Context) error {
 	}
 	pages.Items = files
 	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) like(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Like(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+func (r resource) unlike(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Unlike(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
 }

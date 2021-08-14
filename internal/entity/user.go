@@ -31,6 +31,13 @@ type User struct {
 	CommentsCount    int      `json:"comments_count"`
 }
 
+// UserPrivate represent a user with sensitive fields included.
+type UserPrivate struct {
+	User
+	Email    string `json:"email,omitempty"`
+	Password string `json:"password,omitempty"`
+}
+
 // ID returns a unique ID to identify a User object.
 func (f User) ID() string {
 	return strings.ToLower(f.Username)

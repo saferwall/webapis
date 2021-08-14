@@ -20,7 +20,8 @@ type Service interface {
 	Query(ctx context.Context, offset, limit int) ([]User, error)
 	Count(ctx context.Context) (int, error)
 	Create(ctx context.Context, input CreateUserRequest) (User, error)
-	Update(ctx context.Context, id string, input UpdateUserRequest) (User, error)
+	Update(ctx context.Context, id string, input interface{}) (User, error)
+	Patch(ctx context.Context, id, path string, input interface{}) error
 	Delete(ctx context.Context, id string) (User, error)
 	Activities(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
@@ -111,14 +112,13 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 }
 
 // Update updates the user with the specified ID.
-func (s service) Update(ctx context.Context, id string, req UpdateUserRequest) (
+func (s service) Update(ctx context.Context, id string, req interface{}) (
 	User, error) {
 
 	user, err := s.Get(ctx, id)
 	if err != nil {
 		return user, err
 	}
-
 	data, err := json.Marshal(req)
 	if err != nil {
 		return user, err
@@ -128,12 +128,16 @@ func (s service) Update(ctx context.Context, id string, req UpdateUserRequest) (
 		return user, err
 	}
 
-	// check if user.Username == id
 	if err := s.repo.Update(ctx, user.User); err != nil {
 		return user, err
 	}
 
 	return user, nil
+}
+
+func (s service) Patch(ctx context.Context, id, path string,
+	 input interface{}) error {
+	return s.repo.Patch(ctx, id, path, input)
 }
 
 // Delete deletes the user with the specified ID.
@@ -282,10 +286,7 @@ func (s service) Follow(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	loggedInUser, ok := ctx.Value(entity.UserKey).(entity.User)
-	if !ok {
-		return err
-	}
+	loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
 	currentUser, err := s.Get(ctx, loggedInUser.ID())
 	if err != nil {
 		return err
@@ -326,10 +327,7 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	loggedInUser, ok := ctx.Value(entity.UserKey).(entity.User)
-	if !ok {
-		return err
-	}
+	loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
 	currentUser, err := s.Get(ctx, loggedInUser.ID())
 	if err != nil {
 		return err

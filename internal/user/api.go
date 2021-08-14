@@ -85,8 +85,7 @@ func (r resource) update(c echo.Context) error {
 		return errors.BadRequest("")
 	}
 
-	user, err := r.service.Update(ctx,
-		c.Param("username"), input)
+	user, err := r.service.Update(ctx, c.Param("username"), input)
 	if err != nil {
 		return err
 	}

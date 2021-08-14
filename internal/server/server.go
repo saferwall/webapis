@@ -93,7 +93,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
 		sec, userSvc)
 	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, updown,
-		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName)
+		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, userSvc, actSvc)
 
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger)

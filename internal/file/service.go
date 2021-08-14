@@ -12,7 +12,9 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/entity"
+	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -31,6 +33,8 @@ type Service interface {
 	Update(ctx context.Context, id string, input UpdateFileRequest) (File, error)
 	Delete(ctx context.Context, id string) (File, error)
 	Query(ctx context.Context, offset, limit int) ([]File, error)
+	Like(ctx context.Context, id string) error
+	Unlike(ctx context.Context, id string) error
 }
 
 // File represents the data about a File.
@@ -68,6 +72,8 @@ type service struct {
 	producer Producer
 	topic    string
 	bucket   string
+	userSvc  user.Service
+	actSvc   activity.Service
 }
 
 // UpdateUserRequest represents a File update request.
@@ -95,8 +101,10 @@ type UpdateFileRequest struct {
 
 // NewService creates a new File service.
 func NewService(repo Repository, logger log.Logger, sec Securer,
-	updown UploadDownloader, producer Producer, topic, bucket string) Service {
-	return service{sec, repo, logger, updown, producer, topic, bucket}
+	updown UploadDownloader, producer Producer, topic, bucket string,
+	userSvc user.Service, actSvc activity.Service) Service {
+	return service{sec, repo, logger, updown,
+		producer, topic, bucket, userSvc, actSvc}
 }
 
 // Get returns the File with the specified File ID.
@@ -182,27 +190,27 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 func (s service) Update(ctx context.Context, id string, req UpdateFileRequest) (
 	File, error) {
 
-	File, err := s.Get(ctx, id, nil)
+	file, err := s.Get(ctx, id, nil)
 	if err != nil {
-		return File, err
+		return file, err
 	}
 
 	// merge the structures.
 	data, err := json.Marshal(req)
 	if err != nil {
-		return File, err
+		return file, err
 	}
-	err = json.Unmarshal(data, &File)
+	err = json.Unmarshal(data, &file)
 	if err != nil {
-		return File, err
+		return file, err
 	}
 
 	// check if File.Username == id
-	if err := s.repo.Update(ctx, id, File.File); err != nil {
-		return File, err
+	if err := s.repo.Update(ctx, id, file.File); err != nil {
+		return file, err
 	}
 
-	return File, nil
+	return file, nil
 }
 
 // Delete deletes the File with the specified ID.
@@ -235,4 +243,82 @@ func (s service) Query(ctx context.Context, offset, limit int) (
 		result = append(result, File{item})
 	}
 	return result, nil
+}
+
+func (s service) Like(ctx context.Context, sha256 string) error {
+
+	loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
+	user, err := s.userSvc.Get(ctx, loggedInUser.ID())
+	if err != nil {
+		return err
+	}
+	_, err = s.Get(ctx, sha256, nil)
+	if err != nil {
+		return err
+	}
+
+	if !isStringInSlice(sha256, user.Likes) {
+		user.Likes = append(user.Likes, sha256)
+		user.LikesCount += 1
+		user, err = s.userSvc.Update(ctx, user.ID(), user)
+		if err != nil {
+			return err
+		}
+
+		// add new activity
+		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
+			Kind:     "like",
+			Username: user.ID(),
+			Target:   sha256,
+		}); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s service) Unlike(ctx context.Context, sha256 string) error {
+
+	loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
+	user, err := s.userSvc.Get(ctx, loggedInUser.ID())
+	if err != nil {
+		return err
+	}
+	_, err = s.Get(ctx, sha256, nil)
+	if err != nil {
+		return err
+	}
+
+	if isStringInSlice(sha256, user.Likes) {
+		user.Likes = removeStringFromSlice(user.Likes, sha256)
+		user.LikesCount -= 1
+		user, err = s.userSvc.Update(ctx, user.ID(), user)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// isStringInSlice check if a string exist in a list of strings
+func isStringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+
+	return false
+}
+
+// removeStringFromSlice removes a string item from a list of strings.
+func removeStringFromSlice(s []string, r string) []string {
+	for i, v := range s {
+		if v == r {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
 }
