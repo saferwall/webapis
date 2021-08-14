@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -39,6 +40,8 @@ type Service interface {
 	CountFollowers(ctx context.Context, id string) (int, error)
 	CountComments(ctx context.Context, id string) (int, error)
 	CountSubmissions(ctx context.Context, id string) (int, error)
+	Follow(ctx context.Context, id string) error
+	Unfollow(ctx context.Context, id string) error
 }
 
 // User represents the data about a user.
@@ -55,6 +58,7 @@ type service struct {
 	sec    Securer
 	repo   Repository
 	logger log.Logger
+	actSvc activity.Service
 }
 
 // CreateUserRequest represents a user creation request.
@@ -73,8 +77,9 @@ type UpdateUserRequest struct {
 }
 
 // NewService creates a new user service.
-func NewService(repo Repository, logger log.Logger, sec Securer) Service {
-	return service{sec, repo, logger}
+func NewService(repo Repository, logger log.Logger,
+	sec Securer, actSvc activity.Service) Service {
+	return service{sec, repo, logger, actSvc}
 }
 
 // Get returns the user with the specified user ID.
@@ -269,4 +274,108 @@ func (s service) CountSubmissions(ctx context.Context, id string) (int, error) {
 		return 0, err
 	}
 	return user.SubmissionsCount, err
+}
+
+func (s service) Follow(ctx context.Context, id string) error {
+	var err error
+	targetUser, err := s.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	loggedInUser, ok := ctx.Value(entity.UserKey).(entity.User)
+	if !ok {
+		return err
+	}
+	currentUser, err := s.Get(ctx, loggedInUser.ID())
+	if err != nil {
+		return err
+	}
+
+	targetUsername := targetUser.ID()
+	currentUsername := currentUser.ID()
+
+	if !isStringInSlice(targetUsername, currentUser.Following) {
+		currentUser.Following = append(currentUser.Following, targetUsername)
+		currentUser.FollowingCount += 1
+
+		// add new activity
+		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
+			Kind:     "follow",
+			Username: currentUsername,
+			Target:   targetUsername,
+		}); err != nil {
+			return err
+		}
+		if err = s.repo.Update(ctx, currentUser.User); err != nil {
+			return err
+		}
+
+	}
+	if !isStringInSlice(currentUsername, targetUser.Followers) {
+		targetUser.Followers = append(targetUser.Followers, currentUsername)
+		targetUser.FollowersCount += 1
+		return s.repo.Update(ctx, targetUser.User)
+	}
+
+	return nil
+}
+
+func (s service) Unfollow(ctx context.Context, id string) error {
+	var err error
+	targetUser, err := s.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	loggedInUser, ok := ctx.Value(entity.UserKey).(entity.User)
+	if !ok {
+		return err
+	}
+	currentUser, err := s.Get(ctx, loggedInUser.ID())
+	if err != nil {
+		return err
+	}
+
+	targetUsername := targetUser.ID()
+	currentUsername := currentUser.ID()
+
+	if isStringInSlice(targetUsername, currentUser.Following) {
+		currentUser.Following = removeStringFromSlice(
+			currentUser.Following, targetUsername)
+		currentUser.FollowingCount -= 1
+	}
+	if isStringInSlice(currentUsername, targetUser.Followers) {
+		targetUser.Followers = removeStringFromSlice(
+			targetUser.Followers, currentUsername)
+		targetUser.FollowersCount -= 1
+	}
+
+	if s.repo.Update(ctx, currentUser.User); err != nil {
+		return err
+	}
+	if s.repo.Update(ctx, targetUser.User); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// isStringInSlice check if a string exist in a list of strings
+func isStringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+
+	return false
+}
+
+// removeStringFromSlice removes a string item from a list of strings.
+func removeStringFromSlice(s []string, r string) []string {
+	for i, v := range s {
+		if v == r {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
 }

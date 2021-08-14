@@ -71,8 +71,6 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	// Add trailing slash for consistent URIs.
 	e.Pre(middleware.AddTrailingSlash())
 
-
-
 	// Setup JWT Auth handler.
 	authHandler := auth.Handler(cfg.JWTSigningKey)
 	optAuthHandler := auth.IsAuthenticated(authHandler)
@@ -90,12 +88,12 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	g := e.Group("/v1")
 
 	// Create the services and register the handlers.
-	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec)
+	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
+	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec, actSvc)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
 		sec, userSvc)
 	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, updown,
 		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName)
-	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
 
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger)

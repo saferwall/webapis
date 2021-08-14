@@ -12,7 +12,7 @@ type Activity struct {
 	ID string `json:"id,omitempty"`
 	// Kind represents the type of the activity,
 	// possible values: "follow", "comment", "like", "Submit".
-	Kind string `json:"activity,omitempty"`
+	Kind string `json:"kind,omitempty"`
 	// Timestamp when this activity happened.
 	Timestamp int64 `json:"timestamp,omitempty"`
 	// Username represents the user who made this activity.

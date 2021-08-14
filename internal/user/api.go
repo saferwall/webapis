@@ -24,15 +24,15 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.GET("/users/:username/", res.get)
 	g.PATCH("/users/:username/", res.update, requireLogin)
 	g.DELETE("/users/:username/", res.delete, requireLogin)
-
 	g.GET("/users/", res.getUsers)
-
 	g.GET("/users/activities/", res.activities, optionalLogin)
 	g.GET("/users/:username/likes/", res.likes, optionalLogin)
 	g.GET("/users/:username/following/", res.following, optionalLogin)
 	g.GET("/users/:username/followers/", res.followers, optionalLogin)
 	g.GET("/users/:username/submissions/", res.submissions, optionalLogin)
 	g.GET("/users/:username/comments/", res.comments, optionalLogin)
+	g.POST("/users/:username/follow/", res.follow, requireLogin)
+	g.POST("/users/:username/unfollow/", res.unfollow, requireLogin)
 }
 
 type resource struct {
@@ -235,4 +235,28 @@ func (r resource) comments(c echo.Context) error {
 	}
 	pages.Items = comments
 	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) follow(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Follow(ctx, c.Param("username"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+func (r resource) unfollow(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Unfollow(ctx, c.Param("username"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
 }
