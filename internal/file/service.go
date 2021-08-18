@@ -44,7 +44,7 @@ type File struct {
 
 // Securer represents security interface.
 type Securer interface {
-	HashFile([]byte) string
+	Hash([]byte) string
 }
 
 type UploadDownloader interface {
@@ -126,7 +126,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		return File{}, err
 	}
 
-	sha256 := s.sec.HashFile(fileContent)
+	sha256 := s.sec.Hash(fileContent)
 	file, err := s.Get(ctx, sha256, nil)
 	if err != nil && err.Error() != ErrDocumentNotFound {
 		return File{}, err

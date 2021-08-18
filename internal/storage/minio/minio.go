@@ -26,7 +26,7 @@ func New(endpoint, accessKey, secretKey string) (Service, error) {
 	// determined based on the Endpoint value.
 	s3Client, err := miniogo.New(endpoint, &miniogo.Options{
 		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-		Secure: false,
+		Secure: true,
 	})
 	if err != nil {
 		return Service{}, nil

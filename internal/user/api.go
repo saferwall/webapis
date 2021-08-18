@@ -16,9 +16,9 @@ import (
 
 func RegisterHandlers(g *echo.Group, service Service,
 	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
-	logger log.Logger) {
+	logger log.Logger, mailer Mailer) {
 
-	res := resource{service, logger}
+	res := resource{service, logger, mailer}
 
 	g.POST("/users/", res.create)
 	g.GET("/users/:username/", res.get)
@@ -35,9 +35,15 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.POST("/users/:username/unfollow/", res.unfollow, requireLogin)
 }
 
+// Mailer represents the mailer interface/
+type Mailer interface {
+	Send(body, subject, from, to string) error
+}
+
 type resource struct {
 	service Service
 	logger  log.Logger
+	mailer  Mailer
 }
 
 func (r resource) get(c echo.Context) error {
@@ -52,15 +58,25 @@ func (r resource) get(c echo.Context) error {
 
 func (r resource) create(c echo.Context) error {
 	var input CreateUserRequest
+	ctx := c.Request().Context()
 	if err := c.Bind(&input); err != nil {
-		r.logger.With(c.Request().Context()).Info(err)
+		r.logger.With(ctx).Info(err)
 		return err
+	}
+	user, err := r.service.Create(ctx, input)
+	if err != nil {
+		switch err {
+		case errEmailAlreadyExists:
+			return errors.BadRequest(err.Error())
+		case errUserAlreadyExists:
+			return errors.BadRequest(err.Error())
+		default:
+			return err
+		}
 	}
 
-	user, err := r.service.Create(c.Request().Context(), input)
-	if err != nil {
-		return err
-	}
+	go r.mailer.Send("hello", "saferwall - confirm account", "noreply@saferwall.com",
+					user.Email)
 	user.Email = ""
 	user.Password = ""
 	return c.JSON(http.StatusCreated, user)

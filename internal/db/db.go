@@ -107,6 +107,9 @@ func (db *DB) Get(ctx context.Context, key string, model interface{}) error {
 
 	// Performs a fetch operation against the collection.
 	getResult, err := db.Collection.Get(key, &gocb.GetOptions{})
+	if errors.Is(err, gocb.ErrDocumentNotFound) {
+		return errors.New("document not found")
+	}
 	if err != nil {
 		return err
 	}

@@ -39,7 +39,7 @@ avatars_container_name = "images" # Container name for avatars.
     access_key = "minio" # Access key ID.
     secret_key = "minio123" # Secret Access Key.
     [storage.local]
-    root_dir = "/saferwall"    # Full path to the directory where to store the files.
+    root_dir = "/saferwall" # Full path to the directory where to store the files.
 
 [smtp]
 server = "smtp.example.com"

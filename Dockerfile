@@ -49,6 +49,7 @@ COPY --from=build-stage /go/bin/server .
 # Copy the config files.
 COPY configs/ conf/
 COPY db/ db/
+COPY templates/ templates/
 
 # Create an app user so our program doesn't run as root.
 RUN addgroup -g 102 -S $GROUP \
@@ -58,4 +59,4 @@ RUN addgroup -g 102 -S $GROUP \
 # Switch to our user.
 USER saferwall
 
-ENTRYPOINT ["/saferwall/server", "-config", "/saferwall/conf", "-db", "/saferwall/db"]
+ENTRYPOINT ["/saferwall/server", "-config", "/saferwall/conf", "-db", "/saferwall/db", "-tpl", "/saferwall/templates"]

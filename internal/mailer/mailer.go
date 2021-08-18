@@ -5,14 +5,13 @@
 package mailer
 
 import (
-	"crypto/tls"
 	"time"
 
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
 type SMTPServer struct {
-	server mail.SMTPServer
+	server *mail.SMTPServer
 }
 
 type SMTPClient struct {
@@ -20,8 +19,7 @@ type SMTPClient struct {
 }
 
 // New creates a new SMTP client using the default configuration.
-func New(host string, port int, username, password string,
-	encryption int) *mail.SMTPServer {
+func New(host string, port int, username, password string) SMTPServer {
 	server := mail.NewSMTPClient()
 
 	// SMTP Server
@@ -29,7 +27,7 @@ func New(host string, port int, username, password string,
 	server.Port = port
 	server.Username = username
 	server.Password = password
-	server.Encryption = mail.Encryption(encryption)
+	server.Encryption = mail.EncryptionTLS
 
 	// Since v2.3.0 you can specified authentication type:
 	// - PLAIN (default)
@@ -48,24 +46,23 @@ func New(host string, port int, username, password string,
 
 	// Set TLSConfig to provide custom TLS configuration. For example,
 	// to skip TLS verification (useful for testing):
-	server.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	// server.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
-	return server
+	return SMTPServer{server}
 }
 
-func (s SMTPServer) Connect() (*mail.SMTPClient, error) {
-	smtpClient, err := s.server.Connect()
+func (s SMTPServer) Connect() (SMTPClient, error) {
+	c, err := s.server.Connect()
 	if err != nil {
-		return nil, err
+		return SMTPClient{}, err
 	}
-	return smtpClient, nil
+	return SMTPClient{client: c}, nil
 }
 
-func (c SMTPClient) Send(htmlBody, subject, from string) error {
+func (c SMTPClient) Send(htmlBody, subject, from, to string) error {
 
-	// New email simple html with inline and CC
 	email := mail.NewMSG()
-	email.SetFrom(from).SetSubject(subject)
+	email.SetFrom(from).AddTo(to).SetSubject(subject)
 	email.SetBody(mail.TextHTML, htmlBody)
 
 	// always check error after send
