@@ -1,6 +1,7 @@
 # Config used for devcontainer development.
 # General app config.
 address = ":8080" # The IP:Port. Defaults to 8080.
+debug = true # Debug mode.
 log_level = "debug" # Log level. Defaults to info.
 jwt_signkey = "secret" # JWT sign key secret.
 jwt_expiration = 72 # JWT expiration in hours. Defaults to 72 hours (3 days)

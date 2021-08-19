@@ -94,13 +94,16 @@ func run(logger log.Logger) error {
 	}
 
 	// Create email client.
-	smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
-		cfg.SMTP.Password)
-	smtpClient, err := smtpServer.Connect()
-	if err != nil {
-		return err
+	var smtpClient mailer.SMTPClient
+	if !cfg.Debug {
+		smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
+			cfg.SMTP.Password)
+		smtpClient, err = smtpServer.Connect()
+		if err != nil {
+			return err
+		}
+		mailer.ParseTemplates(*flagN1QLFiles)
 	}
-	mailer.ParseTemplates(*flagN1QLFiles)
 
 	// Build HTTP server.
 	hs := &http.Server{
