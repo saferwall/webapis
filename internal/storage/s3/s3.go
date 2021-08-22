@@ -108,7 +108,7 @@ func (s Service) MakeBucket(ctx context.Context, bucketName, location string) er
 
 	// ignore location constraint for `us-east-1`.
 	createBucketConfig := awss3.CreateBucketConfiguration{}
-	if location == "us-east-1" {
+	if location != "us-east-1" {
 		createBucketConfig.LocationConstraint = aws.String(location)
 	}
 	input := &awss3.CreateBucketInput{
