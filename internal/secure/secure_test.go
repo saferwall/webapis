@@ -28,7 +28,7 @@ func TestHashAndMatch(t *testing.T) {
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
 			s := secure.New(nil)
-			hash := s.Hash(tt.pass)
+			hash := s.HashPW(tt.pass)
 			assert.Equal(t, tt.want, s.HashMatchesPassword(hash, tt.pass))
 		})
 	}
