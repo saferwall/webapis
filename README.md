@@ -84,6 +84,7 @@ The following endpoints are available:
 
 - `POST /v1/files/:sha256/like`: [likes an existing file](docs/actions/like.md).
 - `POST /v1/files/:sha256/unlike`: [unlike an existing file](docs/actions/unlike.md).
+- `POST /v1/files/:sha256/rescan`: [re-scan an existing file](docs/actions/rescan.md).
 
 ### Comments resource
 

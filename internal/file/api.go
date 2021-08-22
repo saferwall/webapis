@@ -30,6 +30,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	g.POST("/files/:sha256/like/", res.like, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
+	g.POST("/files/:sha256/rescan/", res.rescan, requireLogin)
 
 }
 
@@ -177,6 +178,18 @@ func (r resource) like(c echo.Context) error {
 func (r resource) unlike(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Unlike(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+func (r resource) rescan(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Rescan(ctx, c.Param("sha256"))
 	if err != nil {
 		return err
 	}
