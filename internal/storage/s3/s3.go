@@ -106,14 +106,13 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 // MakeBucket creates a new bucket in s2.
 func (s Service) MakeBucket(ctx context.Context, bucketName, location string) error {
 
-	// ignore location constraint for `us-east-1`.
-	createBucketConfig := awss3.CreateBucketConfiguration{}
+	input := &awss3.CreateBucketInput{Bucket: aws.String(bucketName)}
+
+	// ignore location constraint for `us-east-1`, otherwise bucket
+	// creation request fails.
 	if location != "us-east-1" {
-		createBucketConfig.LocationConstraint = aws.String(location)
-	}
-	input := &awss3.CreateBucketInput{
-		Bucket:                    aws.String(bucketName),
-		CreateBucketConfiguration: &createBucketConfig,
+		input.CreateBucketConfiguration = &awss3.CreateBucketConfiguration{
+			LocationConstraint: aws.String(location)}
 	}
 
 	_, err := s.s3svc.CreateBucket(input)
