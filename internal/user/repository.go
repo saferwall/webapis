@@ -30,6 +30,7 @@ type Repository interface {
 	Patch(ctx context.Context, key, path string, val interface{}) error
 	// Delete removes the user with given ID from the storage.
 	Delete(ctx context.Context, id string) error
+	EmailExists(ctx context.Context, email string) (bool, error)
 	Activities(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	Likes(ctx context.Context, id string, offset, limit int) (
@@ -103,6 +104,26 @@ func (r repository) Count(ctx context.Context) (int, error) {
 
 	err := r.db.Count(ctx, statement, params, &count)
 	return count, err
+}
+
+// Count returns the number of the user records in the database.
+func (r repository) EmailExists(ctx context.Context, email string) (bool, error) {
+	var res interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["docType"] = "user"
+	params["email"] = email
+
+	statement :=
+		"SELECT true as docPresent FROM `" + r.db.Bucket.Name() + "` " +
+			"WHERE `type`=$docType AND email=$email"
+
+	if err := r.db.Query(ctx, statement, params, &res) ; err != nil {
+		return false, err
+	}
+
+	present := res.([]interface{})
+	return len(present)>0, nil
 }
 
 // Query retrieves the user records with the specified offset and limit

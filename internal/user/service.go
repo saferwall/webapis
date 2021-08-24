@@ -7,6 +7,7 @@ package user
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/saferwall/saferwall-api/internal/activity"
@@ -45,6 +46,11 @@ type Service interface {
 	Unfollow(ctx context.Context, id string) error
 }
 
+var (
+	errEmailAlreadyExists = errors.New("email already exists")
+	errUserAlreadyExists  = errors.New("username already exists")
+)
+
 // User represents the data about a user.
 type User struct {
 	entity.User
@@ -52,7 +58,7 @@ type User struct {
 
 // Securer represents security interface.
 type Securer interface {
-	Hash(string) string
+	HashPW(string) string
 }
 
 type service struct {
@@ -96,11 +102,29 @@ func (s service) Get(ctx context.Context, id string) (User, error) {
 func (s service) Create(ctx context.Context, req CreateUserRequest) (
 	User, error) {
 
+	// check if the username is already taken.
+	user, err := s.Get(ctx, req.Username)
+	if err != nil && err.Error() != "document not found" {
+		return User{}, err
+	}
+	if user.Username != "" {
+		return User{}, errUserAlreadyExists
+	}
+
+	// check if the email already exists.
+	present, err := s.repo.EmailExists(ctx, req.Email)
+	if err != nil {
+		return User{}, err
+	}
+	if present {
+		return User{}, errEmailAlreadyExists
+	}
+
 	now := time.Now()
-	err := s.repo.Create(ctx, entity.User{
+	err = s.repo.Create(ctx, entity.User{
 		Type:        "user",
 		Username:    req.Username,
-		Password:    s.sec.Hash(req.Password),
+		Password:    s.sec.HashPW(req.Password),
 		Email:       req.Email,
 		MemberSince: now.Unix(),
 		LastSeen:    now.Unix(),
@@ -136,7 +160,7 @@ func (s service) Update(ctx context.Context, id string, req interface{}) (
 }
 
 func (s service) Patch(ctx context.Context, id, path string,
-	 input interface{}) error {
+	input interface{}) error {
 	return s.repo.Patch(ctx, id, path, input)
 }
 

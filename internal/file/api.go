@@ -30,6 +30,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	g.POST("/files/:sha256/like/", res.like, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
+	g.POST("/files/:sha256/rescan/", res.rescan, requireLogin)
 
 }
 
@@ -56,27 +57,28 @@ func (r resource) get(c echo.Context) error {
 
 func (r resource) create(c echo.Context) error {
 
+	ctx := c.Request().Context()
 	f, err := c.FormFile("file")
 	if err != nil {
-		r.logger.With(c.Request().Context()).Info(err)
+		r.logger.With(ctx).Info(err)
 		return errors.BadRequest("missing file in form request")
 	}
 
 	if f.Size > 60000000 {
-		r.logger.With(c.Request().Context()).Info("payload too large")
+		r.logger.With(ctx).Info("payload too large")
 		return errors.TooLargeEntity("")
 	}
 
 	src, err := f.Open()
 	if err != nil {
-		r.logger.With(c.Request().Context()).Error(err)
+		r.logger.With(ctx).Error(err)
 		return errors.InternalServerError("")
 	}
 	defer src.Close()
 
 	input := CreateFileRequest{src, f.Filename,
 		c.Request().Header.Get("X-Geoip-Country")}
-	file, err := r.service.Create(c.Request().Context(), input)
+	file, err := r.service.Create(ctx, input)
 	if err != nil {
 		return err
 	}
@@ -176,6 +178,18 @@ func (r resource) like(c echo.Context) error {
 func (r resource) unlike(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Unlike(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+func (r resource) rescan(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Rescan(ctx, c.Param("sha256"))
 	if err != nil {
 		return err
 	}

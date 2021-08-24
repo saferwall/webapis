@@ -73,10 +73,19 @@ type StorageCfg struct {
 	Local LocalFsCfg `mapstructure:"local"`
 }
 
+type SMTPConfig struct {
+	Server   string `mapstructure:"server"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+}
+
 // Config represents our application config.
 type Config struct {
 	// The IP:Port. Defaults to 8080.
 	Address string `mapstructure:"address"`
+	// Debug mode.
+	Debug bool `mapstructure:"debug"`
 	// Log level. Defaults to info.
 	LogLevel string `mapstructure:"log_level"`
 	// The data source name (DSN) for th frontend.
@@ -97,6 +106,8 @@ type Config struct {
 	UI UICfg `mapstructure:"ui"`
 	// Object storage configuration.
 	ObjStorage StorageCfg `mapstructure:"storage"`
+	// SMTP server configuration.
+	SMTP SMTPConfig `mapstructure:"smtp"`
 }
 
 // Load returns an application configuration which is populated

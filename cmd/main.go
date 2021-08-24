@@ -6,7 +6,7 @@ package main
 
 import (
 	"context"
-	"crypto/sha1"
+	"crypto/sha256"
 	"flag"
 	"net/http"
 	"os"
@@ -19,6 +19,7 @@ import (
 	en_translations "github.com/go-playground/validator/v10/translations/en"
 	"github.com/saferwall/saferwall-api/internal/config"
 	"github.com/saferwall/saferwall-api/internal/db"
+	"github.com/saferwall/saferwall-api/internal/mailer"
 	"github.com/saferwall/saferwall-api/internal/queue"
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/server"
@@ -31,6 +32,7 @@ var Version = "1.0.0"
 
 var flagConfig = flag.String("config", "./../configs/", "path to the config file")
 var flagN1QLFiles = flag.String("db", "./../db/", "path to the n1ql files")
+var flagTplFiles = flag.String("tpl", "./../templates/", "path to html templates")
 
 func main() {
 
@@ -77,7 +79,7 @@ func run(logger log.Logger) error {
 	en_translations.RegisterDefaultTranslations(validate, trans)
 
 	// Create a securer for auth.
-	sec := secure.New(sha1.New())
+	sec := secure.New(sha256.New())
 
 	// Create an uploader to upload file to object storage.
 	updown, err := storage.New(cfg.ObjStorage)
@@ -91,11 +93,23 @@ func run(logger log.Logger) error {
 		return err
 	}
 
+	// Create email client.
+	var smtpClient mailer.SMTPClient
+	if !cfg.Debug {
+		smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
+			cfg.SMTP.Password)
+		smtpClient, err = smtpServer.Connect()
+		if err != nil {
+			return err
+		}
+		mailer.ParseTemplates(*flagN1QLFiles)
+	}
+
 	// Build HTTP server.
 	hs := &http.Server{
 		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			updown, producer),
+			updown, producer, smtpClient),
 	}
 
 	// Start server.

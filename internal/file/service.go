@@ -35,6 +35,7 @@ type Service interface {
 	Query(ctx context.Context, offset, limit int) ([]File, error)
 	Like(ctx context.Context, id string) error
 	Unlike(ctx context.Context, id string) error
+	Rescan(ctx context.Context, id string) error
 }
 
 // File represents the data about a File.
@@ -44,7 +45,7 @@ type File struct {
 
 // Securer represents security interface.
 type Securer interface {
-	HashFile([]byte) string
+	Hash([]byte) string
 }
 
 type UploadDownloader interface {
@@ -126,7 +127,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		return File{}, err
 	}
 
-	sha256 := s.sec.HashFile(fileContent)
+	sha256 := s.sec.Hash(fileContent)
 	file, err := s.Get(ctx, sha256, nil)
 	if err != nil && err.Error() != ErrDocumentNotFound {
 		return File{}, err
@@ -297,6 +298,22 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (s service) Rescan(ctx context.Context, sha256 string) error {
+
+	_, err := s.Get(ctx, sha256, nil)
+	if err != nil {
+		return err
+	}
+
+	err = s.producer.Produce(s.topic, []byte(sha256))
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return err
 	}
 
 	return nil

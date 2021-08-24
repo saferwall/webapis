@@ -5,12 +5,10 @@
 package secure
 
 import (
-	"crypto/sha256"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
-	"fmt"
 	"hash"
-	"strconv"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,8 +23,8 @@ type Service struct {
 	h hash.Hash
 }
 
-// Hash hashes the password using bcrypt.
-func (Service) Hash(password string) string {
+// HashPW hashes the password using bcrypt.
+func (Service) HashPW(password string) string {
 	hashedPW, _ := bcrypt.GenerateFromPassword(
 		[]byte(password), bcrypt.DefaultCost)
 	return string(hashedPW)
@@ -39,15 +37,35 @@ func (Service) HashMatchesPassword(hash, password string) bool {
 }
 
 // Token generates new unique token.
-func (s Service) Token(str string) string {
-	s.h.Reset()
-	fmt.Fprintf(s.h, "%s%s", str, strconv.Itoa(time.Now().Nanosecond()))
-	return fmt.Sprintf("%x", s.h.Sum(nil))
+func (Service) Token(str string) string {
+	token, _ := GenerateRandomStringURLSafe(32)
+	return token
 }
 
-// HashFile hashes the password using bcrypt.
-func (Service) HashFile(b []byte) string {
-	h := sha256.New()
-	h.Write(b)
-	return hex.EncodeToString(h.Sum(nil))
+// Hash hashes a stream of bytes using sha2 algorihtm.
+func (s Service) Hash(b []byte) string {
+	s.h.Write(b)
+	return hex.EncodeToString(s.h.Sum(nil))
+}
+
+// GenerateRandomBytes returns securely generated random bytes.
+// It will return an error if the system's secure random
+// number generator fails to function correctly, in which
+// case the caller should not continue.
+func GenerateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+// GenerateRandomStringURLSafe returns a URL-safe, base64 encoded securely
+// generated random string. It will return an error if the system's secure
+// random number generator fails to function correctly, in which case the
+// caller should not continue.
+func GenerateRandomStringURLSafe(n int) (string, error) {
+	b, err := GenerateRandomBytes(n)
+	return base64.URLEncoding.EncodeToString(b), err
 }

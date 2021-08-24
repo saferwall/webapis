@@ -17,6 +17,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/queue"
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/storage"
+	"github.com/saferwall/saferwall-api/internal/mailer"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -37,7 +38,8 @@ type Server struct {
 // BuildHandler sets up the HTTP routing and builds an HTTP handler.
 func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	cfg *config.Config, version string, trans ut.Translator,
-	updown storage.UploadDownloader, p queue.Producer) http.Handler {
+	updown storage.UploadDownloader, p queue.Producer,
+	smtpClient mailer.SMTPClient) http.Handler {
 
 	// Create `echo` instance.
 	e := echo.New()
@@ -96,7 +98,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, userSvc, actSvc)
 
 	healthcheck.RegisterHandlers(e, version)
-	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger)
+	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger, smtpClient)
 	auth.RegisterHandlers(g, authSvc, logger)
 	file.RegisterHandlers(g, fileSvc, authHandler, logger)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
