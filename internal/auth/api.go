@@ -36,12 +36,12 @@ func (r resource) login(c echo.Context) error {
 	ctx := c.Request().Context()
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Errorf("invalid request: %v", err)
-		return errors.Unauthorized("")
+		return errors.Unauthorized("Invalid username or password")
 	}
 
 	token, err := r.service.Login(ctx, req.Username, req.Password)
 	if err != nil {
-		return errors.Unauthorized("")
+		return errors.Unauthorized("Invalid username or password")
 	}
 
 	cookie := &http.Cookie{
