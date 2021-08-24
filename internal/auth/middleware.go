@@ -13,6 +13,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/saferwall/saferwall-api/internal/entity"
+	e "github.com/saferwall/saferwall-api/internal/errors"
 )
 
 const (
@@ -25,6 +26,7 @@ func Handler(verificationKey string) echo.MiddlewareFunc {
 		SigningKey:     []byte(verificationKey),
 		SuccessHandler: successHandler,
 		ParseTokenFunc: parseTokenFunc([]byte(verificationKey)),
+		ErrorHandler:   errorHandler,
 		TokenLookup:    "header:Authorization,cookie:JWTCookie",
 	})
 }
@@ -59,6 +61,10 @@ func successHandler(c echo.Context) {
 		token.Claims.(jwt.MapClaims)["isAdmin"].(bool),
 	)
 	c.SetRequest(c.Request().WithContext(ctx))
+}
+
+func errorHandler(err error) error {
+	return e.Unauthorized("invalid or expired jwt")
 }
 
 // IsAuthenticated middleware checks if a user is authenticated.
