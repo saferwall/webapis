@@ -3,6 +3,7 @@
 SELECT
   {
     "type": activity.kind,
+    "id": META(activity).id,
     "author": {
       "username": activity.username,
       "member_since": (
