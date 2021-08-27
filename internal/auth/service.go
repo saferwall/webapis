@@ -7,6 +7,7 @@ package auth
 import (
 	"context"
 	e "errors"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -61,6 +62,7 @@ func NewService(signingKey string, tokenExpiration int,
 func (s service) Login(ctx context.Context, username, password string) (
 	string, error) {
 	logger := s.logger.With(ctx, "user", username)
+	username = strings.ToLower(username)
 	identity, err := s.authenticate(ctx, username, password)
 	if err != nil {
 		logger.Debugf(err.Error())

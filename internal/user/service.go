@@ -316,8 +316,8 @@ func (s service) Follow(ctx context.Context, id string) error {
 		return err
 	}
 
-	targetUsername := targetUser.ID()
 	currentUsername := currentUser.ID()
+	targetUsername := targetUser.ID()
 
 	if !isStringInSlice(targetUsername, currentUser.Following) {
 		currentUser.Following = append(currentUser.Following, targetUsername)

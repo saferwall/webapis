@@ -118,12 +118,12 @@ func (r repository) EmailExists(ctx context.Context, email string) (bool, error)
 		"SELECT true as docPresent FROM `" + r.db.Bucket.Name() + "` " +
 			"WHERE `type`=$docType AND email=$email"
 
-	if err := r.db.Query(ctx, statement, params, &res) ; err != nil {
+	if err := r.db.Query(ctx, statement, params, &res); err != nil {
 		return false, err
 	}
 
 	present := res.([]interface{})
-	return len(present)>0, nil
+	return len(present) > 0, nil
 }
 
 // Query retrieves the user records with the specified offset and limit
@@ -190,7 +190,7 @@ func (r repository) Likes(ctx context.Context, id string, offset,
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
 	params["limit"] = limit
-	params["user"] = id
+	params["user"] = strings.ToLower(id)
 
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		currentUser = user.ID()
@@ -220,7 +220,7 @@ func (r repository) Followers(ctx context.Context, id string, offset,
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
 	params["limit"] = limit
-	params["user"] = id
+	params["user"] = strings.ToLower(id)
 
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		currentUser = user.ID()
@@ -250,7 +250,7 @@ func (r repository) Following(ctx context.Context, id string, offset,
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
 	params["limit"] = limit
-	params["user"] = id
+	params["user"] = strings.ToLower(id)
 
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		currentUser = user.ID()
@@ -279,7 +279,7 @@ func (r repository) Submissions(ctx context.Context, id string, offset,
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
 	params["limit"] = limit
-	params["user"] = id
+	params["user"] = strings.ToLower(id)
 
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		currentUser = user.ID()
@@ -309,7 +309,7 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
 	params["limit"] = limit
-	params["user"] = id
+	params["user"] = strings.ToLower(id)
 
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		currentUser = user.ID()
