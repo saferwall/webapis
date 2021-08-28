@@ -1,31 +1,24 @@
 /* N1QL query to retrieve likes for an logged-in user. */
 
 SELECT
-  t.*
+{
+  "id": meta(act).id,
+  "date": act.timestamp
+}.*,
+t.*
 FROM
   (
     SELECT
-      { "liked": ARRAY_BINARY_SEARCH(
-        ARRAY_SORT(
-          (
-            SELECT
-              RAW likes
-            FROM
-              `bucket_name` USE KEYS $loggedInUser
-          ) [0]
-        ),
-        f.sha256
-      ) >= 0,
-      "date": (
-        SELECT
-          RAW act.timestamp
-        FROM
-          `bucket_name` act
-        WHERE
-          act.type = "activity"
-          AND act.kind = "like"
-          AND act.username = $user
-      ) [ 0 ],
+      {
+      "liked": ARRAY_BINARY_SEARCH(
+                  ARRAY_SORT(
+                    (
+                      SELECT
+                        RAW likes
+                      FROM
+                        `bucket_name` USE KEYS $loggedInUser
+                    ) [0]
+                  ), f.sha256) >= 0,
       "file": { "hash": f.sha256,
       "tags": f.tags,
       "filename": f.submissions [ 0 ].filename,
@@ -45,5 +38,9 @@ FROM
 LIMIT
   $limit
 ) AS t
+LEFT JOIN `bucket_name` act ON act.target = t.file.`hash`
+WHERE act.`type` = "activity"
+AND act.kind = "like"
+AND act.username = $user
 ORDER BY
   t.date DESC

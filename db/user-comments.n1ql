@@ -2,6 +2,7 @@
 
 SELECT
   {
+      "id": META(c).id,
       "comment": c.body,
       "liked": ARRAY_BINARY_SEARCH(
         ARRAY_SORT(

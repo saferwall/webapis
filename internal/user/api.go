@@ -76,7 +76,7 @@ func (r resource) create(c echo.Context) error {
 	}
 
 	go r.mailer.Send("hello", "saferwall - confirm account", "noreply@saferwall.com",
-					user.Email)
+		user.Email)
 	user.Email = ""
 	user.Password = ""
 	return c.JSON(http.StatusCreated, user)

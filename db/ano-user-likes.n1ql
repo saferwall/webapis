@@ -1,17 +1,14 @@
 /* N1QL query to retrieve likes for an anonymous user. */
 SELECT
-  t.*
+{
+  "id": meta(act).id,
+  "date": act.timestamp
+}.*,
+t.*
 FROM (
   SELECT
     {
       "liked": false,
-      "date":  (
-          SELECT
-            RAW act.timestamp
-          FROM
-            `bucket_name` act
-          WHERE act.type = "activity" AND act.kind = "like" AND act.username = $user
-      ) [0],
       "file": {
         "hash": f.sha256,
         "tags": f.tags,
@@ -36,5 +33,9 @@ FROM (
   LIMIT
     $limit
 ) AS t
+LEFT JOIN `bucket_name` act ON act.target = t.file.`hash`
+WHERE act.`type` = "activity"
+AND act.kind = "like"
+AND act.username = $user
 ORDER BY
   t.date DESC

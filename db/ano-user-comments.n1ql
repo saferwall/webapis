@@ -2,6 +2,7 @@
 
 SELECT
   {
+      "id": META(c).id,
       "comment": c.body,
       "liked": false,
       "date": c.timestamp,

@@ -1,6 +1,7 @@
 /* N1QL query to retrieve user followers for an anonymous user. */
 
 SELECT RAW {
+  "id": META(p).id,
   "user": p.`username`,
   "member_since": p.`member_since`,
   "follow": false

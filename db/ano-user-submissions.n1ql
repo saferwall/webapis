@@ -2,6 +2,7 @@
 
 SELECT
 {
+    "id": META(a).id,
     "liked": false,
     "date": a.timestamp,
     "file": {
