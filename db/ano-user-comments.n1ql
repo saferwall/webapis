@@ -4,7 +4,7 @@ SELECT
   {
       "comment": c.body,
       "liked": false,
-      "timestamp": c.timestamp,
+      "date": c.timestamp,
       "file": {
         "hash": f.sha256,
         "tags": f.tags,

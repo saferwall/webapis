@@ -17,7 +17,7 @@ SELECT
     },
     "follow": true,
     "comment": f.body,
-    "timestamp": activity.timestamp
+    "date": activity.timestamp
   }.*,
   (
     CASE WHEN activity.kind = "follow" THEN {"target": activity.target} ELSE {

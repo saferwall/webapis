@@ -14,7 +14,7 @@ SELECT
         ),
         c.sha256
       ) >= 0,
-      "timestamp": c.timestamp,
+      "date": c.timestamp,
       "file": {
         "hash": f.sha256,
         "tags": f.tags,
