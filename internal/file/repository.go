@@ -29,6 +29,8 @@ type Repository interface {
 	Patch(ctx context.Context, key, path string, val interface{}) error
 	// Delete removes the file with given ID from the storage.
 	Delete(ctx context.Context, id string) error
+	// DeleteActivity removes the activity given its kind and target.
+	DeleteActivity(ctx context.Context, kind, username, target string) error
 }
 
 // repository persists files in database.
@@ -125,4 +127,16 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 		files = append(files, file)
 	}
 	return files, nil
+}
+
+func (r repository) DeleteActivity(ctx context.Context, kind, username,
+	target string) error {
+
+	var result interface{}
+	params := make(map[string]interface{}, 1)
+	params["kind"] = kind
+	params["username"] = username
+	params["target"] = target
+	query := r.db.N1QLQuery[dbcontext.DeleteActivity]
+	return r.db.Query(ctx, query, params, &result)
 }

@@ -169,6 +169,7 @@ func (r resource) activities(c echo.Context) error {
 		return err
 	}
 	pages.Items = activities
+	c.Response().Header().Set("Cache-Control", "public, max-age=120")
 	return c.JSON(http.StatusOK, pages)
 }
 

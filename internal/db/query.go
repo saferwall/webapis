@@ -29,6 +29,7 @@ const (
 	AnoUserFollowers
 	AnoUserSubmissions
 	GetAllDocType
+	DeleteActivity
 )
 
 var fileQueryMap = map[string]n1qlQuery{
@@ -45,6 +46,7 @@ var fileQueryMap = map[string]n1qlQuery{
 	"ano-user-activities.n1ql":       AnoUserActivities,
 	"ano-user-submissions.n1ql":      AnoUserSubmissions,
 	"get-all-doc-type.n1ql":          GetAllDocType,
+	"delete-activity.n1ql":                DeleteActivity,
 	"count-user-activities.n1ql":     CountUserActivities,
 	"count-ano-user-activities.n1ql": CountAnoUserActivities,
 }

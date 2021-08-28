@@ -364,6 +364,12 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 		currentUser.Following = removeStringFromSlice(
 			currentUser.Following, targetUsername)
 		currentUser.FollowingCount -= 1
+
+		// delete corresponsing activity.
+		if s.repo.DeleteActivity(ctx, "follow", currentUsername,
+		 targetUsername) ; err != nil {
+			return err
+		}
 	}
 	if isStringInSlice(currentUsername, targetUser.Followers) {
 		targetUser.Followers = removeStringFromSlice(

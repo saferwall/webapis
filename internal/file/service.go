@@ -298,6 +298,12 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 		if err != nil {
 			return err
 		}
+
+		// delete corresponsing activity.
+		if s.repo.DeleteActivity(ctx, "like", user.ID(),
+		sha256) ; err != nil {
+			return err
+		}
 	}
 
 	return nil
