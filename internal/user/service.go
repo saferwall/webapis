@@ -311,33 +311,33 @@ func (s service) Follow(ctx context.Context, id string) error {
 		return err
 	}
 	loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
-	currentUser, err := s.Get(ctx, loggedInUser.ID())
+	curUser, err := s.Get(ctx, loggedInUser.ID())
 	if err != nil {
 		return err
 	}
 
-	currentUsername := currentUser.ID()
+	curUsername := curUser.ID()
 	targetUsername := targetUser.ID()
 
-	if !isStringInSlice(targetUsername, currentUser.Following) {
-		currentUser.Following = append(currentUser.Following, targetUsername)
-		currentUser.FollowingCount += 1
+	if !isStringInSlice(targetUsername, curUser.Following) {
+		curUser.Following = append(curUser.Following, targetUsername)
+		curUser.FollowingCount += 1
 
 		// add new activity
 		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
 			Kind:     "follow",
-			Username: currentUsername,
-			Target:   targetUsername,
+			Username: curUser.Username,
+			Target:   targetUser.Username,
 		}); err != nil {
 			return err
 		}
-		if err = s.repo.Update(ctx, currentUser.User); err != nil {
+		if err = s.repo.Update(ctx, curUser.User); err != nil {
 			return err
 		}
 
 	}
-	if !isStringInSlice(currentUsername, targetUser.Followers) {
-		targetUser.Followers = append(targetUser.Followers, currentUsername)
+	if !isStringInSlice(curUsername, targetUser.Followers) {
+		targetUser.Followers = append(targetUser.Followers, curUsername)
 		targetUser.FollowersCount += 1
 		return s.repo.Update(ctx, targetUser.User)
 	}
@@ -352,32 +352,32 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 		return err
 	}
 	loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
-	currentUser, err := s.Get(ctx, loggedInUser.ID())
+	curUser, err := s.Get(ctx, loggedInUser.ID())
 	if err != nil {
 		return err
 	}
 
 	targetUsername := targetUser.ID()
-	currentUsername := currentUser.ID()
+	curUsername := curUser.ID()
 
-	if isStringInSlice(targetUsername, currentUser.Following) {
-		currentUser.Following = removeStringFromSlice(
-			currentUser.Following, targetUsername)
-		currentUser.FollowingCount -= 1
+	if isStringInSlice(targetUsername, curUser.Following) {
+		curUser.Following = removeStringFromSlice(
+			curUser.Following, targetUsername)
+		curUser.FollowingCount -= 1
 
 		// delete corresponsing activity.
-		if s.repo.DeleteActivity(ctx, "follow", currentUsername,
+		if s.repo.DeleteActivity(ctx, "follow", curUser.Username,
 		 targetUsername) ; err != nil {
 			return err
 		}
 	}
-	if isStringInSlice(currentUsername, targetUser.Followers) {
+	if isStringInSlice(curUsername, targetUser.Followers) {
 		targetUser.Followers = removeStringFromSlice(
-			targetUser.Followers, currentUsername)
+			targetUser.Followers, curUsername)
 		targetUser.FollowersCount -= 1
 	}
 
-	if s.repo.Update(ctx, currentUser.User); err != nil {
+	if s.repo.Update(ctx, curUser.User); err != nil {
 		return err
 	}
 	if s.repo.Update(ctx, targetUser.User); err != nil {
