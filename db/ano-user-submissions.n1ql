@@ -26,7 +26,9 @@ FROM
 LEFT JOIN `bucket_name` f
    ON KEYS a.target
 WHERE
-  a.`type` = 'activity' AND a.`username` = $user AND a.`kind` = "submit"
+  a.`type` = 'activity'
+    AND LOWER(a.`username`) = $user
+    AND a.`kind` = "submit"
 OFFSET $offset
 LIMIT
   $limit
