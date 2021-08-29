@@ -257,8 +257,12 @@ func (r resource) follow(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Follow(ctx, c.Param("username"))
 	if err != nil {
-		return err
+		switch err {
+		case errUserSelfFollow:
+			return errors.BadRequest("You can't follow yourself.")
+		}
 	}
+
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
 		Status  int    `json:"status"`
@@ -269,7 +273,10 @@ func (r resource) unfollow(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Unfollow(ctx, c.Param("username"))
 	if err != nil {
-		return err
+		switch err {
+		case errUserSelfFollow:
+			return errors.BadRequest("You can't unfollow yourself.")
+		}
 	}
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`

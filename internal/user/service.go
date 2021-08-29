@@ -49,6 +49,8 @@ type Service interface {
 var (
 	errEmailAlreadyExists = errors.New("email already exists")
 	errUserAlreadyExists  = errors.New("username already exists")
+	errUserSelfFollow     = errors.New(
+		"source and target user in follow request is the same")
 )
 
 // User represents the data about a user.
@@ -319,6 +321,10 @@ func (s service) Follow(ctx context.Context, id string) error {
 	curUsername := curUser.ID()
 	targetUsername := targetUser.ID()
 
+	if curUsername == targetUsername {
+		return errUserSelfFollow
+	}
+
 	if !isStringInSlice(targetUsername, curUser.Following) {
 		curUser.Following = append(curUser.Following, targetUsername)
 		curUser.FollowingCount += 1
@@ -359,6 +365,9 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 
 	targetUsername := targetUser.ID()
 	curUsername := curUser.ID()
+	if curUsername == targetUsername {
+		return errUserSelfFollow
+	}
 
 	if isStringInSlice(targetUsername, curUser.Following) {
 		curUser.Following = removeStringFromSlice(
@@ -367,7 +376,7 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 
 		// delete corresponsing activity.
 		if s.repo.DeleteActivity(ctx, "follow", curUser.Username,
-		 targetUsername) ; err != nil {
+			targetUsername); err != nil {
 			return err
 		}
 	}
