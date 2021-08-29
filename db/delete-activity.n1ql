@@ -1,0 +1,9 @@
+/* N1QL query to delete user's activity. */
+
+DELETE
+ FROM `sfw`
+WHERE
+ `type` = "activity"
+AND kind = $kind
+AND username = $username
+AND target = $target

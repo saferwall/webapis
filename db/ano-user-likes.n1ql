@@ -36,6 +36,6 @@ FROM (
 LEFT JOIN `bucket_name` act ON act.target = t.file.`hash`
 WHERE act.`type` = "activity"
 AND act.kind = "like"
-AND act.username = $user
+AND LOWER(act.username) = $user
 ORDER BY
   t.date DESC

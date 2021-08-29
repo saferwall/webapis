@@ -12,7 +12,7 @@ SELECT
         FROM
           `bucket_name` u
         USE KEYS
-          activity.username
+          LOWER(activity.username)
       ) [0]
     },
     "follow": false,
