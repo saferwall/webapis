@@ -6,7 +6,7 @@ SELECT RAW {
     "member_since": p.`member_since`,
     "follow":  ARRAY_BINARY_SEARCH(ARRAY_SORT((
                 SELECT
-                RAW `followers`
+                RAW `following`
                 FROM
                 `bucket_name`
                 USE KEYS $loggedInUser
