@@ -93,9 +93,9 @@ type CreateUserRequest struct {
 // UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
 	Name     string `json:"name" validate:"omitempty,min=1,max=32"`
-	Location string `json:"location" validate:"omitempty,alphanumunicode,min=2,max=16"`
+	Location string `json:"location" validate:"omitempty,min=1,max=16"`
 	URL      string `json:"url" validate:"omitempty,url,max=64"`
-	Bio      string `json:"bio" validate:"omitempty,printascii,min=1,max=64"`
+	Bio      string `json:"bio" validate:"omitempty,min=1,max=64"`
 }
 
 // NewService creates a new user service.
