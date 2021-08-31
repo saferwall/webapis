@@ -2,7 +2,7 @@
 
 SELECT RAW {
     "id": META(p).id,
-    "user": p.`username`,
+    "username": p.`username`,
     "member_since": p.`member_since`,
     "follow":  ARRAY_BINARY_SEARCH(ARRAY_SORT((
                 SELECT
