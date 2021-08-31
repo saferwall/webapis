@@ -48,6 +48,7 @@ type Service interface {
 	Follow(ctx context.Context, id string) error
 	Unfollow(ctx context.Context, id string) error
 	UpdateAvatar(ctx context.Context, id string, src io.Reader) error
+	UpdatePassword(ctx context.Context, input UpdatePasswordRequest) error
 }
 
 var (
@@ -55,6 +56,7 @@ var (
 	avatarUploadTimeout   = time.Duration(time.Second * 10)
 	errEmailAlreadyExists = errors.New("email already exists")
 	errUserAlreadyExists  = errors.New("username already exists")
+	errWrongPassword      = errors.New("wrong password")
 	errUserSelfFollow     = errors.New(
 		"source and target user in follow request is the same")
 )
@@ -67,6 +69,7 @@ type User struct {
 // Securer represents security interface.
 type Securer interface {
 	HashPW(string) string
+	HashMatchesPassword(string, string) bool
 }
 
 // Uploader represents the file upload interface.
@@ -87,7 +90,7 @@ type service struct {
 type CreateUserRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
-	Password string `json:"password" validate:"required,alphanum,min=8,max=30"`
+	Password string `json:"password" validate:"required,min=8,max=30"`
 }
 
 // UpdateUserRequest represents a user update request.
@@ -96,6 +99,12 @@ type UpdateUserRequest struct {
 	Location string `json:"location" validate:"omitempty,min=1,max=16"`
 	URL      string `json:"url" validate:"omitempty,url,max=64"`
 	Bio      string `json:"bio" validate:"omitempty,min=1,max=64"`
+}
+
+// UpdatePasswordRequest represents a password update request.
+type UpdatePasswordRequest struct {
+	OldPassword string `json:"old" validate:"required,min=8,max=30"`
+	NewPassword string `json:"new" validate:"required,necsfield=OldPassword,min=8,max=30"`
 }
 
 // NewService creates a new user service.
@@ -407,6 +416,26 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (s service) UpdatePassword(ctx context.Context, input UpdatePasswordRequest) error {
+
+	var id string
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		id = user.ID()
+	}
+
+	user, err := s.repo.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if !s.sec.HashMatchesPassword(user.Password, input.OldPassword) {
+		return errWrongPassword
+	}
+
+	user.Password = s.sec.HashPW(input.NewPassword)
+	return s.repo.Update(ctx, user)
 }
 
 func (s service) UpdateAvatar(ctx context.Context, id string, src io.Reader) error {

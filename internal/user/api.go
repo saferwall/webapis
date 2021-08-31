@@ -24,6 +24,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.POST("/users/", res.create)
 	g.GET("/users/:username/", res.get)
 	g.PATCH("/users/:username/", res.update, requireLogin)
+	g.PATCH("/users/:username/password/", res.password, requireLogin)
 	g.DELETE("/users/:username/", res.delete, requireLogin)
 	g.GET("/users/", res.getUsers)
 	g.GET("/users/activities/", res.activities, optionalLogin)
@@ -99,7 +100,7 @@ func (r resource) update(c echo.Context) error {
 		curUser = user.ID()
 	}
 
-	if curUser != c.Param("username") {
+	if curUser != strings.ToLower(c.Param("username")) {
 		return errors.Forbidden("")
 	}
 
@@ -323,6 +324,40 @@ func (r resource) avatar(c echo.Context) error {
 		r.logger.With(ctx).Error(err)
 		return err
 	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+// password handle update password request for authenticated users.
+func (r resource) password(c echo.Context) error {
+	var req UpdatePasswordRequest
+	ctx := c.Request().Context()
+	if err := c.Bind(&req); err != nil {
+		r.logger.With(ctx).Errorf("invalid request: %v", err)
+		return err
+	}
+
+	var curUsername string
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		curUsername = user.ID()
+	}
+
+	if curUsername != strings.ToLower(c.Param("username")) {
+		return errors.Forbidden("")
+	}
+
+	err := r.service.UpdatePassword(ctx, req)
+	if err != nil {
+		switch err {
+		case errWrongPassword:
+			return errors.Forbidden("")
+		default:
+			return err
+		}
+	}
+
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
 		Status  int    `json:"status"`

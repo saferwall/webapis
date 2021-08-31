@@ -33,10 +33,9 @@ The following endpoints are available:
 - `POST /v1/auth/confirm` [confirms an account from email token](docs/auth/confirm.md).
 - `POST /v1/auth/resend-confirmation` [re-send confirmation email](docs/auth/resend-confirmation.md).
 - `POST /v1/auth/reset-password` [send an email with a reset password token](docs/auth/reset-password.md).
+
 - update password given a token
-- update password for logged in users
 - update email
-- update avatar
 
 ### Users resource
 
@@ -52,12 +51,14 @@ The following endpoints are available:
 - `PATCH /v1/users/:username`: [updates an existing user](docs/user/patch.md).
 - `PUT /v1/users/:username`: [replaces an existing user](docs/user/post.md).
 - `DELETE /v1/users/:username`: [deletes an existing user](docs/user/delete.md).
+- `PATCH /v1/users/:username/password`: [updates an authenticated user's password](docs/auth/patch.md).
 - `GET /v1/users/:username/likes`: [get a paginated list of user's likes](docs/user/get.md).
 - `GET /v1/users/:username/submissions`: [get a paginated list of user's submissions](docs/profile/submissions.md).
 - `GET /v1/users/:username/following`: [get a paginated list of user's following](docs/profile/following.md).
 - `GET /v1/users/:username/followers`: [get a paginated list of user's followers](docs/profile/followers.md).
 - `GET /v1/users/:username/comments`: [get a paginated list of user's comments](docs/profile/comments.md).
 - `GET /v1/users/:username/activities`: [get a paginated list of user's activities](docs/profile/activities.md).
+- `POST /v1/users/:username/avatar`: [updates an existing user's avatar](docs/user/avatar.md).
 
 ### User actions
 

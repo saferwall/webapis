@@ -27,7 +27,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger) {
 	g.POST("/auth/resend-confirmation/", res.resendConfirmation)
 }
 
-// login returns a handler that handles user login request.
+// login handles authentication request.
 func (r resource) login(c echo.Context) error {
 	var req struct {
 		Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
