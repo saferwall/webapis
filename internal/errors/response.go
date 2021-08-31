@@ -104,6 +104,18 @@ func TooLargeEntity(msg string) ErrorResponse {
 	}
 }
 
+// UnsupportedMediaType creates a new error response representing a an
+// unsupported media type (HTTP 415).
+func UnsupportedMediaType(msg string) ErrorResponse {
+	if msg == "" {
+		msg = "Your request payload's format is not supported."
+	}
+	return ErrorResponse{
+		Status:  http.StatusUnsupportedMediaType,
+		Message: msg,
+	}
+}
+
 // BuildErrorResponse builds an error response from an error.
 func BuildErrorResponse(err error, trans ut.Translator) ErrorResponse {
 	switch err.(type) {

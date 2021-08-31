@@ -13,6 +13,8 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/h2non/filetype"
+
 	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/pkg/log"
@@ -59,6 +61,7 @@ var (
 	errWrongPassword      = errors.New("wrong password")
 	errUserSelfFollow     = errors.New(
 		"source and target user in follow request is the same")
+	errImageFormatNotSupported = errors.New("unsupported file type")
 )
 
 // User represents the data about a user.
@@ -448,6 +451,10 @@ func (s service) UpdateAvatar(ctx context.Context, id string, src io.Reader) err
 	fileContent, err := ioutil.ReadAll(src)
 	if err != nil {
 		return err
+	}
+
+	if !filetype.IsImage(fileContent) {
+		return errImageFormatNotSupported
 	}
 
 	// Create a context with a timeout that will abort the upload if it takes

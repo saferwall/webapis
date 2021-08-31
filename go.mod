@@ -10,6 +10,7 @@ require (
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/google/uuid v1.2.0
+	github.com/h2non/filetype v1.1.1
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/labstack/echo/v4 v4.4.0
 	github.com/leodido/go-urn v1.2.1 // indirect

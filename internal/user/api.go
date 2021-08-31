@@ -308,8 +308,8 @@ func (r resource) avatar(c echo.Context) error {
 	}
 
 	if f.Size > 1000000 {
-		r.logger.With(ctx).Info("payload too large")
-		return errors.TooLargeEntity("")
+		r.logger.With(ctx).Infof("image size too large: %v", f.Size)
+		return errors.TooLargeEntity("The file size is too large, maximm allowed: 1MB")
 	}
 
 	src, err := f.Open()
@@ -321,8 +321,14 @@ func (r resource) avatar(c echo.Context) error {
 
 	err = r.service.UpdateAvatar(ctx, curUsername, src)
 	if err != nil {
-		r.logger.With(ctx).Error(err)
-		return err
+		switch err {
+		case errImageFormatNotSupported:
+			return errors.UnsupportedMediaType("The image format is not supported.")
+		default:
+			r.logger.With(ctx).Error(err)
+			return err
+		}
+
 	}
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
