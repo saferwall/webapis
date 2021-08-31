@@ -14,10 +14,10 @@ import (
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/internal/file"
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
+	"github.com/saferwall/saferwall-api/internal/mailer"
 	"github.com/saferwall/saferwall-api/internal/queue"
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/storage"
-	"github.com/saferwall/saferwall-api/internal/mailer"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -69,7 +69,6 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	// Rate limiter middleware.
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 
-
 	// Add trailing slash for consistent URIs.
 	e.Pre(middleware.AddTrailingSlash())
 
@@ -91,7 +90,8 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 
 	// Create the services and register the handlers.
 	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
-	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec, actSvc)
+	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec,
+		cfg.ObjStorage.AvatarsContainerName, updown, actSvc)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
 		sec, userSvc)
 	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, updown,

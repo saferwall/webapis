@@ -6,6 +6,7 @@ package user
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -33,6 +34,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.GET("/users/:username/comments/", res.comments, optionalLogin)
 	g.POST("/users/:username/follow/", res.follow, requireLogin)
 	g.POST("/users/:username/unfollow/", res.unfollow, requireLogin)
+	g.POST("/users/:username/avatar/", res.avatar, requireLogin)
 }
 
 // Mailer represents the mailer interface/
@@ -98,7 +100,7 @@ func (r resource) update(c echo.Context) error {
 	}
 
 	if curUser != c.Param("username") {
-		return errors.BadRequest("")
+		return errors.Forbidden("")
 	}
 
 	user, err := r.service.Update(ctx, c.Param("username"), input)
@@ -259,7 +261,7 @@ func (r resource) follow(c echo.Context) error {
 	if err != nil {
 		switch err {
 		case errUserSelfFollow:
-			return errors.BadRequest("You can't follow yourself.")
+			return errors.Forbidden("You can't follow yourself.")
 		}
 	}
 
@@ -275,8 +277,51 @@ func (r resource) unfollow(c echo.Context) error {
 	if err != nil {
 		switch err {
 		case errUserSelfFollow:
-			return errors.BadRequest("You can't unfollow yourself.")
+			return errors.Forbidden("You can't unfollow yourself.")
 		}
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+func (r resource) avatar(c echo.Context) error {
+	var curUsername string
+	ctx := c.Request().Context()
+
+	targetUsername := strings.ToLower(c.Param("username"))
+
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		curUsername = user.ID()
+	}
+
+	if curUsername != targetUsername {
+		return errors.Forbidden("")
+	}
+
+	f, err := c.FormFile("file")
+	if err != nil {
+		r.logger.With(ctx).Info(err)
+		return errors.BadRequest("missing file in form request")
+	}
+
+	if f.Size > 1000000 {
+		r.logger.With(ctx).Info("payload too large")
+		return errors.TooLargeEntity("")
+	}
+
+	src, err := f.Open()
+	if err != nil {
+		r.logger.With(ctx).Error(err)
+		return errors.InternalServerError("")
+	}
+	defer src.Close()
+
+	err = r.service.UpdateAvatar(ctx, curUsername, src)
+	if err != nil {
+		r.logger.With(ctx).Error(err)
+		return err
 	}
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`

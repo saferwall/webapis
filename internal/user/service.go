@@ -5,9 +5,12 @@
 package user
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"io/ioutil"
 	"time"
 
 	"github.com/saferwall/saferwall-api/internal/activity"
@@ -44,9 +47,12 @@ type Service interface {
 	CountSubmissions(ctx context.Context, id string) (int, error)
 	Follow(ctx context.Context, id string) error
 	Unfollow(ctx context.Context, id string) error
+	UpdateAvatar(ctx context.Context, id string, src io.Reader) error
 }
 
 var (
+	// avatar upload timeout in seconds.
+	avatarUploadTimeout   = time.Duration(time.Second * 10)
 	errEmailAlreadyExists = errors.New("email already exists")
 	errUserAlreadyExists  = errors.New("username already exists")
 	errUserSelfFollow     = errors.New(
@@ -63,11 +69,18 @@ type Securer interface {
 	HashPW(string) string
 }
 
+// Uploader represents the file upload interface.
+type Uploader interface {
+	Upload(ctx context.Context, bucket, key string, file io.Reader) error
+}
+
 type service struct {
 	sec    Securer
 	repo   Repository
 	logger log.Logger
 	actSvc activity.Service
+	bucket string
+	objsto Uploader
 }
 
 // CreateUserRequest represents a user creation request.
@@ -86,9 +99,9 @@ type UpdateUserRequest struct {
 }
 
 // NewService creates a new user service.
-func NewService(repo Repository, logger log.Logger,
-	sec Securer, actSvc activity.Service) Service {
-	return service{sec, repo, logger, actSvc}
+func NewService(repo Repository, logger log.Logger, sec Securer,
+	bucket string, upl Uploader, actSvc activity.Service) Service {
+	return service{sec, repo, logger, actSvc, bucket, upl}
 }
 
 // Get returns the user with the specified user ID.
@@ -394,6 +407,37 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (s service) UpdateAvatar(ctx context.Context, id string, src io.Reader) error {
+
+	user, err := s.repo.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	fileContent, err := ioutil.ReadAll(src)
+	if err != nil {
+		return err
+	}
+
+	// Create a context with a timeout that will abort the upload if it takes
+	// more than the passed in timeout.
+	uploadCtx, cancelFn := context.WithTimeout(context.Background(),
+		avatarUploadTimeout)
+
+	// Ensure the context is canceled to prevent leaking.
+	// See context package for more information, https://golang.org/pkg/context/
+	defer cancelFn()
+
+	err = s.objsto.Upload(uploadCtx, s.bucket, id, bytes.NewReader(fileContent))
+	if err != nil {
+		return err
+	}
+
+	user.HasAvatar = true
+
+	return s.repo.Update(ctx, user)
 }
 
 // isStringInSlice check if a string exist in a list of strings
