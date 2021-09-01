@@ -401,7 +401,7 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 
 		// delete corresponsing activity.
 		if s.repo.DeleteActivity(ctx, "follow", curUser.Username,
-			targetUsername); err != nil {
+			targetUser.Username); err != nil {
 			return err
 		}
 	}
