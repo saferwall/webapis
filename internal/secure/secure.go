@@ -44,6 +44,7 @@ func (Service) Token(str string) string {
 
 // Hash hashes a stream of bytes using sha2 algorihtm.
 func (s Service) Hash(b []byte) string {
+	s.h.Reset()
 	s.h.Write(b)
 	return hex.EncodeToString(s.h.Sum(nil))
 }
