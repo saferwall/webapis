@@ -161,6 +161,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		err = s.repo.Create(ctx, sha256, entity.File{
+			SHA256:      sha256,
 			Type:        "file",
 			FirstSeen:   now,
 			LastScanned: now,
@@ -301,7 +302,7 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 
 		// delete corresponsing activity.
 		if s.repo.DeleteActivity(ctx, "like", user.ID(),
-		sha256) ; err != nil {
+			sha256); err != nil {
 			return err
 		}
 	}
