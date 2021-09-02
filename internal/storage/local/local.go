@@ -6,6 +6,7 @@ package local
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -78,4 +79,17 @@ func (s Service) MakeBucket(ctx context.Context, bucketName, location string) er
 		}
 	}
 	return nil
+}
+
+// Exists checks whether a file exists in disk.
+func (s Service) Exists(ctx context.Context, bucketName, key string) (bool, error) {
+	name := filepath.Join(s.root, bucketName, key)
+	_, err := os.Stat(name)
+	if err == nil {
+		return true, nil
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
 }

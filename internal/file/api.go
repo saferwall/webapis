@@ -205,7 +205,12 @@ func (r resource) download(c echo.Context) error {
 	var zippedFile string
 	err := r.service.Download(ctx, c.Param("sha256"), &zippedFile)
 	if err != nil {
-		return err
+		switch err {
+		case ErrObjectNotFound:
+			return errors.NotFound("")
+		default:
+			return err
+		}
 	}
 	return c.File(zippedFile)
 }

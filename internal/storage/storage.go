@@ -29,7 +29,9 @@ type UploadDownloader interface {
 	// Download downloads a file from a remote object storage location.
 	Download(ctx context.Context, bucket, key string, file io.Writer) error
 	// MakeBucket creates a new bucket.
-	MakeBucket(ctx context.Context, bucketName, location string) error
+	MakeBucket(ctx context.Context, bucket, location string) error
+	// Exists checks whether an object exists.
+	Exists(ctx context.Context, bucket, key string) (bool, error)
 }
 
 func New(cfg config.StorageCfg) (UploadDownloader, error) {

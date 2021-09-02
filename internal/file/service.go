@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"path/filepath"
@@ -22,6 +23,8 @@ import (
 var (
 	// ErrDocumentNotFound is returned when the doc does not exist in the DB.
 	ErrDocumentNotFound = "document not found"
+	// ErrObjectNotFound is returned when an object does not exist in Obj storage.
+	ErrObjectNotFound = errors.New("object not found")
 	// file upload timeout in seconds.
 	fileUploadTimeout = time.Duration(time.Second * 30)
 	// SamplesPwd represents the pasword used to zip the files during file download.
@@ -55,6 +58,7 @@ type Securer interface {
 type UploadDownloader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
 	Download(ctx context.Context, bucket, key string, file io.Writer) error
+	Exists(ctx context.Context, bucket, key string) (bool, error)
 }
 
 // Producer represents event stream message producer interface.
@@ -344,8 +348,17 @@ func (s service) Download(ctx context.Context, sha256 string, zipfile *string) e
 		context.Background(), time.Duration(time.Second*30))
 	defer cancelFn()
 
+	found, err := s.objsto.Exists(ctx, s.bucket, sha256)
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return err
+	}
+
+	if !found {
+		return ErrObjectNotFound
+	}
 	buf := new(bytes.Buffer)
-	err := s.objsto.Download(downloadCtx, s.bucket, sha256, buf)
+	err = s.objsto.Download(downloadCtx, s.bucket, sha256, buf)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err
