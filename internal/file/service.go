@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"path/filepath"
 	"time"
 
 	"github.com/saferwall/saferwall-api/internal/activity"
@@ -23,6 +24,8 @@ var (
 	ErrDocumentNotFound = "document not found"
 	// file upload timeout in seconds.
 	fileUploadTimeout = time.Duration(time.Second * 30)
+	// SamplesPwd represents the pasword used to zip the files during file download.
+	SamplesPwd = "infected"
 )
 
 // Service encapsulates usecase logic for files.
@@ -36,6 +39,7 @@ type Service interface {
 	Like(ctx context.Context, id string) error
 	Unlike(ctx context.Context, id string) error
 	Rescan(ctx context.Context, id string) error
+	Download(ctx context.Context, id string, zipfile *string) error
 }
 
 // File represents the data about a File.
@@ -58,6 +62,11 @@ type Producer interface {
 	Produce(string, []byte) error
 }
 
+// Archiver represents the archiving interface for files.
+type Archiver interface {
+	Archive(string, string, io.Reader) error
+}
+
 // CreateFileRequest represents a file creation request.
 type CreateFileRequest struct {
 	src      io.Reader
@@ -75,6 +84,7 @@ type service struct {
 	bucket   string
 	userSvc  user.Service
 	actSvc   activity.Service
+	archiver Archiver
 }
 
 // UpdateUserRequest represents a File update request.
@@ -103,9 +113,9 @@ type UpdateFileRequest struct {
 // NewService creates a new File service.
 func NewService(repo Repository, logger log.Logger, sec Securer,
 	updown UploadDownloader, producer Producer, topic, bucket string,
-	userSvc user.Service, actSvc activity.Service) Service {
+	userSvc user.Service, actSvc activity.Service, arch Archiver) Service {
 	return service{sec, repo, logger, updown,
-		producer, topic, bucket, userSvc, actSvc}
+		producer, topic, bucket, userSvc, actSvc, arch}
 }
 
 // Get returns the File with the specified File ID.
@@ -323,6 +333,30 @@ func (s service) Rescan(ctx context.Context, sha256 string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (s service) Download(ctx context.Context, sha256 string, zipfile *string) error {
+
+	// Create a context with a timeout that will abort the download if it takes
+	// more than the passed in timeout.
+	downloadCtx, cancelFn := context.WithTimeout(
+		context.Background(), time.Duration(time.Second*30))
+	defer cancelFn()
+
+	buf := new(bytes.Buffer)
+	err := s.objsto.Download(downloadCtx, s.bucket, sha256, buf)
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return err
+	}
+
+	*zipfile = filepath.Join("/tmp", sha256+".zip")
+	err = s.archiver.Archive(*zipfile, SamplesPwd, buf)
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return err
+	}
 	return nil
 }
 

@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/saferwall/saferwall-api/internal/activity"
+	"github.com/saferwall/saferwall-api/internal/archive"
 	"github.com/saferwall/saferwall-api/internal/auth"
 	"github.com/saferwall/saferwall-api/internal/config"
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
@@ -39,7 +40,7 @@ type Server struct {
 func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	cfg *config.Config, version string, trans ut.Translator,
 	updown storage.UploadDownloader, p queue.Producer,
-	smtpClient mailer.SMTPClient) http.Handler {
+	smtpClient mailer.SMTPClient, arch archive.Archiver) http.Handler {
 
 	// Create `echo` instance.
 	e := echo.New()
@@ -95,7 +96,8 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
 		sec, userSvc)
 	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, updown,
-		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, userSvc, actSvc)
+		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, userSvc, actSvc,
+		arch)
 
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger, smtpClient)

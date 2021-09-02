@@ -31,6 +31,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.POST("/files/:sha256/like/", res.like, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
 	g.POST("/files/:sha256/rescan/", res.rescan, requireLogin)
+	g.GET("/files/:sha256/download/", res.download, requireLogin)
 
 }
 
@@ -197,4 +198,14 @@ func (r resource) rescan(c echo.Context) error {
 		Message string `json:"message"`
 		Status  int    `json:"status"`
 	}{"ok", http.StatusOK})
+}
+
+func (r resource) download(c echo.Context) error {
+	ctx := c.Request().Context()
+	var zippedFile string
+	err := r.service.Download(ctx, c.Param("sha256"), &zippedFile)
+	if err != nil {
+		return err
+	}
+	return c.File(zippedFile)
 }

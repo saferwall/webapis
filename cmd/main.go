@@ -24,7 +24,9 @@ import (
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/server"
 	"github.com/saferwall/saferwall-api/internal/storage"
+	"github.com/saferwall/saferwall-api/internal/archive"
 	"github.com/saferwall/saferwall-api/pkg/log"
+	"github.com/yeka/zip"
 )
 
 // Version indicates the current version of the application.
@@ -93,6 +95,9 @@ func run(logger log.Logger) error {
 		return err
 	}
 
+	// Create an archiver to zip files with a password in file download.
+	archiver := archive.New(zip.AES256Encryption)
+
 	// Create email client.
 	var smtpClient mailer.SMTPClient
 	if !cfg.Debug {
@@ -109,7 +114,7 @@ func run(logger log.Logger) error {
 	hs := &http.Server{
 		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			updown, producer, smtpClient),
+			updown, producer, smtpClient, archiver),
 	}
 
 	// Start server.
