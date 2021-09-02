@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"net/http"
 
-	gocb "github.com/couchbase/gocb/v2"
+	"github.com/saferwall/saferwall-api/internal/db"
 	ut "github.com/go-playground/universal-translator"
 	validator "github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
@@ -137,7 +137,7 @@ func BuildErrorResponse(err error, trans ut.Translator) ErrorResponse {
 			}
 		}
 	}
-	if errors.Is(err, gocb.ErrDocumentNotFound) {
+	if errors.Is(err, db.ErrDocumentNotFound) {
 		return NotFound("")
 	}
 	return InternalServerError("")
