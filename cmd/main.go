@@ -17,6 +17,7 @@ import (
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
+	"github.com/saferwall/saferwall-api/internal/archive"
 	"github.com/saferwall/saferwall-api/internal/config"
 	"github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/mailer"
@@ -24,7 +25,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/server"
 	"github.com/saferwall/saferwall-api/internal/storage"
-	"github.com/saferwall/saferwall-api/internal/archive"
+	"github.com/saferwall/saferwall-api/internal/resetpwd"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/yeka/zip"
 )
@@ -83,6 +84,9 @@ func run(logger log.Logger) error {
 	// Create a securer for auth.
 	sec := secure.New(sha256.New())
 
+	// Create a reset password token service.
+	resetPassword := resetpwd.New(dbx, sha256.New(), cfg.ResetPasswordTokenExp)
+
 	// Create an uploader to upload file to object storage.
 	updown, err := storage.New(cfg.ObjStorage)
 	if err != nil {
@@ -114,7 +118,7 @@ func run(logger log.Logger) error {
 	hs := &http.Server{
 		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			updown, producer, smtpClient, archiver),
+			updown, producer, smtpClient, archiver, resetPassword),
 	}
 
 	// Start server.

@@ -5,8 +5,6 @@
 package secure
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/hex"
 	"hash"
 
@@ -36,37 +34,9 @@ func (Service) HashMatchesPassword(hash, password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
-// Token generates new unique token.
-func (Service) Token(str string) string {
-	token, _ := GenerateRandomStringURLSafe(32)
-	return token
-}
-
 // Hash hashes a stream of bytes using sha2 algorihtm.
 func (s Service) Hash(b []byte) string {
 	s.h.Reset()
 	s.h.Write(b)
 	return hex.EncodeToString(s.h.Sum(nil))
-}
-
-// GenerateRandomBytes returns securely generated random bytes.
-// It will return an error if the system's secure random
-// number generator fails to function correctly, in which
-// case the caller should not continue.
-func GenerateRandomBytes(n int) ([]byte, error) {
-	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
-		return nil, err
-	}
-
-	return b, nil
-}
-
-// GenerateRandomStringURLSafe returns a URL-safe, base64 encoded securely
-// generated random string. It will return an error if the system's secure
-// random number generator fails to function correctly, in which case the
-// caller should not continue.
-func GenerateRandomStringURLSafe(n int) (string, error) {
-	b, err := GenerateRandomBytes(n)
-	return base64.URLEncoding.EncodeToString(b), err
 }

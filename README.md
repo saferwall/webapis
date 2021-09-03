@@ -30,7 +30,7 @@ The following endpoints are available:
 ### Authentication
 
 - `POST /v1/auth/login` [authenticates a user and generates a JWT](docs/auth/login.md).
-- `POST /v1/auth/confirm` [confirms an account from email token](docs/auth/confirm.md).
+- `POST /v1/auth/confirm-account` [confirms an account from email token](docs/auth/confirm.md).
 - `POST /v1/auth/resend-confirmation` [re-send confirmation email](docs/auth/resend-confirmation.md).
 - `POST /v1/auth/reset-password` [send an email with a reset password token](docs/auth/reset-password.md).
 

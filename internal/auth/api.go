@@ -13,18 +13,30 @@ import (
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
+const (
+	msgEmailSent = "A password reset message was sent to your email address"
+)
+
 type resource struct {
 	service Service
 	logger  log.Logger
+	mailer  Mailer
+}
+
+// Mailer represents the mailer interface/
+type Mailer interface {
+	Send(body, subject, from, to string) error
 }
 
 // RegisterHandlers registers handlers for different HTTP requests.
-func RegisterHandlers(g *echo.Group, service Service, logger log.Logger) {
+func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
+	mailer Mailer) {
 
-	res := resource{service, logger}
+	res := resource{service, logger, mailer}
 
 	g.POST("/auth/login/", res.login)
 	g.POST("/auth/resend-confirmation/", res.resendConfirmation)
+	g.POST("/auth/reset-password/", res.resetPassword)
 }
 
 // login handles authentication request.
@@ -36,7 +48,7 @@ func (r resource) login(c echo.Context) error {
 	ctx := c.Request().Context()
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Errorf("invalid request: %v", err)
-		return errors.Unauthorized("Invalid username or password")
+		return errors.BadRequest("Invalid username or password")
 	}
 
 	token, err := r.service.Login(ctx, req.Username, req.Password)
@@ -63,4 +75,36 @@ func (r resource) login(c echo.Context) error {
 
 func (r resource) resendConfirmation(c echo.Context) error {
 	return nil
+}
+
+func (r resource) resetPassword(c echo.Context) error {
+	var req struct {
+		Email string `json:"email" validate:"required,email"`
+	}
+	ctx := c.Request().Context()
+	if err := c.Bind(&req); err != nil {
+		r.logger.With(ctx).Infof("invalid request: %v", err)
+		return err
+	}
+
+	resp, err := r.service.ResetPassword(ctx, req.Email)
+	if err != nil {
+		r.logger.With(ctx).Infof("invalid request: %v", err)
+		return c.JSON(http.StatusOK, struct {
+			Message string `json:"message"`
+			Status  int    `json:"status"`
+		}{msgEmailSent, http.StatusOK})
+	}
+
+	link := "https://saferwall.com/auth/reset-password?token=" +
+		resp.token + "&token=" + "&guid=" + resp.guid
+
+	go r.mailer.Send(link, "saferwall - reset password",
+		"noreply@saferwall.com", req.Email)
+
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{msgEmailSent, http.StatusOK})
+
 }

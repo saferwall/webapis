@@ -26,7 +26,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PATCH("/users/:username/", res.update, requireLogin)
 	g.PATCH("/users/:username/password/", res.password, requireLogin)
 	g.DELETE("/users/:username/", res.delete, requireLogin)
-	g.GET("/users/", res.getUsers)
+	g.GET("/users/", res.getUsers, requireLogin)
 	g.GET("/users/activities/", res.activities, optionalLogin)
 	g.GET("/users/:username/likes/", res.likes, optionalLogin)
 	g.GET("/users/:username/following/", res.following, optionalLogin)

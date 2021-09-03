@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
+	"github.com/saferwall/saferwall-api/internal/resetpwd"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -28,6 +29,16 @@ type Service interface {
 	// authenticate authenticates a user using username and password.
 	// It returns a JWT token if authentication succeeds. Otherwise, an error is returned.
 	Login(ctx context.Context, username, password string) (string, error)
+	// reset password generates a password reset token. The hash of the token
+	// is stored in the database, a GUID is also generated to retrieve the
+	// document when the user send the new password from the html form.
+	ResetPassword(ctx context.Context, email string) (ResetPasswordResponse, error)
+}
+
+type ResetPasswordResponse struct {
+	token string
+	guid  string
+	user  entity.User
 }
 
 // Identity represents an authenticated user identity.
@@ -49,12 +60,15 @@ type service struct {
 	logger          log.Logger
 	sec             Securer
 	userSvc         user.Service
+	resetpwd        resetpwd.Service
 }
 
 // NewService creates a new authentication service.
 func NewService(signingKey string, tokenExpiration int,
-	logger log.Logger, sec Securer, userSvc user.Service) Service {
-	return service{signingKey, tokenExpiration, logger, sec, userSvc}
+	logger log.Logger, sec Securer, userSvc user.Service,
+	resetPassword resetpwd.Service) Service {
+	return service{signingKey, tokenExpiration, logger, sec,
+		userSvc, resetPassword}
 }
 
 // Login authenticates a user and generates a JWT token if authentication
@@ -98,4 +112,26 @@ func (s service) generateJWT(identity Identity) (string, error) {
 		"isAdmin": identity.IsAdmin(),
 		"exp":     time.Now().Add(time.Duration(s.tokenExpiration) * time.Hour).Unix(),
 	}).SignedString([]byte(s.signingKey))
+}
+
+func (s service) ResetPassword(ctx context.Context, email string) (
+	ResetPasswordResponse, error) {
+
+	user, err := s.userSvc.GetByEmail(ctx, email)
+	if err != nil {
+		return ResetPasswordResponse{}, err
+	}
+
+	rpt, err := s.resetpwd.Create(ctx, user.Username)
+	if err != nil {
+		return ResetPasswordResponse{}, err
+	}
+
+	resp := ResetPasswordResponse{
+		token: rpt.Token,
+		guid:  rpt.ID,
+		user:  user.User,
+	}
+
+	return resp, nil
 }

@@ -94,6 +94,9 @@ type Config struct {
 	JWTSigningKey string `mapstructure:"jwt_signkey"`
 	// JWT expiration in hours.
 	JWTExpiration int `mapstructure:"jwt_expiration"`
+	// ResetPasswordTokenExp expiration the token expiration
+	// for reset password and email confirmation requests in minutes.
+	ResetPasswordTokenExp int `mapstructure:"reset_pwd_token_expiration"`
 	// Maximum file size to allow for samples.
 	MaxFileSize int64 `mapstructure:"max_file_size"`
 	// Maximum avatar size to allow for user profile picture.

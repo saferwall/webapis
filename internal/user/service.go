@@ -49,6 +49,7 @@ type Service interface {
 	CountSubmissions(ctx context.Context, id string) (int, error)
 	Follow(ctx context.Context, id string) error
 	Unfollow(ctx context.Context, id string) error
+	GetByEmail(ctx context.Context, id string) (User, error)
 	UpdateAvatar(ctx context.Context, id string, src io.Reader) error
 	UpdatePassword(ctx context.Context, input UpdatePasswordRequest) error
 }
@@ -474,6 +475,15 @@ func (s service) UpdateAvatar(ctx context.Context, id string, src io.Reader) err
 	user.HasAvatar = true
 
 	return s.repo.Update(ctx, user)
+}
+
+// GetByEmail returns the user given its email address.
+func (s service) GetByEmail(ctx context.Context, email string) (User, error) {
+	user, err := s.repo.GetByEmail(ctx, email)
+	if err != nil {
+		return User{}, err
+	}
+	return User{user}, nil
 }
 
 // isStringInSlice check if a string exist in a list of strings
