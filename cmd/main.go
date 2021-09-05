@@ -22,10 +22,11 @@ import (
 	"github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/mailer"
 	"github.com/saferwall/saferwall-api/internal/queue"
-	"github.com/saferwall/saferwall-api/internal/secure"
+	"github.com/saferwall/saferwall-api/internal/secure/password"
+	"github.com/saferwall/saferwall-api/internal/secure/token"
 	"github.com/saferwall/saferwall-api/internal/server"
 	"github.com/saferwall/saferwall-api/internal/storage"
-	"github.com/saferwall/saferwall-api/internal/resetpwd"
+	tpl "github.com/saferwall/saferwall-api/internal/template"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/yeka/zip"
 )
@@ -81,11 +82,11 @@ func run(logger log.Logger) error {
 	validate := validator.New()
 	en_translations.RegisterDefaultTranslations(validate, trans)
 
-	// Create a securer for auth.
-	sec := secure.New(sha256.New())
+	// Create a password securer for auth.
+	sec := password.New(sha256.New())
 
-	// Create a reset password token service.
-	resetPassword := resetpwd.New(dbx, sha256.New(), cfg.ResetPasswordTokenExp)
+	// Create a token generator service.
+	tokenGen := token.New(dbx, sha256.New(), cfg.ResetPasswordTokenExp)
 
 	// Create an uploader to upload file to object storage.
 	updown, err := storage.New(cfg.ObjStorage)
@@ -104,21 +105,25 @@ func run(logger log.Logger) error {
 
 	// Create email client.
 	var smtpClient mailer.SMTPClient
-	if !cfg.Debug {
+	var emailTemplates tpl.Service
+	if cfg.Debug {
 		smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
 			cfg.SMTP.Password)
 		smtpClient, err = smtpServer.Connect()
 		if err != nil {
 			return err
 		}
-		mailer.ParseTemplates(*flagN1QLFiles)
+		emailTemplates, err = tpl.New(*flagTplFiles)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Build HTTP server.
 	hs := &http.Server{
 		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			updown, producer, smtpClient, archiver, resetPassword),
+			updown, producer, smtpClient, archiver, tokenGen, emailTemplates),
 	}
 
 	// Start server.

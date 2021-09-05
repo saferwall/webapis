@@ -17,6 +17,7 @@ import (
 
 	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/entity"
+	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -52,6 +53,7 @@ type Service interface {
 	GetByEmail(ctx context.Context, id string) (User, error)
 	UpdateAvatar(ctx context.Context, id string, src io.Reader) error
 	UpdatePassword(ctx context.Context, input UpdatePasswordRequest) error
+	GenerateConfirmationEmail(ctx context.Context, id string) (ConfirmAccountResponse, error)
 }
 
 var (
@@ -70,24 +72,19 @@ type User struct {
 	entity.User
 }
 
-// Securer represents security interface.
-type Securer interface {
-	HashPW(string) string
-	HashMatchesPassword(string, string) bool
-}
-
 // Uploader represents the file upload interface.
 type Uploader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
 }
 
 type service struct {
-	sec    Securer
-	repo   Repository
-	logger log.Logger
-	actSvc activity.Service
-	bucket string
-	objsto Uploader
+	repo     Repository
+	logger   log.Logger
+	tokenGen secure.TokenGenerator
+	sec      secure.Password
+	actSvc   activity.Service
+	bucket   string
+	objsto   Uploader
 }
 
 // CreateUserRequest represents a user creation request.
@@ -111,10 +108,16 @@ type UpdatePasswordRequest struct {
 	NewPassword string `json:"new" validate:"required,necsfield=OldPassword,min=8,max=30"`
 }
 
+// ConfirmAccountResponse holds data coming from the token generator.
+type ConfirmAccountResponse struct {
+	token string
+	guid  string
+}
+
 // NewService creates a new user service.
-func NewService(repo Repository, logger log.Logger, sec Securer,
-	bucket string, upl Uploader, actSvc activity.Service) Service {
-	return service{sec, repo, logger, actSvc, bucket, upl}
+func NewService(repo Repository, logger log.Logger, tokenGen secure.TokenGenerator,
+	sec secure.Password, bucket string, upl Uploader, actSvc activity.Service) Service {
+	return service{repo, logger, tokenGen, sec, actSvc, bucket, upl}
 }
 
 // Get returns the user with the specified user ID.
@@ -152,7 +155,7 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 	err = s.repo.Create(ctx, entity.User{
 		Type:        "user",
 		Username:    req.Username,
-		Password:    s.sec.HashPW(req.Password),
+		Password:    s.sec.HashPassword(req.Password),
 		Email:       req.Email,
 		MemberSince: now.Unix(),
 		LastSeen:    now.Unix(),
@@ -438,7 +441,7 @@ func (s service) UpdatePassword(ctx context.Context, input UpdatePasswordRequest
 		return errWrongPassword
 	}
 
-	user.Password = s.sec.HashPW(input.NewPassword)
+	user.Password = s.sec.HashPassword(input.NewPassword)
 	return s.repo.Update(ctx, user)
 }
 
@@ -484,6 +487,22 @@ func (s service) GetByEmail(ctx context.Context, email string) (User, error) {
 		return User{}, err
 	}
 	return User{user}, nil
+}
+
+func (s service) GenerateConfirmationEmail(ctx context.Context, ownerID string) (
+	ConfirmAccountResponse, error) {
+
+	rpt, err := s.tokenGen.Create(ctx, ownerID)
+	if err != nil {
+		return ConfirmAccountResponse{}, err
+	}
+
+	resp := ConfirmAccountResponse{
+		token: rpt.Token,
+		guid:  rpt.ID,
+	}
+
+	return resp, nil
 }
 
 // isStringInSlice check if a string exist in a list of strings

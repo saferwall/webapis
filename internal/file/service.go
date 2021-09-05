@@ -7,6 +7,8 @@ package file
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
@@ -50,11 +52,6 @@ type File struct {
 	entity.File
 }
 
-// Securer represents security interface.
-type Securer interface {
-	Hash([]byte) string
-}
-
 type UploadDownloader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
 	Download(ctx context.Context, bucket, key string, file io.Writer) error
@@ -79,7 +76,6 @@ type CreateFileRequest struct {
 }
 
 type service struct {
-	sec      Securer
 	repo     Repository
 	logger   log.Logger
 	objsto   UploadDownloader
@@ -115,10 +111,10 @@ type UpdateFileRequest struct {
 }
 
 // NewService creates a new File service.
-func NewService(repo Repository, logger log.Logger, sec Securer,
+func NewService(repo Repository, logger log.Logger,
 	updown UploadDownloader, producer Producer, topic, bucket string,
 	userSvc user.Service, actSvc activity.Service, arch Archiver) Service {
-	return service{sec, repo, logger, updown,
+	return service{repo, logger, updown,
 		producer, topic, bucket, userSvc, actSvc, arch}
 }
 
@@ -141,7 +137,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		return File{}, err
 	}
 
-	sha256 := s.sec.Hash(fileContent)
+	sha256 := hash(fileContent)
 	file, err := s.Get(ctx, sha256, nil)
 	if err != nil && err.Error() != ErrDocumentNotFound {
 		return File{}, err
@@ -392,4 +388,11 @@ func removeStringFromSlice(s []string, r string) []string {
 		}
 	}
 	return s
+}
+
+// hash calculates the sha256 hash over a stream of bytes.
+func hash(b []byte) string {
+	h := sha256.New()
+	h.Write(b)
+	return hex.EncodeToString(h.Sum(nil))
 }

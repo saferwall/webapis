@@ -17,9 +17,10 @@ import (
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
 	"github.com/saferwall/saferwall-api/internal/mailer"
 	"github.com/saferwall/saferwall-api/internal/queue"
-	"github.com/saferwall/saferwall-api/internal/resetpwd"
-	"github.com/saferwall/saferwall-api/internal/secure"
+	"github.com/saferwall/saferwall-api/internal/secure/password"
+	"github.com/saferwall/saferwall-api/internal/secure/token"
 	"github.com/saferwall/saferwall-api/internal/storage"
+	tpl "github.com/saferwall/saferwall-api/internal/template"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -38,11 +39,12 @@ type Server struct {
 }
 
 // BuildHandler sets up the HTTP routing and builds an HTTP handler.
-func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
+func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	cfg *config.Config, version string, trans ut.Translator,
 	updown storage.UploadDownloader, p queue.Producer,
 	smtpClient mailer.SMTPClient, arch archive.Archiver,
-	resetPassword resetpwd.Service) http.Handler {
+	tokenGen token.Service,
+	emailTpl tpl.Service) http.Handler {
 
 	// Create `echo` instance.
 	e := echo.New()
@@ -93,17 +95,17 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec *secure.Service,
 
 	// Create the services and register the handlers.
 	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
-	userSvc := user.NewService(user.NewRepository(db, logger), logger, sec,
-		cfg.ObjStorage.AvatarsContainerName, updown, actSvc)
+	userSvc := user.NewService(user.NewRepository(db, logger), logger, tokenGen,
+		sec, cfg.ObjStorage.AvatarsContainerName, updown, actSvc)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
-		sec, userSvc, resetPassword)
-	fileSvc := file.NewService(file.NewRepository(db, logger), logger, sec, updown,
+		sec, userSvc, tokenGen)
+	fileSvc := file.NewService(file.NewRepository(db, logger), logger, updown,
 		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, userSvc, actSvc,
 		arch)
 
 	healthcheck.RegisterHandlers(e, version)
-	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger, smtpClient)
-	auth.RegisterHandlers(g, authSvc, logger, smtpClient)
+	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger, smtpClient, emailTpl)
+	auth.RegisterHandlers(g, authSvc, logger, smtpClient, emailTpl)
 	file.RegisterHandlers(g, fileSvc, authHandler, logger)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 

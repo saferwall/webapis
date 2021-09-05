@@ -13,15 +13,17 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
-	"github.com/saferwall/saferwall-api/internal/resetpwd"
+	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
 var (
 	errUserNotFound     = e.New("user not found")
-	errWrongPassword    = e.New("wrong password")
 	errUserNotConfirmed = e.New("account non confirmed")
+	errWrongPassword    = e.New("wrong password")
+	errExpiredToken     = e.New("token expired")
+	errMalformedToken   = e.New("malformed token")
 )
 
 // Service encapsulates the authentication logic.
@@ -33,6 +35,8 @@ type Service interface {
 	// is stored in the database, a GUID is also generated to retrieve the
 	// document when the user send the new password from the html form.
 	ResetPassword(ctx context.Context, email string) (ResetPasswordResponse, error)
+	// VerifyAccount confirms the user account by verifying the token.
+	VerifyAccount(ctx context.Context, id, token string) error
 }
 
 type ResetPasswordResponse struct {
@@ -49,26 +53,20 @@ type Identity interface {
 	IsAdmin() bool
 }
 
-// Securer represents security interface.
-type Securer interface {
-	HashMatchesPassword(string, string) bool
-}
-
 type service struct {
 	signingKey      string
 	tokenExpiration int
 	logger          log.Logger
-	sec             Securer
+	sec             secure.Password
+	tokenGen        secure.TokenGenerator
 	userSvc         user.Service
-	resetpwd        resetpwd.Service
 }
 
 // NewService creates a new authentication service.
 func NewService(signingKey string, tokenExpiration int,
-	logger log.Logger, sec Securer, userSvc user.Service,
-	resetPassword resetpwd.Service) Service {
-	return service{signingKey, tokenExpiration, logger, sec,
-		userSvc, resetPassword}
+	logger log.Logger, sec secure.Password, userSvc user.Service,
+	tokenGen secure.TokenGenerator) Service {
+	return service{signingKey, tokenExpiration, logger, sec, tokenGen, userSvc}
 }
 
 // Login authenticates a user and generates a JWT token if authentication
@@ -114,6 +112,31 @@ func (s service) generateJWT(identity Identity) (string, error) {
 	}).SignedString([]byte(s.signingKey))
 }
 
+func (s service) VerifyAccount(ctx context.Context, id,
+	token string) error {
+
+	confirmAccTok, err := s.tokenGen.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	exp := time.Unix(confirmAccTok.Expiration, 0)
+	if exp.Before(time.Now()) {
+		return errExpiredToken
+	}
+
+	if !s.tokenGen.HashMatchesToken(ctx, confirmAccTok.Secret, token) {
+		return errMalformedToken
+	}
+
+	userID := strings.ToLower(confirmAccTok.OwnerID)
+	err = s.userSvc.Patch(ctx, userID, "confirmed", true)
+	if err != nil {
+		return err
+	}
+	return s.tokenGen.Delete(ctx, id)
+}
+
 func (s service) ResetPassword(ctx context.Context, email string) (
 	ResetPasswordResponse, error) {
 
@@ -122,7 +145,7 @@ func (s service) ResetPassword(ctx context.Context, email string) (
 		return ResetPasswordResponse{}, err
 	}
 
-	rpt, err := s.resetpwd.Create(ctx, user.Username)
+	rpt, err := s.tokenGen.Create(ctx, user.Username)
 	if err != nil {
 		return ResetPasswordResponse{}, err
 	}

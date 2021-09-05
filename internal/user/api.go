@@ -5,21 +5,23 @@
 package user
 
 import (
+	"bytes"
 	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
+	tpl "github.com/saferwall/saferwall-api/internal/template"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
 	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
-	logger log.Logger, mailer Mailer) {
+	logger log.Logger, mailer Mailer, templater tpl.Service) {
 
-	res := resource{service, logger, mailer}
+	res := resource{service, logger, mailer, templater}
 
 	g.POST("/users/", res.create)
 	g.GET("/users/:username/", res.get)
@@ -27,6 +29,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PATCH("/users/:username/password/", res.password, requireLogin)
 	g.DELETE("/users/:username/", res.delete, requireLogin)
 	g.GET("/users/", res.getUsers, requireLogin)
+	g.POST("/users/resend-confirmation/", res.resendConfirmation)
 	g.GET("/users/activities/", res.activities, optionalLogin)
 	g.GET("/users/:username/likes/", res.likes, optionalLogin)
 	g.GET("/users/:username/following/", res.following, optionalLogin)
@@ -38,15 +41,16 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.POST("/users/:username/avatar/", res.avatar, requireLogin)
 }
 
-// Mailer represents the mailer interface/
+// Mailer represents the mailer interface.
 type Mailer interface {
 	Send(body, subject, from, to string) error
 }
 
 type resource struct {
-	service Service
-	logger  log.Logger
-	mailer  Mailer
+	service   Service
+	logger    log.Logger
+	mailer    Mailer
+	templater tpl.Service
 }
 
 func (r resource) get(c echo.Context) error {
@@ -78,8 +82,38 @@ func (r resource) create(c echo.Context) error {
 		}
 	}
 
-	go r.mailer.Send("hello", "saferwall - confirm account", "noreply@saferwall.com",
-		user.Email)
+	resp, err := r.service.GenerateConfirmationEmail(ctx, user.Username)
+	if err != nil {
+		r.logger.With(ctx).Error("generate confirmation email failed: %v", err)
+		return err
+	}
+
+	body := new(bytes.Buffer)
+	link := c.Request().Host + "/auth/verify-account?token=" +
+		resp.token + "&guid=" + resp.guid
+	templateData := struct {
+		Username     string
+		ActionURL    string
+		LoginURL     string
+		LiveChatURL  string
+		HelpURL      string
+		SupportEmail string
+	}{
+		Username:     user.Username,
+		ActionURL:    link,
+		LoginURL:     "https://saferwall.com/auth/login",
+		LiveChatURL:  "https://discord.gg/an37PYHeZP",
+		HelpURL:      "https://about.saferwall.com/",
+		SupportEmail: "contact@saferwall.com",
+	}
+
+	confirmAccountTpl := r.templater.EmailRequestTemplate[tpl.ConfirmAccount]
+	if err = confirmAccountTpl.Execute(templateData, body); err != nil {
+		return err
+	}
+
+	go r.mailer.Send(body.String(),
+		confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
 	user.Email = ""
 	user.Password = ""
 	return c.JSON(http.StatusCreated, user)
@@ -368,4 +402,61 @@ func (r resource) password(c echo.Context) error {
 		Message string `json:"message"`
 		Status  int    `json:"status"`
 	}{"ok", http.StatusOK})
+}
+
+func (r resource) resendConfirmation(c echo.Context) error {
+
+	var req struct {
+		Email string `json:"email" validate:"required,email"`
+	}
+	ctx := c.Request().Context()
+	if err := c.Bind(&req); err != nil {
+		r.logger.With(ctx).Infof("invalid request: %v", err)
+		return errors.BadRequest(err.Error())
+	}
+
+	user, err := r.service.GetByEmail(ctx, req.Email)
+	if err != nil {
+		r.logger.With(ctx).Infof("invalid request: %v", err)
+		return err
+	}
+
+	resp, err := r.service.GenerateConfirmationEmail(ctx, req.Email)
+	if err != nil {
+		r.logger.With(ctx).Error("generate confirmation email failed: %v", err)
+		return err
+	}
+
+	body := new(bytes.Buffer)
+	link := c.Request().Host + "/auth/verify-account?token=" +
+		resp.token + "&guid=" + resp.guid
+	templateData := struct {
+		Username     string
+		ActionURL    string
+		LoginURL     string
+		LiveChatURL  string
+		HelpURL      string
+		SupportEmail string
+	}{
+		Username:     user.Username,
+		ActionURL:    link,
+		LoginURL:     "https://saferwall.com/auth/login",
+		LiveChatURL:  "https://discord.gg/an37PYHeZP",
+		HelpURL:      "https://about.saferwall.com/",
+		SupportEmail: "contact@saferwall.com",
+	}
+
+	confirmAccountTpl := r.templater.EmailRequestTemplate[tpl.ConfirmAccount]
+	if err = confirmAccountTpl.Execute(templateData, body); err != nil {
+		return err
+	}
+
+	go r.mailer.Send(body.String(),
+		confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
+
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+
 }

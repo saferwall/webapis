@@ -5,8 +5,11 @@
 package auth
 
 import (
+	"bytes"
 	"net/http"
 	"time"
+
+	tpl "github.com/saferwall/saferwall-api/internal/template"
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/errors"
@@ -18,9 +21,10 @@ const (
 )
 
 type resource struct {
-	service Service
-	logger  log.Logger
-	mailer  Mailer
+	service   Service
+	logger    log.Logger
+	mailer    Mailer
+	templater tpl.Service
 }
 
 // Mailer represents the mailer interface/
@@ -30,13 +34,13 @@ type Mailer interface {
 
 // RegisterHandlers registers handlers for different HTTP requests.
 func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
-	mailer Mailer) {
+	mailer Mailer, templater tpl.Service) {
 
-	res := resource{service, logger, mailer}
+	res := resource{service, logger, mailer, templater}
 
 	g.POST("/auth/login/", res.login)
-	g.POST("/auth/resend-confirmation/", res.resendConfirmation)
 	g.POST("/auth/reset-password/", res.resetPassword)
+	g.GET("/auth/verify-account/", res.verifyAccount)
 }
 
 // login handles authentication request.
@@ -73,8 +77,22 @@ func (r resource) login(c echo.Context) error {
 	}{token})
 }
 
-func (r resource) resendConfirmation(c echo.Context) error {
-	return nil
+func (r resource) verifyAccount(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.VerifyAccount(ctx, c.QueryParam("guid"), c.QueryParam("token"))
+	if err != nil {
+		r.logger.With(ctx).Errorf("verify account failed: %v", err)
+		switch err {
+		case errExpiredToken:
+			return errors.Unauthorized(err.Error())
+		case errMalformedToken:
+			return errors.BadRequest(err.Error())
+		}
+		return err
+	}
+
+	return c.Redirect(http.StatusPermanentRedirect, c.Request().Host)
+
 }
 
 func (r resource) resetPassword(c echo.Context) error {
@@ -84,23 +102,37 @@ func (r resource) resetPassword(c echo.Context) error {
 	ctx := c.Request().Context()
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Infof("invalid request: %v", err)
-		return err
+		return errors.BadRequest(err.Error())
 	}
 
 	resp, err := r.service.ResetPassword(ctx, req.Email)
 	if err != nil {
-		r.logger.With(ctx).Infof("invalid request: %v", err)
-		return c.JSON(http.StatusOK, struct {
-			Message string `json:"message"`
-			Status  int    `json:"status"`
-		}{msgEmailSent, http.StatusOK})
+		r.logger.With(ctx).Error("reset password failed: %v", err)
+		return err
 	}
 
-	link := "https://saferwall.com/auth/reset-password?token=" +
-		resp.token + "&token=" + "&guid=" + resp.guid
+	body := new(bytes.Buffer)
+	link := c.Request().Host + "/auth/reset-password?token=" +
+		resp.token + "&guid=" + resp.guid
+	templateData := struct {
+		Username     string
+		ActionURL    string
+		HelpURL      string
+		SupportEmail string
+	}{
+		Username:     resp.user.Username,
+		ActionURL:    link,
+		HelpURL:      "https://about.saferwall.com/",
+		SupportEmail: "contact@saferwall.com",
+	}
 
-	go r.mailer.Send(link, "saferwall - reset password",
-		"noreply@saferwall.com", req.Email)
+	resetPasswordTpl := r.templater.EmailRequestTemplate[tpl.ResetPassword]
+	if err = resetPasswordTpl.Execute(templateData, body); err != nil {
+		return err
+	}
+
+	go r.mailer.Send(body.String(),
+		resetPasswordTpl.Subject, resetPasswordTpl.From, resp.user.Email)
 
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`

@@ -7,6 +7,7 @@ package file
 import (
 	"context"
 	"encoding/json"
+	"strings"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -84,7 +85,7 @@ func (r repository) Patch(ctx context.Context, key, path string,
 
 // Delete deletes a file with the specified ID from the database.
 func (r repository) Delete(ctx context.Context, id string) error {
-	key := "files::" + id
+	key := strings.ToLower(id)
 	return r.db.Delete(ctx, key)
 }
 
