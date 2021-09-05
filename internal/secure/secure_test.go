@@ -5,13 +5,11 @@
 package secure_test
 
 import (
-	"crypto/sha1"
 	"testing"
 
 	"github.com/saferwall/saferwall-api/internal/secure"
 	"github.com/stretchr/testify/assert"
 )
-
 
 func TestHashAndMatch(t *testing.T) {
 	cases := []struct {
@@ -32,11 +30,4 @@ func TestHashAndMatch(t *testing.T) {
 			assert.Equal(t, tt.want, s.HashMatchesPassword(hash, tt.pass))
 		})
 	}
-}
-
-func TestToken(t *testing.T) {
-	s := secure.New(sha1.New())
-	token := "token"
-	tokenized := s.Token(token)
-	assert.NotEqual(t, tokenized, token)
 }
