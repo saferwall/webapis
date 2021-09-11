@@ -53,16 +53,19 @@ type Service interface {
 	GetByEmail(ctx context.Context, id string) (User, error)
 	UpdateAvatar(ctx context.Context, id string, src io.Reader) error
 	UpdatePassword(ctx context.Context, input UpdatePasswordRequest) error
+	UpdateEmail(ctx context.Context, input UpdateEmailRequest) error
 	GenerateConfirmationEmail(ctx context.Context, id string) (ConfirmAccountResponse, error)
 }
 
 var (
 	// avatar upload timeout in seconds.
-	avatarUploadTimeout   = time.Duration(time.Second * 10)
-	errEmailAlreadyExists = errors.New("email already exists")
-	errUserAlreadyExists  = errors.New("username already exists")
-	errWrongPassword      = errors.New("wrong password")
-	errUserSelfFollow     = errors.New(
+	avatarUploadTimeout     = time.Duration(time.Second * 10)
+	errEmailAlreadyExists   = errors.New("email already exists")
+	errUserAlreadyExists    = errors.New("username already exists")
+	errUserNotFound         = errors.New("user not found")
+	errUserAlreadyConfirmed = errors.New("email already confirmed")
+	errWrongPassword        = errors.New("wrong password")
+	errUserSelfFollow       = errors.New(
 		"source and target user in follow request is the same")
 	errImageFormatNotSupported = errors.New("unsupported file type")
 )
@@ -108,10 +111,17 @@ type UpdatePasswordRequest struct {
 	NewPassword string `json:"new" validate:"required,necsfield=OldPassword,min=8,max=30"`
 }
 
+// UpdateEmailRequest represents an email update request.
+type UpdateEmailRequest struct {
+	Password string `json:"password" validate:"required,min=8,max=30"`
+	NewEmail string `json:"email" validate:"required,email"`
+}
+
 // ConfirmAccountResponse holds data coming from the token generator.
 type ConfirmAccountResponse struct {
-	token string
-	guid  string
+	token    string
+	guid     string
+	username string
 }
 
 // NewService creates a new user service.
@@ -445,6 +455,21 @@ func (s service) UpdatePassword(ctx context.Context, input UpdatePasswordRequest
 	return s.repo.Update(ctx, user)
 }
 
+func (s service) UpdateEmail(ctx context.Context, input UpdateEmailRequest) error {
+
+	var id string
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		id = user.ID()
+	}
+
+	_, err := s.repo.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return s.repo.Patch(ctx, id, "email", input.NewEmail)
+}
+
 func (s service) UpdateAvatar(ctx context.Context, id string, src io.Reader) error {
 
 	user, err := s.repo.Get(ctx, id)
@@ -492,14 +517,24 @@ func (s service) GetByEmail(ctx context.Context, email string) (User, error) {
 func (s service) GenerateConfirmationEmail(ctx context.Context, ownerID string) (
 	ConfirmAccountResponse, error) {
 
-	rpt, err := s.tokenGen.Create(ctx, ownerID)
+	user, err := s.GetByEmail(ctx, ownerID)
+	if err != nil {
+		return ConfirmAccountResponse{}, err
+	}
+
+	if user.Confirmed {
+		return ConfirmAccountResponse{}, errUserAlreadyConfirmed
+	}
+
+	rpt, err := s.tokenGen.Create(ctx, user.ID())
 	if err != nil {
 		return ConfirmAccountResponse{}, err
 	}
 
 	resp := ConfirmAccountResponse{
-		token: rpt.Token,
-		guid:  rpt.ID,
+		username: user.Username,
+		token:    rpt.Token,
+		guid:     rpt.ID,
 	}
 
 	return resp, nil

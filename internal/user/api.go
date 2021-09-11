@@ -27,6 +27,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.GET("/users/:username/", res.get)
 	g.PATCH("/users/:username/", res.update, requireLogin)
 	g.PATCH("/users/:username/password/", res.password, requireLogin)
+	g.PATCH("/users/:username/email/", res.email, requireLogin)
 	g.DELETE("/users/:username/", res.delete, requireLogin)
 	g.GET("/users/", res.getUsers, requireLogin)
 	g.POST("/users/resend-confirmation/", res.resendConfirmation)
@@ -89,7 +90,7 @@ func (r resource) create(c echo.Context) error {
 	}
 
 	body := new(bytes.Buffer)
-	link := c.Request().Host + "/auth/verify-account?token=" +
+	actionURL := c.Request().Host + "/auth/verify-account/?token=" +
 		resp.token + "&guid=" + resp.guid
 	templateData := struct {
 		Username     string
@@ -100,7 +101,7 @@ func (r resource) create(c echo.Context) error {
 		SupportEmail string
 	}{
 		Username:     user.Username,
-		ActionURL:    link,
+		ActionURL:    actionURL,
 		LoginURL:     "https://saferwall.com/auth/login",
 		LiveChatURL:  "https://discord.gg/an37PYHeZP",
 		HelpURL:      "https://about.saferwall.com/",
@@ -404,6 +405,35 @@ func (r resource) password(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// email handle update email request for authenticated users.
+func (r resource) email(c echo.Context) error {
+	var req UpdateEmailRequest
+	ctx := c.Request().Context()
+	if err := c.Bind(&req); err != nil {
+		r.logger.With(ctx).Errorf("invalid request: %v", err)
+		return err
+	}
+
+	var curUsername string
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		curUsername = user.ID()
+	}
+
+	if curUsername != strings.ToLower(c.Param("username")) {
+		return errors.Forbidden("")
+	}
+
+	err := r.service.UpdateEmail(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
 func (r resource) resendConfirmation(c echo.Context) error {
 
 	var req struct {
@@ -415,12 +445,6 @@ func (r resource) resendConfirmation(c echo.Context) error {
 		return errors.BadRequest(err.Error())
 	}
 
-	user, err := r.service.GetByEmail(ctx, req.Email)
-	if err != nil {
-		r.logger.With(ctx).Infof("invalid request: %v", err)
-		return err
-	}
-
 	resp, err := r.service.GenerateConfirmationEmail(ctx, req.Email)
 	if err != nil {
 		r.logger.With(ctx).Error("generate confirmation email failed: %v", err)
@@ -428,7 +452,7 @@ func (r resource) resendConfirmation(c echo.Context) error {
 	}
 
 	body := new(bytes.Buffer)
-	link := c.Request().Host + "/auth/verify-account?token=" +
+	link := c.Request().Host + "/v1/auth/verify-account/?token=" +
 		resp.token + "&guid=" + resp.guid
 	templateData := struct {
 		Username     string
@@ -438,7 +462,7 @@ func (r resource) resendConfirmation(c echo.Context) error {
 		HelpURL      string
 		SupportEmail string
 	}{
-		Username:     user.Username,
+		Username:     resp.username,
 		ActionURL:    link,
 		LoginURL:     "https://saferwall.com/auth/login",
 		LiveChatURL:  "https://discord.gg/an37PYHeZP",
@@ -452,7 +476,7 @@ func (r resource) resendConfirmation(c echo.Context) error {
 	}
 
 	go r.mailer.Send(body.String(),
-		confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
+		confirmAccountTpl.Subject, confirmAccountTpl.From, req.Email)
 
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`

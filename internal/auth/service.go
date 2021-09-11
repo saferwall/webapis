@@ -37,6 +37,8 @@ type Service interface {
 	ResetPassword(ctx context.Context, email string) (ResetPasswordResponse, error)
 	// VerifyAccount confirms the user account by verifying the token.
 	VerifyAccount(ctx context.Context, id, token string) error
+	// create a new password if the user has already a reset password token.
+	CreateNewPassword(ctx context.Context, id, password, token string) error
 }
 
 type ResetPasswordResponse struct {
@@ -142,6 +144,9 @@ func (s service) ResetPassword(ctx context.Context, email string) (
 
 	user, err := s.userSvc.GetByEmail(ctx, email)
 	if err != nil {
+		if err.Error() == "user not found" {
+			return ResetPasswordResponse{}, errUserNotFound
+		}
 		return ResetPasswordResponse{}, err
 	}
 
@@ -157,4 +162,30 @@ func (s service) ResetPassword(ctx context.Context, email string) (
 	}
 
 	return resp, nil
+}
+
+func (s service) CreateNewPassword(ctx context.Context, id,
+	token, password string) error {
+
+	confirmAccTok, err := s.tokenGen.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	exp := time.Unix(confirmAccTok.Expiration, 0)
+	if exp.Before(time.Now()) {
+		return errExpiredToken
+	}
+
+	if !s.tokenGen.HashMatchesToken(ctx, confirmAccTok.Secret, token) {
+		return errMalformedToken
+	}
+
+	passwordHash := s.sec.HashPassword(password)
+	userID := strings.ToLower(confirmAccTok.OwnerID)
+	err = s.userSvc.Patch(ctx, userID, "password", passwordHash)
+	if err != nil {
+		return err
+	}
+	return s.tokenGen.Delete(ctx, id)
 }

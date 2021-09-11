@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	msgEmailSent = "A password reset message was sent to your email address"
+	msgEmailSent = "A request to reset your password has been sent to your email address"
 )
 
 type resource struct {
@@ -40,6 +40,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 	g.POST("/auth/login/", res.login)
 	g.POST("/auth/reset-password/", res.resetPassword)
+	g.POST("/auth/password/", res.createNewPassword)
 	g.GET("/auth/verify-account/", res.verifyAccount)
 }
 
@@ -107,12 +108,19 @@ func (r resource) resetPassword(c echo.Context) error {
 
 	resp, err := r.service.ResetPassword(ctx, req.Email)
 	if err != nil {
+		switch err {
+		case errUserNotFound:
+			return c.JSON(http.StatusOK, struct {
+				Message string `json:"message"`
+				Status  int    `json:"status"`
+			}{msgEmailSent, http.StatusOK})
+		}
 		r.logger.With(ctx).Error("reset password failed: %v", err)
 		return err
 	}
 
 	body := new(bytes.Buffer)
-	link := c.Request().Host + "/auth/reset-password?token=" +
+	link := c.Request().Host + "/v1/auth/password/?token=" +
 		resp.token + "&guid=" + resp.guid
 	templateData := struct {
 		Username     string
@@ -138,5 +146,33 @@ func (r resource) resetPassword(c echo.Context) error {
 		Message string `json:"message"`
 		Status  int    `json:"status"`
 	}{msgEmailSent, http.StatusOK})
+
+}
+
+func (r resource) createNewPassword(c echo.Context) error {
+	var req struct {
+		Token    string `json:"token" validate:"required"`
+		GUID     string `json:"guid" validate:"required"`
+		Password string `json:"password" validate:"required,min=8,max=30"`
+	}
+	ctx := c.Request().Context()
+	if err := c.Bind(&req); err != nil {
+		r.logger.With(ctx).Errorf("invalid request: %v", err)
+		return err
+	}
+
+	err := r.service.CreateNewPassword(ctx, req.GUID, req.Token, req.Password)
+	if err != nil {
+		r.logger.With(ctx).Errorf("create new password failed: %v", err)
+		switch err {
+		case errExpiredToken:
+			return errors.Unauthorized(err.Error())
+		case errMalformedToken:
+			return errors.BadRequest(err.Error())
+		}
+		return err
+	}
+
+	return c.Redirect(http.StatusPermanentRedirect, c.Request().Host)
 
 }

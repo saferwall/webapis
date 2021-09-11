@@ -18,11 +18,13 @@ type EmailTemplate int
 const (
 	ConfirmAccount = iota
 	ResetPassword
+	EmailUpdate
 )
 
 var emailTplMap = map[string]EmailTemplate{
 	"account-confirmation": ConfirmAccount,
 	"password-reset":       ResetPassword,
+	"email-update":         EmailUpdate,
 }
 
 type Service struct {
@@ -75,7 +77,7 @@ func New(filePath string) (Service, error) {
 
 		er := EmailRequest{
 			From: "noreply@saferwall.com",
-			tpl: t,
+			tpl:  t,
 		}
 
 		switch name {
@@ -83,6 +85,8 @@ func New(filePath string) (Service, error) {
 			er.Subject = "saferwall - confirm account"
 		case "password-reset":
 			er.Subject = "saferwall - reset password"
+		case "email-update":
+			er.Subject = "saferwall - confirm new email"
 		}
 		templates[key] = er
 	}

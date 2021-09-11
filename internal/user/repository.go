@@ -143,6 +143,10 @@ func (r repository) GetByEmail(ctx context.Context, email string) (
 		return entity.User{}, nil
 	}
 
+	if res.([]interface{}) == nil {
+		return entity.User{}, errUserNotFound
+	}
+
 	user := entity.User{}
 	b, _ := json.Marshal(res.([]interface{})[0])
 	json.Unmarshal(b, &user)
