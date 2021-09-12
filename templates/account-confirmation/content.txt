@@ -1,10 +1,6 @@
-Thanks for trying out saferwall. We’ve pulled together some information and resources to help you get started.
-
-Blog and documentation ( https://about.saferwall.com )
-
-******************
+***********************
 Welcome, {{.Username}}!
-******************
+***********************
 
 Thanks for trying saferwall. We’re thrilled to have you on board. To get the most out of saferwall, do this primary next step:
 

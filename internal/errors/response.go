@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/saferwall/saferwall-api/internal/db"
 	ut "github.com/go-playground/universal-translator"
 	validator "github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"github.com/saferwall/saferwall-api/internal/db"
 )
 
 // ErrorResponse is the response that represents an error.

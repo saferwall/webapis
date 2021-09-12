@@ -1,7 +1,3 @@
-Use this link to reset your password. The link is only valid for 10 minutes.
-
-Saferwall ( https://saferwall.com )
-
 *****************
 Hi {{.Username}},
 *****************

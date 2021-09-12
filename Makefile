@@ -27,7 +27,9 @@ WHITE        := $(shell tput -Txterm setaf 7)
 RESET := $(shell tput -Txterm sgr0)
 
 # Our config file.
-include $(ROOT_DIR)/.env
+include .env
+-include private.env
+export
 
 # Include our internals makefiles.
 include build/docker.mk

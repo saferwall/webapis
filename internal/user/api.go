@@ -83,14 +83,14 @@ func (r resource) create(c echo.Context) error {
 		}
 	}
 
-	resp, err := r.service.GenerateConfirmationEmail(ctx, user.Username)
+	resp, err := r.service.GenerateConfirmationEmail(ctx, user)
 	if err != nil {
-		r.logger.With(ctx).Error("generate confirmation email failed: %v", err)
+		r.logger.With(ctx).Errorf("generate confirmation email failed: %v", err)
 		return err
 	}
 
 	body := new(bytes.Buffer)
-	actionURL := c.Request().Host + "/auth/verify-account/?token=" +
+	actionURL := c.Request().Host + "/v1/auth/verify-account/?token=" +
 		resp.token + "&guid=" + resp.guid
 	templateData := struct {
 		Username     string
@@ -445,10 +445,22 @@ func (r resource) resendConfirmation(c echo.Context) error {
 		return errors.BadRequest(err.Error())
 	}
 
-	resp, err := r.service.GenerateConfirmationEmail(ctx, req.Email)
+	user, err := r.service.GetByEmail(ctx, req.Email)
 	if err != nil {
-		r.logger.With(ctx).Error("generate confirmation email failed: %v", err)
-		return err
+		r.logger.With(ctx).Errorf("get by email failed: %v", err)
+		return c.JSON(http.StatusOK, struct {
+			Message string `json:"message"`
+			Status  int    `json:"status"`
+		}{"ok", http.StatusOK})
+	}
+
+	resp, err := r.service.GenerateConfirmationEmail(ctx, user)
+	if err != nil {
+		r.logger.With(ctx).Errorf("generate confirmation email failed: %v", err)
+		return c.JSON(http.StatusOK, struct {
+			Message string `json:"message"`
+			Status  int    `json:"status"`
+		}{"ok", http.StatusOK})
 	}
 
 	body := new(bytes.Buffer)

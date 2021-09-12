@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"runtime/debug"
 
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
@@ -104,8 +105,9 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 		arch)
 
 	healthcheck.RegisterHandlers(e, version)
-	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, logger, smtpClient, emailTpl)
-	auth.RegisterHandlers(g, authSvc, logger, smtpClient, emailTpl)
+	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler,
+		logger, smtpClient, emailTpl)
+	auth.RegisterHandlers(g, authSvc, logger, smtpClient, emailTpl, cfg.UI.Address)
 	file.RegisterHandlers(g, fileSvc, authHandler, logger)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 
@@ -153,6 +155,7 @@ func CustomHTTPErrorHandler(trans ut.Translator) echo.HTTPErrorHandler {
 		l := c.Logger()
 		res := errors.BuildErrorResponse(err, trans)
 		if res.StatusCode() == http.StatusInternalServerError {
+			debug.PrintStack()
 			l.Errorf("encountered internal server error: %v", err)
 		}
 		if err = c.JSON(res.StatusCode(), res); err != nil {

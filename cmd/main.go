@@ -106,7 +106,7 @@ func run(logger log.Logger) error {
 	// Create email client.
 	var smtpClient mailer.SMTPClient
 	var emailTemplates tpl.Service
-	if cfg.Debug {
+	if !cfg.Debug {
 		smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
 			cfg.SMTP.Password)
 		smtpClient, err = smtpServer.Connect()

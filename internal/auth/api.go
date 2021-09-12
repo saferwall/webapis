@@ -25,6 +25,7 @@ type resource struct {
 	logger    log.Logger
 	mailer    Mailer
 	templater tpl.Service
+	UIAddress string
 }
 
 // Mailer represents the mailer interface/
@@ -34,9 +35,9 @@ type Mailer interface {
 
 // RegisterHandlers registers handlers for different HTTP requests.
 func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
-	mailer Mailer, templater tpl.Service) {
+	mailer Mailer, templater tpl.Service, UIAddress string) {
 
-	res := resource{service, logger, mailer, templater}
+	res := resource{service, logger, mailer, templater, UIAddress}
 
 	g.POST("/auth/login/", res.login)
 	g.POST("/auth/reset-password/", res.resetPassword)
@@ -92,7 +93,7 @@ func (r resource) verifyAccount(c echo.Context) error {
 		return err
 	}
 
-	return c.Redirect(http.StatusPermanentRedirect, c.Request().Host)
+	return c.Redirect(http.StatusPermanentRedirect, r.UIAddress)
 
 }
 
@@ -173,6 +174,9 @@ func (r resource) createNewPassword(c echo.Context) error {
 		return err
 	}
 
-	return c.Redirect(http.StatusPermanentRedirect, c.Request().Host)
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{msgEmailSent, http.StatusOK})
 
 }

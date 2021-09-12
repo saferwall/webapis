@@ -39,4 +39,4 @@ docker-tag-version: 	## Generate container `latest` tag
 	docker tag $(REPO)/$(IMG) $(REPO)/$(IMG):$(VERSION)
 
 docker-repo-login: 	## Login to Docker Hub
-	@echo '$(DOCKER_HUB_PWD)' | docker login --username=$(DOCKER_HUB_USR) --password-stdin
+	@echo '$(DOCKER_HUB_PWD)' | docker login -u $(DOCKER_HUB_USR) --password-stdin

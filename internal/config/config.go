@@ -88,8 +88,6 @@ type Config struct {
 	Debug bool `mapstructure:"debug"`
 	// Log level. Defaults to info.
 	LogLevel string `mapstructure:"log_level"`
-	// The data source name (DSN) for th frontend.
-	FrontendAddress string `mapstructure:"frontend_address"`
 	// JWT signing key.
 	JWTSigningKey string `mapstructure:"jwt_signkey"`
 	// JWT expiration in hours.

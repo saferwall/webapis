@@ -54,7 +54,8 @@ type Service interface {
 	UpdateAvatar(ctx context.Context, id string, src io.Reader) error
 	UpdatePassword(ctx context.Context, input UpdatePasswordRequest) error
 	UpdateEmail(ctx context.Context, input UpdateEmailRequest) error
-	GenerateConfirmationEmail(ctx context.Context, id string) (ConfirmAccountResponse, error)
+	GenerateConfirmationEmail(ctx context.Context, user User) (
+		ConfirmAccountResponse, error)
 }
 
 var (
@@ -514,13 +515,8 @@ func (s service) GetByEmail(ctx context.Context, email string) (User, error) {
 	return User{user}, nil
 }
 
-func (s service) GenerateConfirmationEmail(ctx context.Context, ownerID string) (
+func (s service) GenerateConfirmationEmail(ctx context.Context, user User) (
 	ConfirmAccountResponse, error) {
-
-	user, err := s.GetByEmail(ctx, ownerID)
-	if err != nil {
-		return ConfirmAccountResponse{}, err
-	}
 
 	if user.Confirmed {
 		return ConfirmAccountResponse{}, errUserAlreadyConfirmed
