@@ -109,7 +109,7 @@ func run(logger log.Logger) error {
 	if !cfg.Debug {
 		smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
 			cfg.SMTP.Password)
-		smtpClient, err = smtpServer.Connect()
+		smtpClient, err = smtpServer.Connect(logger)
 		if err != nil {
 			return err
 		}

@@ -7,6 +7,7 @@ package mailer
 import (
 	"time"
 
+	"github.com/saferwall/saferwall-api/pkg/log"
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
@@ -16,6 +17,7 @@ type SMTPServer struct {
 
 type SMTPClient struct {
 	client *mail.SMTPClient
+	logger log.Logger
 }
 
 // New creates a new SMTP client using the default configuration.
@@ -36,7 +38,7 @@ func New(host string, port int, username, password string) SMTPServer {
 	server.Authentication = mail.AuthPlain
 
 	// Variable to keep alive connection
-	server.KeepAlive = false
+	server.KeepAlive = true
 
 	// Timeout for connect to SMTP Server
 	server.ConnectTimeout = 10 * time.Second
@@ -51,12 +53,12 @@ func New(host string, port int, username, password string) SMTPServer {
 	return SMTPServer{server}
 }
 
-func (s SMTPServer) Connect() (SMTPClient, error) {
+func (s SMTPServer) Connect(logger log.Logger) (SMTPClient, error) {
 	c, err := s.server.Connect()
 	if err != nil {
 		return SMTPClient{}, err
 	}
-	return SMTPClient{client: c}, nil
+	return SMTPClient{c, logger}, nil
 }
 
 func (c SMTPClient) Send(htmlBody, subject, from, to string) error {
@@ -71,5 +73,9 @@ func (c SMTPClient) Send(htmlBody, subject, from, to string) error {
 	}
 
 	// Call Send and pass the client
-	return email.Send(c.client)
+	if err := email.Send(c.client); err != nil {
+		c.logger.Errorf("email send failed: %v", err)
+	}
+
+	return nil
 }
