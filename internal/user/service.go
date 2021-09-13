@@ -463,9 +463,13 @@ func (s service) UpdateEmail(ctx context.Context, input UpdateEmailRequest) erro
 		id = user.ID()
 	}
 
-	_, err := s.repo.Get(ctx, id)
+	user, err := s.repo.Get(ctx, id)
 	if err != nil {
 		return err
+	}
+
+	if !s.sec.HashMatchesPassword(user.Password, input.Password) {
+		return errWrongPassword
 	}
 
 	return s.repo.Patch(ctx, id, "email", input.NewEmail)
