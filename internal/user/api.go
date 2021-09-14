@@ -62,7 +62,7 @@ func (r resource) get(c echo.Context) error {
 	}
 
 	curUser, ok := ctx.Value(entity.UserKey).(entity.User)
-	if !ok  || curUser.ID() != strings.ToLower(c.Param("username")) {
+	if !ok || curUser.ID() != strings.ToLower(c.Param("username")) {
 		user.Email = ""
 	}
 	user.Password = ""
@@ -430,7 +430,14 @@ func (r resource) email(c echo.Context) error {
 
 	err := r.service.UpdateEmail(ctx, req)
 	if err != nil {
-		return err
+		if err != nil {
+			switch err {
+			case errWrongPassword:
+				return errors.Forbidden("")
+			default:
+				return err
+			}
+		}
 	}
 
 	return c.JSON(http.StatusOK, struct {
