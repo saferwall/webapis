@@ -24,7 +24,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	res := resource{service, logger, mailer, templater}
 
 	g.POST("/users/", res.create)
-	g.GET("/users/:username/", res.get)
+	g.GET("/users/:username/", res.get, optionalLogin)
 	g.PATCH("/users/:username/", res.update, requireLogin)
 	g.PATCH("/users/:username/password/", res.password, requireLogin)
 	g.PATCH("/users/:username/email/", res.email, requireLogin)
@@ -55,11 +55,16 @@ type resource struct {
 }
 
 func (r resource) get(c echo.Context) error {
+	ctx := c.Request().Context()
 	user, err := r.service.Get(c.Request().Context(), c.Param("username"))
 	if err != nil {
 		return err
 	}
-	user.Email = ""
+
+	curUser, ok := ctx.Value(entity.UserKey).(entity.User)
+	if !ok || curUser.ID() != strings.ToLower(c.Param("username")) {
+		user.Email = ""
+	}
 	user.Password = ""
 	return c.JSON(http.StatusOK, user)
 }
@@ -425,7 +430,14 @@ func (r resource) email(c echo.Context) error {
 
 	err := r.service.UpdateEmail(ctx, req)
 	if err != nil {
-		return err
+		if err != nil {
+			switch err {
+			case errWrongPassword:
+				return errors.Forbidden("")
+			default:
+				return err
+			}
+		}
 	}
 
 	return c.JSON(http.StatusOK, struct {
