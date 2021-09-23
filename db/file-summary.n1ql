@@ -1,0 +1,28 @@
+/* N1QL query to retrieve file summary of a scan. */
+
+SELECT
+  {
+    "properties": {
+      "Size": f.size,
+      "CRC32": f.crc32,
+      "MD5": f.md5,
+      "SHA1": f.sha1,
+      "SHA256": f.sha256,
+      "SHA512": f.sha512,
+      "SSDeep": f.ssdeep,
+      "Packer": f.packer,
+      "Magic": f.magic,
+      "Tags": f.tags
+    },
+    "first_seen": f.first_seen,
+    "exif": f.exif,
+    "submissions": f.submissions,
+    "class": f.ml.pe.predicted_class,
+    "multiav": {
+       "value": ARRAY_COUNT(ARRAY_FLATTEN(ARRAY i.infected FOR i IN OBJECT_VALUES(f.multiav.last_scan) WHEN i.infected = TRUE END,1)),
+        "count": OBJECT_LENGTH(f.multiav.last_scan)
+    }
+  }.*
+FROM
+  `bucket_name` f
+USE KEYS $sha256

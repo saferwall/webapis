@@ -33,6 +33,13 @@ var (
 	SamplesPwd = "infected"
 )
 
+// Progress of a file scan.
+const (
+	queued     = iota
+	processing = iota
+	finished   = iota
+)
+
 // Service encapsulates usecase logic for files.
 type Service interface {
 	Get(ctx context.Context, id string, fields []string) (File, error)
@@ -41,6 +48,7 @@ type Service interface {
 	Update(ctx context.Context, id string, input UpdateFileRequest) (File, error)
 	Delete(ctx context.Context, id string) (File, error)
 	Query(ctx context.Context, offset, limit int) ([]File, error)
+	Summary(ctx context.Context, id string) (interface{}, error)
 	Like(ctx context.Context, id string) error
 	Unlike(ctx context.Context, id string) error
 	Rescan(ctx context.Context, id string) error
@@ -176,6 +184,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			FirstSeen:   now,
 			LastScanned: now,
 			Submissions: append(file.Submissions, submission),
+			Status:      queued,
 		})
 		if err != nil {
 			s.logger.With(ctx).Error(err)
@@ -255,6 +264,16 @@ func (s service) Query(ctx context.Context, offset, limit int) (
 		result = append(result, File{item})
 	}
 	return result, nil
+}
+
+// Summary returns a summary of a file scan.
+func (s service) Summary(ctx context.Context, id string) (interface{}, error) {
+	res, err := s.repo.Summary(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (s service) Like(ctx context.Context, sha256 string) error {
