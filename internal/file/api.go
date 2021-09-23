@@ -28,11 +28,11 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PATCH("/files/:sha256/", res.patch, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, requireLogin)
 
+	g.GET("/files/:sha256/summary/", res.summary)
 	g.POST("/files/:sha256/like/", res.like, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
 	g.POST("/files/:sha256/rescan/", res.rescan, requireLogin)
 	g.GET("/files/:sha256/download/", res.download, requireLogin)
-
 }
 
 type resource struct {
@@ -162,6 +162,15 @@ func (r resource) getFiles(c echo.Context) error {
 	}
 	pages.Items = files
 	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) summary(c echo.Context) error {
+	ctx := c.Request().Context()
+	fileSummary, err := r.service.Summary(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, fileSummary)
 }
 
 func (r resource) like(c echo.Context) error {

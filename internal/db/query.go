@@ -30,6 +30,7 @@ const (
 	AnoUserSubmissions
 	GetAllDocType
 	DeleteActivity
+	FileSummary
 )
 
 var fileQueryMap = map[string]n1qlQuery{
@@ -49,6 +50,7 @@ var fileQueryMap = map[string]n1qlQuery{
 	"delete-activity.n1ql":           DeleteActivity,
 	"count-user-activities.n1ql":     CountUserActivities,
 	"count-ano-user-activities.n1ql": CountAnoUserActivities,
+	"file-summary.n1ql":              FileSummary,
 }
 
 // walk returns list of files in directory.

@@ -32,6 +32,8 @@ type Repository interface {
 	Delete(ctx context.Context, id string) error
 	// DeleteActivity removes the activity given its kind and target.
 	DeleteActivity(ctx context.Context, kind, username, target string) error
+	// Summary returns a summary of a file scan.
+	Summary(ctx context.Context, id string) (interface{}, error)
 }
 
 // repository persists files in database.
@@ -140,4 +142,20 @@ func (r repository) DeleteActivity(ctx context.Context, kind, username,
 	params["target"] = target
 	query := r.db.N1QLQuery[dbcontext.DeleteActivity]
 	return r.db.Query(ctx, query, params, &result)
+}
+
+func (r repository) Summary(ctx context.Context, id string) (
+	interface{}, error) {
+
+	var results interface{}
+	var query string
+	params := make(map[string]interface{}, 1)
+	params["sha256"] = strings.ToLower(id)
+
+	query = r.db.N1QLQuery[dbcontext.FileSummary]
+	err := r.db.Query(ctx, query, params, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results.([]interface{})[0], nil
 }
