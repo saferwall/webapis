@@ -15,6 +15,11 @@ import (
 	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
 
+type resource struct {
+	service Service
+	logger  log.Logger
+}
+
 func RegisterHandlers(g *echo.Group, service Service,
 	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
 	logger log.Logger) {
@@ -35,11 +40,6 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.POST("/files/:sha256/rescan/", res.rescan, requireLogin)
 	g.GET("/files/:sha256/download/", res.download, requireLogin)
 	g.GET("/files/:sha256/comments/", res.comments, optionalLogin)
-}
-
-type resource struct {
-	service Service
-	logger  log.Logger
 }
 
 func (r resource) get(c echo.Context) error {

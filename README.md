@@ -86,7 +86,7 @@ The following endpoints are available:
 ### Comments resource
 
 - `GET /v1/comments/` [returns a paginated list of comments](docs/comments/get.md).
-- `POST /v1/comments/`: [creates a new comment](docs/users/post.md).
+- `POST /v1/comments/`: [creates a new comment](docs/comments/post.md).
 - `DELETE /v1/comments/` [deletes multiple comments](docs/comments/delete.md).
 
 ### Comment resource
