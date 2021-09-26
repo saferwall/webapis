@@ -108,7 +108,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler,
 		logger, smtpClient, emailTpl)
 	auth.RegisterHandlers(g, authSvc, logger, smtpClient, emailTpl, cfg.UI.Address)
-	file.RegisterHandlers(g, fileSvc, authHandler, logger)
+	file.RegisterHandlers(g, fileSvc, authHandler, optAuthHandler, logger)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 
 	return e

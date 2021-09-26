@@ -1,0 +1,23 @@
+/* N1QL query to get file comments. */
+
+SELECT
+  {
+      "id": META(c).id,
+      "comment": c.body,
+      "username":  c.username,
+      "follow":  ARRAY_BINARY_SEARCH(ARRAY_SORT((
+                SELECT
+                RAW `following`
+                FROM
+                `sfw`
+                USE KEYS $loggedInUser
+                ) [0]), c.username) >= 0,
+      "date": c.timestamp
+}.*
+FROM
+  `bucket_name` c
+WHERE
+  c.`sha256` = $sha256 AND c.`type` = 'comment'
+OFFSET $offset
+LIMIT
+  $limit

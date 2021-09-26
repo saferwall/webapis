@@ -31,6 +31,7 @@ const (
 	GetAllDocType
 	DeleteActivity
 	FileSummary
+	FileComments
 )
 
 var fileQueryMap = map[string]n1qlQuery{
@@ -51,6 +52,7 @@ var fileQueryMap = map[string]n1qlQuery{
 	"count-user-activities.n1ql":     CountUserActivities,
 	"count-ano-user-activities.n1ql": CountAnoUserActivities,
 	"file-summary.n1ql":              FileSummary,
+	"file-comments.n1ql":             FileComments,
 }
 
 // walk returns list of files in directory.

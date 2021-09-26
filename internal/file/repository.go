@@ -34,6 +34,9 @@ type Repository interface {
 	DeleteActivity(ctx context.Context, kind, username, target string) error
 	// Summary returns a summary of a file scan.
 	Summary(ctx context.Context, id string) (interface{}, error)
+	// Comments returns the list of comments over a file.
+	Comments(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
 }
 
 // repository persists files in database.
@@ -152,10 +155,41 @@ func (r repository) Summary(ctx context.Context, id string) (
 	params := make(map[string]interface{}, 1)
 	params["sha256"] = strings.ToLower(id)
 
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		params["loggedInUser"] = user.ID()
+	} else {
+		params["loggedInUser"] = "_none_"
+	}
+
 	query = r.db.N1QLQuery[dbcontext.FileSummary]
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
 	}
 	return results.([]interface{})[0], nil
+}
+
+func (r repository) Comments(ctx context.Context, id string, offset,
+	limit int) ([]interface{}, error) {
+
+	var results interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
+	params["sha256"] = strings.ToLower(id)
+
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		params["loggedInUser"] = user.ID()
+	} else {
+		params["loggedInUser"] = "_none_"
+
+	}
+
+	query := r.db.N1QLQuery[dbcontext.FileComments]
+	err := r.db.Query(ctx, query, params, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results.([]interface{}), nil
 }

@@ -53,6 +53,8 @@ type Service interface {
 	Unlike(ctx context.Context, id string) error
 	Rescan(ctx context.Context, id string) error
 	Download(ctx context.Context, id string, zipfile *string) error
+	Comments(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
 }
 
 // File represents the data about a File.
@@ -386,6 +388,16 @@ func (s service) Download(ctx context.Context, sha256 string, zipfile *string) e
 		return err
 	}
 	return nil
+}
+
+func (s service) Comments(ctx context.Context, id string, offset, limit int) (
+	[]interface{}, error) {
+
+	result, err := s.repo.Comments(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // isStringInSlice check if a string exist in a list of strings

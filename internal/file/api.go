@@ -16,7 +16,8 @@ import (
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
-	requireLogin echo.MiddlewareFunc, logger log.Logger) {
+	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
+	logger log.Logger) {
 
 	res := resource{service, logger}
 
@@ -33,6 +34,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
 	g.POST("/files/:sha256/rescan/", res.rescan, requireLogin)
 	g.GET("/files/:sha256/download/", res.download, requireLogin)
+	g.GET("/files/:sha256/comments/", res.comments, optionalLogin)
 }
 
 type resource struct {
@@ -222,4 +224,22 @@ func (r resource) download(c echo.Context) error {
 		}
 	}
 	return c.File(zippedFile)
+}
+
+func (r resource) comments(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	file, err := r.service.Get(c.Request().Context(), c.Param("sha256"), nil)
+	if err != nil {
+		return err
+	}
+	count := file.CommentsCount
+	pages := pagination.NewFromRequest(c.Request(), count)
+	comments, err := r.service.Comments(
+		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = comments
+	return c.JSON(http.StatusOK, pages)
 }
