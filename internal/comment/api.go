@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -17,8 +18,7 @@ type resource struct {
 }
 
 func RegisterHandlers(g *echo.Group, service Service,
-	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
-	logger log.Logger) {
+	requireLogin echo.MiddlewareFunc, logger log.Logger) {
 
 	res := resource{service, logger}
 
@@ -35,7 +35,9 @@ func (r resource) create(c echo.Context) error {
 		r.logger.With(ctx).Info(err)
 		return err
 	}
-
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		input.Username = user.ID()
+	}
 	comment, err := r.service.Create(ctx, input)
 	if err != nil {
 		return err
@@ -45,7 +47,7 @@ func (r resource) create(c echo.Context) error {
 
 func (r resource) get(c echo.Context) error {
 	ctx := c.Request().Context()
-	comment, err := r.service.Get(ctx, c.Param("if"))
+	comment, err := r.service.Get(ctx, c.Param("id"))
 	if err != nil {
 		return err
 	}

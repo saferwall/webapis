@@ -37,8 +37,8 @@ type service struct {
 // CreateCommentRequest represents a comment creation request.
 type CreateCommentRequest struct {
 	Body     string `json:"body" validate:"required"`
-	Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
 	SHA256   string `json:"sha256" validate:"required,alphanum,len=64"`
+	Username string
 }
 
 // NewService creates a new user service.
@@ -52,9 +52,10 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	Comment, error) {
 
 	now := time.Now()
+	id := entity.ID()
 	err := s.repo.Create(ctx, entity.Comment{
 		Type:      "comment",
-		ID:        entity.ID(),
+		ID:        id,
 		Body:      req.Body,
 		SHA256:    req.SHA256,
 		Username:  req.Username,
@@ -63,7 +64,25 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	if err != nil {
 		return Comment{}, err
 	}
-	return s.Get(ctx, req.Username)
+
+	user, err := s.userSvc.Get(ctx, req.Username)
+	if err != nil {
+		return Comment{}, err
+	}
+	file, err := s.fileSvc.Get(ctx, req.SHA256, nil)
+	if err != nil {
+		return Comment{}, err
+	}
+
+	err = s.userSvc.Patch(ctx, req.Username, "comments_count", user.CommentsCount+1)
+	if err != nil {
+		return Comment{}, err
+	}
+	err = s.fileSvc.Patch(ctx, req.SHA256, "comments_count", file.CommentsCount+1)
+	if err != nil {
+		return Comment{}, err
+	}
+	return s.Get(ctx, id)
 }
 
 // Get returns the comment with the specified comment ID.

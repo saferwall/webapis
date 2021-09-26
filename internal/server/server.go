@@ -11,6 +11,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/archive"
 	"github.com/saferwall/saferwall-api/internal/auth"
+	"github.com/saferwall/saferwall-api/internal/comment"
 	"github.com/saferwall/saferwall-api/internal/config"
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/errors"
@@ -103,6 +104,8 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	fileSvc := file.NewService(file.NewRepository(db, logger), logger, updown,
 		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, userSvc, actSvc,
 		arch)
+	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
+		actSvc, userSvc, fileSvc)
 
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler,
@@ -110,6 +113,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	auth.RegisterHandlers(g, authSvc, logger, smtpClient, emailTpl, cfg.UI.Address)
 	file.RegisterHandlers(g, fileSvc, authHandler, optAuthHandler, logger)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
+	comment.RegisterHandlers(g, commentSvc, authHandler, logger)
 
 	return e
 }

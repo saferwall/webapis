@@ -201,6 +201,7 @@ func (s service) Update(ctx context.Context, id string, req interface{}) (
 	return user, nil
 }
 
+// Patch performs an atomic user sub document update.
 func (s service) Patch(ctx context.Context, id, path string,
 	input interface{}) error {
 	return s.repo.Patch(ctx, id, path, input)

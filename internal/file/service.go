@@ -48,6 +48,7 @@ type Service interface {
 	Update(ctx context.Context, id string, input UpdateFileRequest) (File, error)
 	Delete(ctx context.Context, id string) (File, error)
 	Query(ctx context.Context, offset, limit int) ([]File, error)
+	Patch(ctx context.Context, key, path string, val interface{}) error
 	Summary(ctx context.Context, id string) (interface{}, error)
 	Like(ctx context.Context, id string) error
 	Unlike(ctx context.Context, id string) error
@@ -266,6 +267,12 @@ func (s service) Query(ctx context.Context, offset, limit int) (
 		result = append(result, File{item})
 	}
 	return result, nil
+}
+
+// Patch performs an atomic file sub document update.
+func (s service) Patch(ctx context.Context, id, path string,
+	input interface{}) error {
+	return s.repo.Patch(ctx, id, path, input)
 }
 
 // Summary returns a summary of a file scan.
