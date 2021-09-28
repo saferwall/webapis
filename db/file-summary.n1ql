@@ -12,7 +12,8 @@ SELECT
       "SSDeep": f.ssdeep,
       "Packer": f.packer,
       "Magic": f.magic,
-      "Tags": f.tags
+      "Tags": f.tags,
+      "TriD": t.trid
     },
     "first_seen": f.first_seen,
     "exif": f.exif,
