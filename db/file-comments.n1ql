@@ -5,11 +5,19 @@ SELECT
       "id": META(c).id,
       "comment": c.body,
       "username":  c.username,
+      "member_since": (
+        SELECT
+          RAW u.member_since
+        FROM
+          `bucket_name` u
+        USE KEYS
+          LOWER(c.username)
+      ) [0],
       "follow":  ARRAY_BINARY_SEARCH(ARRAY_SORT((
                 SELECT
                 RAW `following`
                 FROM
-                `sfw`
+                `bucket_name`
                 USE KEYS $loggedInUser
                 ) [0]), c.username) >= 0,
       "date": c.timestamp
