@@ -118,8 +118,11 @@ func (r resource) create(c echo.Context) error {
 		return err
 	}
 
-	go r.mailer.Send(body.String(),
-		confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
+	if r.mailer != nil {
+		go r.mailer.Send(body.String(),
+			confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
+	}
+
 	user.Email = ""
 	user.Password = ""
 	return c.JSON(http.StatusCreated, user)
@@ -499,8 +502,10 @@ func (r resource) resendConfirmation(c echo.Context) error {
 		return err
 	}
 
-	go r.mailer.Send(body.String(),
-		confirmAccountTpl.Subject, confirmAccountTpl.From, req.Email)
+	if r.mailer != nil {
+		go r.mailer.Send(body.String(),
+			confirmAccountTpl.Subject, confirmAccountTpl.From, req.Email)
+	}
 
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`

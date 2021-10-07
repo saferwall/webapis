@@ -63,6 +63,24 @@ type File struct {
 	entity.File
 }
 
+// DynFileScanCfg represents the dynamic malware analysis configuration.
+type DynFileScanCfg struct {
+	// Destination path where the sample will be located in the VM.
+	SampleDestPath string `json:"sample_dest_path,omitempty"`
+	// Arguments used to run the sample.
+	Arguments string `json:"arguments,omitempty"`
+	// Timeout in seconds for how long to keep the VM running.
+	Timeout int `json:"timeout,omitempty"`
+}
+
+// FileScanCfg represents a file scanning config.
+type FileScanCfg struct {
+	// SHA256 hash of the file.
+	SHA256 string `json:"sha256"`
+	// Dynamic scan configuration.
+	Dynamic DynFileScanCfg `json:"dynamic"`
+}
+
 type UploadDownloader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
 	Download(ctx context.Context, bucket, key string, file io.Writer) error
@@ -194,8 +212,16 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			return File{}, err
 		}
 
+		// Serialize the msg to send to the orchestrator.
+		msg, err := json.Marshal(
+			FileScanCfg{SHA256: sha256, Dynamic: DynFileScanCfg{}})
+		if err != nil {
+			s.logger.With(ctx).Error(err)
+			return File{}, err
+		}
+
 		// Push a message to the queue to scan this file.
-		err = s.producer.Produce(s.topic, []byte(sha256))
+		err = s.producer.Produce(s.topic, msg)
 		if err != nil {
 			s.logger.With(ctx).Error(err)
 			return File{}, err

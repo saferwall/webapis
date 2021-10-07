@@ -13,7 +13,7 @@ SELECT
       "Packer": f.packer,
       "Magic": f.magic,
       "Tags": f.tags,
-      "TriD": t.trid
+      "TrID": f.trid
     },
     "first_seen": f.first_seen,
     "exif": f.exif,

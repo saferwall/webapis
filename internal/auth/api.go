@@ -140,8 +140,10 @@ func (r resource) resetPassword(c echo.Context) error {
 		return err
 	}
 
-	go r.mailer.Send(body.String(),
-		resetPasswordTpl.Subject, resetPasswordTpl.From, resp.user.Email)
+	if r.mailer != nil {
+		go r.mailer.Send(body.String(),
+			resetPasswordTpl.Subject, resetPasswordTpl.From, resp.user.Email)
+	}
 
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
