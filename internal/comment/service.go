@@ -47,7 +47,7 @@ func NewService(repo Repository, logger log.Logger, actSvc activity.Service,
 	return service{repo, logger, actSvc, userSvc, fileSvc}
 }
 
-// Create creates a new user.
+// Create creates a new comment.
 func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	Comment, error) {
 
@@ -74,12 +74,24 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 		return Comment{}, err
 	}
 
+	// Update comments count on user object.
 	err = s.userSvc.Patch(ctx, req.Username, "comments_count", user.CommentsCount+1)
 	if err != nil {
 		return Comment{}, err
 	}
+
+	// Update comments count on file object.
 	err = s.fileSvc.Patch(ctx, req.SHA256, "comments_count", file.CommentsCount+1)
 	if err != nil {
+		return Comment{}, err
+	}
+
+	// Create a new `comment` activity.
+	if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
+		Kind:     "comment",
+		Username: user.Username,
+		Target:   id,
+	}); err != nil {
 		return Comment{}, err
 	}
 	return s.Get(ctx, id)

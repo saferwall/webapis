@@ -174,6 +174,12 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 	now := time.Now().Unix()
 
+	loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
+	user, err := s.userSvc.Get(ctx, loggedInUser.ID())
+	if err != nil {
+		return File{}, err
+	}
+
 	// When a new file has been uploader, we create a new doc in the db.
 	if err != nil && err.Error() == ErrDocumentNotFound {
 
@@ -182,7 +188,6 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		uploadCtx, cancelFn := context.WithTimeout(context.Background(), fileUploadTimeout)
 
 		// Ensure the context is canceled to prevent leaking.
-		// See context package for more information, https://golang.org/pkg/context/
 		defer cancelFn()
 
 		err = s.objsto.Upload(uploadCtx, s.bucket, sha256,
@@ -209,6 +214,15 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		})
 		if err != nil {
 			s.logger.With(ctx).Error(err)
+			return File{}, err
+		}
+
+		// add new `submit` activity.
+		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
+			Kind:     "submit",
+			Username: user.Username,
+			Target:   sha256,
+		}); err != nil {
 			return File{}, err
 		}
 
@@ -331,10 +345,10 @@ func (s service) Like(ctx context.Context, sha256 string) error {
 			return err
 		}
 
-		// add new activity
+		// add new `like` activity.
 		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
 			Kind:     "like",
-			Username: user.ID(),
+			Username: user.Username,
 			Target:   sha256,
 		}); err != nil {
 			return err
@@ -381,7 +395,16 @@ func (s service) Rescan(ctx context.Context, sha256 string) error {
 		return err
 	}
 
-	err = s.producer.Produce(s.topic, []byte(sha256))
+	// Serialize the msg to send to the orchestrator.
+	msg, err := json.Marshal(
+		FileScanCfg{SHA256: sha256, Dynamic: DynFileScanCfg{}})
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return err
+	}
+
+	// Push a message to the queue to scan this file.
+	err = s.producer.Produce(s.topic, msg)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err
