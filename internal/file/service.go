@@ -174,12 +174,6 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 	now := time.Now().Unix()
 
-	loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
-	user, err := s.userSvc.Get(ctx, loggedInUser.ID())
-	if err != nil {
-		return File{}, err
-	}
-
 	// When a new file has been uploader, we create a new doc in the db.
 	if err != nil && err.Error() == ErrDocumentNotFound {
 
@@ -218,11 +212,23 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		// add new `submit` activity.
+		loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
+		user, err := s.userSvc.Get(ctx, loggedInUser.ID())
+		if err != nil {
+			return File{}, err
+		}
+
 		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
 			Kind:     "submit",
 			Username: user.Username,
 			Target:   sha256,
 		}); err != nil {
+			return File{}, err
+		}
+
+		// Update submissions count on user object.
+		err = s.Patch(ctx, user.ID(), "submissions_count", user.SubmissionsCount+1)
+		if err != nil {
 			return File{}, err
 		}
 
