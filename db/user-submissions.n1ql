@@ -42,6 +42,8 @@ WHERE
   a.`type` = 'activity'
     AND LOWER(a.`username`) = $user
     AND a.`kind` = "submit"
+ORDER BY
+  a.timestamp DESC
 OFFSET $offset
 LIMIT
   $limit

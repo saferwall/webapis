@@ -28,6 +28,8 @@ FROM
   `bucket_name` c
 WHERE
   c.`sha256` = $sha256 AND c.`type` = 'comment'
+ORDER BY
+  c.timestamp DESC
 OFFSET $offset
 LIMIT
   $limit

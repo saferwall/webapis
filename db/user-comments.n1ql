@@ -37,6 +37,8 @@ FROM
   LEFT JOIN `bucket_name` f ON KEYS c.sha256
 WHERE
   c.`type` = 'comment' AND c.`username` = $user
+ORDER BY
+  c.timestamp DESC
 OFFSET $offset
 LIMIT
   $limit
