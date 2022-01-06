@@ -99,9 +99,10 @@ type Archiver interface {
 
 // CreateFileRequest represents a file creation request.
 type CreateFileRequest struct {
-	src      io.Reader
-	filename string
-	geoip    string
+	src       io.Reader
+	filename  string
+	geoip     string
+	isBrowser bool
 }
 
 type service struct {
@@ -190,14 +191,23 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			return File{}, err
 		}
 
+		// source controls weather a file submission
+		// originates from a real browser or a script.
+		// Obvisouly, this check is not reliable.
+		source := "api"
+		if req.isBrowser {
+			source = "web"
+		}
+
 		// Create a new submission.
 		submission := entity.Submission{
 			Timestamp: now,
 			Filename:  req.filename,
-			Source:    "web",
+			Source:    source,
 			Country:   req.geoip,
 		}
 
+		// Create a new file.
 		err = s.repo.Create(ctx, sha256, entity.File{
 			SHA256:      sha256,
 			Type:        "file",
@@ -211,13 +221,13 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			return File{}, err
 		}
 
-		// add new `submit` activity.
 		loggedInUser, _ := ctx.Value(entity.UserKey).(entity.User)
 		user, err := s.userSvc.Get(ctx, loggedInUser.ID())
 		if err != nil {
 			return File{}, err
 		}
 
+		// Create a new `submit` activity.
 		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
 			Kind:     "submit",
 			Username: user.Username,
