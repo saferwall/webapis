@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/aws/aws-sdk-go v1.23.4
-	github.com/couchbase/gocb/v2 v2.2.3
+	github.com/couchbase/gocb/v2 v2.3.5
 	github.com/go-playground/locales v0.14.0
 	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-playground/validator/v10 v10.10.0

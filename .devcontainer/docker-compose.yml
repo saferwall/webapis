@@ -56,7 +56,7 @@ services:
     command: server /data
 
   nsqlookupd:
-    image: nsqio/nsq:v1.2.0
+    image: nsqio/nsq:v1.2.1
     command: >
       /nsqlookupd
       --log-level error
@@ -65,7 +65,7 @@ services:
       - 4161:4161
 
   nsqd:
-    image: nsqio/nsq:v1.2.0
+    image: nsqio/nsq:v1.2.1
     command: >
       /nsqd
       --broadcast-address=nsqd
@@ -78,7 +78,7 @@ services:
       - 4151:4151
 
   nsqadmin:
-    image: nsqio/nsq:v1.2.0
+    image: nsqio/nsq:v1.2.1
     command: >
       /nsqadmin
       --lookupd-http-address=nsqlookupd:4161

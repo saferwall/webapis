@@ -32,7 +32,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo \
 # STEP 2 build a small image
 ############################
 
-FROM alpine:3.14
+FROM alpine:3.15
 LABEL maintainer="https://github.com/saferwall/saferwall-api"
 LABEL version="1.0.0"
 LABEL description="Saferwall web APIs service"
@@ -53,10 +53,11 @@ COPY templates/ templates/
 
 # Create an app user so our program doesn't run as root.
 RUN addgroup -g 102 -S $GROUP \
-	&& adduser -u 101 -S $USER -G $GROUP \
-	&& chown -R $USER:$GROUP /saferwall
+    && adduser -u 101 -S $USER -G $GROUP \
+    && chown -R $USER:$GROUP /saferwall
 
 # Switch to our user.
 USER saferwall
 
-ENTRYPOINT ["/saferwall/server", "-config", "/saferwall/conf", "-db", "/saferwall/db", "-tpl", "/saferwall/templates"]
+ENTRYPOINT ["/saferwall/server", "-config", "/saferwall/conf",\
+ "-db", "/saferwall/db", "-tpl", "/saferwall/templates"]

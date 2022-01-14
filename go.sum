@@ -90,10 +90,10 @@ github.com/cncf/xds/go v0.0.0-20211011173535-cb28da3451f1/go.mod h1:eXthEFrGJvWH
 github.com/cncf/xds/go v0.0.0-20211130200136-a8f946100490/go.mod h1:eXthEFrGJvWHgFFCl3hGmgk+/aYT6PnTQLykKQRLhEs=
 github.com/coreos/go-semver v0.3.0/go.mod h1:nnelYz7RCh+5ahJtPPxZlU+153eP4D4r3EedlOD2RNk=
 github.com/coreos/go-systemd/v22 v22.3.2/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
-github.com/couchbase/gocb/v2 v2.2.3 h1:Q+gA4L/DK9+Kg0puxNEYtj9Gxntf4dd3LeaDo/3dEVQ=
-github.com/couchbase/gocb/v2 v2.2.3/go.mod h1:JPsU30oH0p1rnOikAvWxpq2gl8AI4ev6txPdo7HpO6E=
-github.com/couchbase/gocbcore/v9 v9.1.4 h1:V3n2Vpx+xEuwVxVn8f8oiMip6GD2FDGn26sQn7Ou/Hs=
-github.com/couchbase/gocbcore/v9 v9.1.4/go.mod h1:jOSQeBSECyNvD7aS4lfuaw+pD5t6ciTOf8hrDP/4Nus=
+github.com/couchbase/gocb/v2 v2.3.5 h1:qgTqqpXWKBxGlBJPG2P6koZa201CrkXacZjjlU+9iOQ=
+github.com/couchbase/gocb/v2 v2.3.5/go.mod h1:yvuaWdqR8XCyjHYh9ieLlwomBIT2GGNYSwxRlcNCTEA=
+github.com/couchbase/gocbcore/v10 v10.0.6 h1:pKPhJWM9TBBMa755ARm25ZoBO6Fo6C4vVKvEAqpt4jE=
+github.com/couchbase/gocbcore/v10 v10.0.6/go.mod h1:s6dwBFs4c3+cAzZbo1q0VW+QasudhHJuehE8b8U2YNg=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
