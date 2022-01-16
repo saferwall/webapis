@@ -6,16 +6,9 @@ SELECT
     "id": META(activity).id,
     "author": {
       "username": activity.username,
-      "member_since": (
-        SELECT
-          RAW u.member_since
-        FROM
-          `bucket_name` u
-        USE KEYS
-          LOWER(activity.username)
-      ) [0]
+      "member_since": d.member_since
     },
-    "follow": true,
+    "follow": TRUE,
     "comment": f.body,
     "date": activity.timestamp
   }.*,
@@ -39,18 +32,20 @@ SELECT
     } END
   ).*
 FROM
-  `bucket_name` activity
-  LEFT JOIN `bucket_name` f ON KEYS activity.target
-WHERE
-  activity.type = 'activity'
-  AND LOWER(activity.username) IN (
+  (
     SELECT
-      RAW u.`following`
+      u.*
     FROM
-      bucket_name u
+      `bucket_name` s
     USE KEYS
       $user
-  ) [0]
+      JOIN `bucket_name` u ON KEYS s.`following`
+  ) AS d
+  INNER JOIN `bucket_name` activity ON activity.username = d.username
+  INNER JOIN `bucket_name` f ON activity.target = META(f).id
+WHERE
+  activity.type = 'activity'
+  AND f.`type` = 'file'
 ORDER BY
   activity.timestamp DESC OFFSET $offset
 LIMIT
