@@ -40,6 +40,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	res := resource{service, logger, mailer, templater, UIAddress}
 
 	g.POST("/auth/login/", res.login)
+	g.DELETE("/auth/logout/", res.logout)
 	g.POST("/auth/reset-password/", res.resetPassword)
 	g.POST("/auth/password/", res.createNewPassword)
 	g.GET("/auth/verify-account/", res.verifyAccount)
@@ -77,6 +78,21 @@ func (r resource) login(c echo.Context) error {
 	return c.JSON(http.StatusOK, struct {
 		Token string `json:"token"`
 	}{token})
+}
+
+func (r resource) logout(c echo.Context) error {
+
+	cookie := &http.Cookie{
+		Value:    "",
+		HttpOnly: true,
+		Path:     "/",
+		Name:     jwtCookieName,
+		Domain:   c.Request().Host,
+		Expires:  time.Unix(0, 0),
+	}
+
+	c.SetCookie(cookie)
+	return c.NoContent(204)
 }
 
 func (r resource) verifyAccount(c echo.Context) error {
