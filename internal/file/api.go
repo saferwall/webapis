@@ -34,7 +34,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PATCH("/files/:sha256/", res.patch, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, requireLogin)
 
-	g.GET("/files/:sha256/summary/", res.summary)
+	g.GET("/files/:sha256/summary/", res.summary, optionalLogin)
 	g.POST("/files/:sha256/like/", res.like, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
 	g.POST("/files/:sha256/rescan/", res.rescan, requireLogin)

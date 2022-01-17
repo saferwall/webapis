@@ -1,5 +1,6 @@
 /* N1QL query to retrieve file summary of a scan. */
 
+WITH user_likes AS (SELECT RAW likes FROM `bucket_name` USE KEYS $loggedInUser)
 SELECT
   {
     "properties": {
@@ -25,8 +26,8 @@ SELECT
        "value": ARRAY_COUNT(ARRAY_FLATTEN(ARRAY i.infected FOR i IN OBJECT_VALUES(f.multiav.last_scan) WHEN i.infected = TRUE END,1)),
         "count": OBJECT_LENGTH(f.multiav.last_scan)
     },
-    "liked": ARRAY_BINARY_SEARCH(ARRAY_SORT((SELECT RAW likes FROM `bucket_name` USE KEYS $loggedInUser) [0]
-        ), f.sha256) >= 0
+    "liked": CASE WHEN ARRAY_LENGTH(user_likes) = 0 THEN false
+              ELSE ARRAY_BINARY_SEARCH(ARRAY_SORT((user_likes)[0]), f.sha256) >= 0 END
   }.*
 FROM
   `bucket_name` f
