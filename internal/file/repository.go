@@ -37,6 +37,10 @@ type Repository interface {
 	// Comments returns the list of comments over a file.
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
+	CountStrings(ctx context.Context, id string) (int, error)
+	Strings(ctx context.Context, id string, offset, limit int) (
+		[]interface{}, error)
+
 }
 
 // repository persists files in database.
@@ -187,6 +191,36 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 	}
 
 	query := r.db.N1QLQuery[dbcontext.FileComments]
+	err := r.db.Query(ctx, query, params, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results.([]interface{}), nil
+}
+
+// CountStrings returns the number of strings in a file doc in the database.
+func (r repository) CountStrings(ctx context.Context, id string) (int, error) {
+	var count int
+
+	params := make(map[string]interface{}, 1)
+	params["sha256"] = strings.ToLower(id)
+
+	query := r.db.N1QLQuery[dbcontext.CountStrings]
+	err := r.db.Count(ctx, query, params, &count)
+	return count, err
+}
+
+func (r repository) Strings(ctx context.Context, id string, offset,
+	limit int) ([]interface{}, error) {
+
+	var results interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
+	params["sha256"] = strings.ToLower(id)
+
+	query := r.db.N1QLQuery[dbcontext.FileStrings]
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err

@@ -34,6 +34,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PATCH("/files/:sha256/", res.patch, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, requireLogin)
 
+	g.GET("/files/:sha256/strings/", res.strings)
 	g.GET("/files/:sha256/summary/", res.summary, optionalLogin)
 	g.POST("/files/:sha256/like/", res.like, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
@@ -169,6 +170,22 @@ func (r resource) getFiles(c echo.Context) error {
 		return err
 	}
 	pages.Items = files
+	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) strings(c echo.Context) error {
+	ctx := c.Request().Context()
+	count, err := r.service.CountStrings(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	strings, err := r.service.Strings(
+		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = strings
 	return c.JSON(http.StatusOK, pages)
 }
 

@@ -1,0 +1,37 @@
+SELECT
+  {
+    "ascii": (
+      SELECT
+        RAW ascii_str
+      FROM
+        `bucket_name` f
+      USE KEYS
+        $sha256
+      UNNEST
+        f.strings.ascii ascii_str OFFSET $offset
+      LIMIT
+        $limit
+    ), "wide": (
+      SELECT
+        RAW wide_str
+      FROM
+        `bucket_name` f
+      USE KEYS
+        $sha256
+      UNNEST
+        f.strings.wide wide_str OFFSET $offset
+      LIMIT
+        $limit
+    ), "asm": (
+      SELECT
+        RAW asm_str
+      FROM
+        `bucket_name` f
+      USE KEYS
+        $sha256
+      UNNEST
+        f.strings.asm asm_str OFFSET $offset
+      LIMIT
+        $limit
+    )
+  }.*

@@ -4,21 +4,6 @@ version: "3.9"
 # tests.
 
 services:
-  web:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      SFW_WEBAPIS_DEPLOYMENT_KIND: dev
-    depends_on:
-      - couchbase
-      - minio
-      - nsqlookupd-1
-      - nsqlookupd-2
-      - nsqd-1
-      - nsqd-2
-      - nsqd-3
-
   couchbase:
     image: couchbase/server:6.6.2
     ports:

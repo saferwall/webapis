@@ -32,6 +32,8 @@ const (
 	DeleteActivity
 	FileSummary
 	FileComments
+	CountStrings
+	FileStrings
 )
 
 var fileQueryMap = map[string]n1qlQuery{
@@ -53,6 +55,8 @@ var fileQueryMap = map[string]n1qlQuery{
 	"count-ano-user-activities.n1ql": CountAnoUserActivities,
 	"file-summary.n1ql":              FileSummary,
 	"file-comments.n1ql":             FileComments,
+	"file-strings.n1ql":              FileStrings,
+	"count-strings.n1ql":              CountStrings,
 }
 
 // walk returns list of files in directory.

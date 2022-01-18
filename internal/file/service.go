@@ -56,6 +56,8 @@ type Service interface {
 	Download(ctx context.Context, id string, zipfile *string) error
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
+	CountStrings(ctx context.Context, id string) (int, error)
+	Strings(ctx context.Context, id string, offset, limit int) ([]interface{}, error)
 }
 
 // File represents the data about a File.
@@ -466,6 +468,24 @@ func (s service) Comments(ctx context.Context, id string, offset, limit int) (
 	[]interface{}, error) {
 
 	result, err := s.repo.Comments(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s service) CountStrings(ctx context.Context, id string) (int, error) {
+	count, err := s.repo.CountStrings(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return count, err
+}
+
+func (s service) Strings(ctx context.Context, id string, offset, limit int) (
+	[]interface{}, error) {
+
+	result, err := s.repo.Strings(ctx, id, offset, limit)
 	if err != nil {
 		return nil, err
 	}
