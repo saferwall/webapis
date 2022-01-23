@@ -39,7 +39,7 @@ type Repository interface {
 		[]interface{}, error)
 	CountStrings(ctx context.Context, id string) (int, error)
 	Strings(ctx context.Context, id string, offset, limit int) (
-		[]interface{}, error)
+		interface{}, error)
 }
 
 // repository persists files in database.
@@ -214,7 +214,7 @@ func (r repository) CountStrings(ctx context.Context, id string) (int, error) {
 }
 
 func (r repository) Strings(ctx context.Context, id string, offset,
-	limit int) ([]interface{}, error) {
+	limit int) (interface{}, error) {
 
 	var results interface{}
 
@@ -228,5 +228,8 @@ func (r repository) Strings(ctx context.Context, id string, offset,
 	if err != nil {
 		return nil, err
 	}
-	return results.([]interface{}), nil
+	if len(results.([]interface{})) == 0 {
+		return results, nil
+	}
+	return results.([]interface{})[0], nil
 }

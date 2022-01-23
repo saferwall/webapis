@@ -54,4 +54,7 @@ type contextKey int
 const (
 	// UserKey identifies the current user during the request life.
 	UserKey contextKey = iota
+
+	// FileKey identifies the current file during the request life.
+	FileKey
 )

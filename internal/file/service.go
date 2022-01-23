@@ -57,7 +57,7 @@ type Service interface {
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	CountStrings(ctx context.Context, id string) (int, error)
-	Strings(ctx context.Context, id string, offset, limit int) ([]interface{}, error)
+	Strings(ctx context.Context, id string, offset, limit int) (interface{}, error)
 }
 
 // File represents the data about a File.
@@ -307,7 +307,7 @@ func (s service) Delete(ctx context.Context, id string) (File, error) {
 	return file, nil
 }
 
-// Count returns the number of users.
+// Count returns the number of files.
 func (s service) Count(ctx context.Context) (int, error) {
 	return s.repo.Count(ctx)
 }
@@ -483,7 +483,7 @@ func (s service) CountStrings(ctx context.Context, id string) (int, error) {
 }
 
 func (s service) Strings(ctx context.Context, id string, offset, limit int) (
-	[]interface{}, error) {
+	interface{}, error) {
 
 	result, err := s.repo.Strings(ctx, id, offset, limit)
 	if err != nil {
