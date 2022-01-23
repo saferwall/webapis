@@ -16,6 +16,7 @@ SELECT
       "Tags": f.tags,
       "TrID": f.trid
     },
+    "sha256": f.sha256,
     "first_seen": f.first_seen,
     "exif": f.exif,
     "submissions": f.submissions,
