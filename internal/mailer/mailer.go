@@ -63,6 +63,10 @@ func (s SMTPServer) Connect(logger log.Logger) (SMTPClient, error) {
 
 func (c SMTPClient) Send(htmlBody, subject, from, to string) error {
 
+	if c.client == nil {
+		return nil
+	}
+
 	email := mail.NewMSG()
 	email.SetFrom(from).AddTo(to).SetSubject(subject)
 	email.SetBody(mail.TextHTML, htmlBody)
