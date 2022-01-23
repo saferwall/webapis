@@ -40,7 +40,6 @@ type Repository interface {
 	CountStrings(ctx context.Context, id string) (int, error)
 	Strings(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
-
 }
 
 // repository persists files in database.
@@ -169,6 +168,10 @@ func (r repository) Summary(ctx context.Context, id string) (
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(results.([]interface{})) == 0 {
+		return results, nil
 	}
 	return results.([]interface{})[0], nil
 }

@@ -49,6 +49,6 @@ WHERE
   AND act.kind = "like"
   AND LOWER(act.username) = $user
 ORDER BY
-  act.timestamp DESC OFFSET 0
+  act.timestamp DESC OFFSET $offset
 LIMIT
-  10
+  $limit

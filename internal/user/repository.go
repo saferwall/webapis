@@ -198,7 +198,6 @@ func (r repository) Activities(ctx context.Context, id string, offset,
 	} else {
 		// For a logged-in user.
 		params["user"] = id
-
 		err := r.db.Query(ctx, r.db.N1QLQuery[dbcontext.UserActivities], params, &activities)
 		if err != nil {
 			return nil, err

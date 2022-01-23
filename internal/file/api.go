@@ -251,8 +251,7 @@ func (r resource) download(c echo.Context) error {
 
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
-
-	file, err := r.service.Get(c.Request().Context(), c.Param("sha256"), nil)
+	file, err := r.service.Get(ctx, c.Param("sha256"), nil)
 	if err != nil {
 		return err
 	}
