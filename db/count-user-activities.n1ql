@@ -1,1 +1,18 @@
-SELECT RAW COUNT(*) FROM `bucket_name` s WHERE s.type = "activity" AND s.username = $user
+/* N1QL query to count activities for a logged-in user. */
+
+SELECT RAW COUNT(*)
+FROM
+  (
+    SELECT
+      u.*
+    FROM
+      `bucket_name` s
+    USE KEYS
+      $user
+      JOIN `bucket_name` u ON KEYS s.`following`
+  ) AS d
+  INNER JOIN `bucket_name` activity ON activity.username = d.username
+  INNER JOIN `bucket_name` f ON activity.target = META(f).id
+WHERE
+  activity.type = 'activity'
+  AND f.`type` = 'file'
