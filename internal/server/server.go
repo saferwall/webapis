@@ -107,11 +107,14 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
 		actSvc, userSvc, fileSvc)
 
+	// Create the file middleware.
+	fileMiddleware := file.NewMiddleware(fileSvc, logger)
+
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler,
 		logger, smtpClient, emailTpl)
 	auth.RegisterHandlers(g, authSvc, logger, smtpClient, emailTpl, cfg.UI.Address)
-	file.RegisterHandlers(g, fileSvc, authHandler, optAuthHandler, logger)
+	file.RegisterHandlers(g, fileSvc, logger, authHandler, optAuthHandler, fileMiddleware.VerifyHash)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 	comment.RegisterHandlers(g, commentSvc, authHandler, logger)
 

@@ -20,9 +20,8 @@ type resource struct {
 	logger  log.Logger
 }
 
-func RegisterHandlers(g *echo.Group, service Service,
-	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
-	logger log.Logger) {
+func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
+	requireLogin, optionalLogin, verifyHash echo.MiddlewareFunc) {
 
 	res := resource{service, logger}
 
@@ -34,11 +33,11 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PATCH("/files/:sha256/", res.patch, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, requireLogin)
 
-	g.GET("/files/:sha256/strings/", res.strings)
-	g.GET("/files/:sha256/summary/", res.summary, optionalLogin)
-	g.POST("/files/:sha256/like/", res.like, requireLogin)
-	g.POST("/files/:sha256/unlike/", res.unlike, requireLogin)
-	g.POST("/files/:sha256/rescan/", res.rescan, requireLogin)
+	g.GET("/files/:sha256/strings/", res.strings, verifyHash)
+	g.GET("/files/:sha256/summary/", res.summary, verifyHash, optionalLogin)
+	g.POST("/files/:sha256/like/", res.like, verifyHash, requireLogin)
+	g.POST("/files/:sha256/unlike/", res.unlike, verifyHash, requireLogin)
+	g.POST("/files/:sha256/rescan/", res.rescan, verifyHash, requireLogin)
 	g.GET("/files/:sha256/download/", res.download, requireLogin)
 	g.GET("/files/:sha256/comments/", res.comments, optionalLogin)
 }

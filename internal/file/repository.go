@@ -20,6 +20,8 @@ type Repository interface {
 	Get(ctx context.Context, id string, fields []string) (entity.File, error)
 	// Count returns the number of files.
 	Count(ctx context.Context) (int, error)
+	// Exists return true when the doc exists in the DB.
+	Exists(ctx context.Context, id string) (bool, error)
 	// Query returns the list of files with the given offset and limit.
 	Query(ctx context.Context, offset, limit int) ([]entity.File, error)
 	// Create saves a new file in the storage.
@@ -77,6 +79,13 @@ func (r repository) Get(ctx context.Context, id string, fields []string) (
 func (r repository) Create(ctx context.Context, key string,
 	file entity.File) error {
 	return r.db.Create(ctx, file.ID(key), &file)
+}
+
+// Exists checks if a document exists for the given id.
+func (r repository) Exists(ctx context.Context, key string) (bool, error) {
+	docExists := false
+	err := r.db.Exists(ctx, key, &docExists)
+	return docExists, err
 }
 
 // Update saves the changes to a file in the database.

@@ -74,6 +74,17 @@ func Open(server, username, password, bucketName string) (*DB, error) {
 	}, nil
 }
 
+// Exists checks weather a document exists in the DB.
+func (db *DB) Exists(ctx context.Context, key string, docExists *bool) error {
+	existsResult, err := db.Collection.Exists(key, &gocb.ExistsOptions{})
+	if err != nil {
+		return err
+	}
+
+	*docExists = existsResult.Exists()
+	return nil
+}
+
 // Query executes a N1QL query.
 func (db *DB) Query(ctx context.Context, statement string,
 	args map[string]interface{}, val *interface{}) error {

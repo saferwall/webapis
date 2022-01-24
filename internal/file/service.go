@@ -44,6 +44,7 @@ const (
 type Service interface {
 	Get(ctx context.Context, id string, fields []string) (File, error)
 	Count(ctx context.Context) (int, error)
+	Exists(ctx context.Context, id string) (bool, error)
 	Create(ctx context.Context, input CreateFileRequest) (File, error)
 	Update(ctx context.Context, id string, input UpdateFileRequest) (File, error)
 	Delete(ctx context.Context, id string) (File, error)
@@ -312,6 +313,11 @@ func (s service) Count(ctx context.Context) (int, error) {
 	return s.repo.Count(ctx)
 }
 
+// Exists checks if a document exists for the given id.
+func (s service) Exists(ctx context.Context, id string) (bool, error) {
+	return s.repo.Exists(ctx, id)
+}
+
 // Query returns the files with the specified offset and limit.
 func (s service) Query(ctx context.Context, offset, limit int) (
 	[]File, error) {
@@ -350,10 +356,6 @@ func (s service) Like(ctx context.Context, sha256 string) error {
 	if err != nil {
 		return err
 	}
-	_, err = s.Get(ctx, sha256, nil)
-	if err != nil {
-		return err
-	}
 
 	if !isStringInSlice(sha256, user.Likes) {
 		user.Likes = append(user.Likes, sha256)
@@ -383,10 +385,6 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 	if err != nil {
 		return err
 	}
-	_, err = s.Get(ctx, sha256, nil)
-	if err != nil {
-		return err
-	}
 
 	if isStringInSlice(sha256, user.Likes) {
 		user.Likes = removeStringFromSlice(user.Likes, sha256)
@@ -407,11 +405,6 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 }
 
 func (s service) Rescan(ctx context.Context, sha256 string) error {
-
-	_, err := s.Get(ctx, sha256, nil)
-	if err != nil {
-		return err
-	}
 
 	// Serialize the msg to send to the orchestrator.
 	msg, err := json.Marshal(
