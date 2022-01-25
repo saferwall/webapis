@@ -85,12 +85,15 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	if err != nil {
 		return Comment{}, err
 	}
+	// Get the source of the HTTP request from the ctx.
+	source, _ := ctx.Value(entity.SourceKey).(string)
 
 	// Create a new `comment` activity.
 	if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
 		Kind:     "comment",
 		Username: user.Username,
 		Target:   id,
+		Source:   source,
 	}); err != nil {
 		return Comment{}, err
 	}

@@ -85,7 +85,6 @@ func (r resource) create(c echo.Context) error {
 		src:       src,
 		filename:  f.Filename,
 		geoip:     c.Request().Header.Get("X-Geoip-Country"),
-		isBrowser: isBrowser(c.Request().UserAgent()),
 	}
 	file, err := r.service.Create(ctx, input)
 	if err != nil {
@@ -263,17 +262,4 @@ func (r resource) comments(c echo.Context) error {
 	}
 	pages.Items = comments
 	return c.JSON(http.StatusOK, pages)
-}
-
-func isBrowser(userAgent string) bool {
-	browserList := []string{
-		"Chrome", "Chromium", "Mozilla", "Opera", "Safari", "Edge", "MSIE",
-	}
-
-	for _, browserName := range browserList {
-		if strings.Contains(userAgent, browserName) {
-			return true
-		}
-	}
-	return false
 }

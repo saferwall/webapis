@@ -38,6 +38,7 @@ type CreateActivityRequest struct {
 	Kind     string `json:"kind" validate:"required,alpha"`
 	Username string `json:"username" validate:"required,alpha"`
 	Target   string `json:"target" validate:"required,alpha"`
+	Source   string `json:"src" validate:"required,alpha"`
 }
 
 // UpdateActivityRequest represents a user update request.
@@ -72,6 +73,7 @@ func (s service) Create(ctx context.Context, req CreateActivityRequest) (
 		Username:  req.Username,
 		Target:    req.Target,
 		Timestamp: now.Unix(),
+		Source:    req.Source,
 	})
 	if err != nil {
 		return Activity{}, err

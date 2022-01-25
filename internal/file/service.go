@@ -102,10 +102,9 @@ type Archiver interface {
 
 // CreateFileRequest represents a file creation request.
 type CreateFileRequest struct {
-	src       io.Reader
-	filename  string
-	geoip     string
-	isBrowser bool
+	src      io.Reader
+	filename string
+	geoip    string
 }
 
 type service struct {
@@ -194,13 +193,8 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			return File{}, err
 		}
 
-		// source controls weather a file submission
-		// originates from a real browser or a script.
-		// Obvisouly, this check is not reliable.
-		source := "api"
-		if req.isBrowser {
-			source = "web"
-		}
+		// Get the source of the HTTP request from the ctx.
+		source, _ := ctx.Value(entity.SourceKey).(string)
 
 		// Create a new submission.
 		submission := entity.Submission{
@@ -235,6 +229,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			Kind:     "submit",
 			Username: user.Username,
 			Target:   sha256,
+			Source:   source,
 		}); err != nil {
 			return File{}, err
 		}
@@ -357,6 +352,9 @@ func (s service) Like(ctx context.Context, sha256 string) error {
 		return err
 	}
 
+	// Get the source of the HTTP request from the ctx.
+	source, _ := ctx.Value(entity.SourceKey).(string)
+
 	if !isStringInSlice(sha256, user.Likes) {
 		user.Likes = append(user.Likes, sha256)
 		user.LikesCount += 1
@@ -370,6 +368,7 @@ func (s service) Like(ctx context.Context, sha256 string) error {
 			Kind:     "like",
 			Username: user.Username,
 			Target:   sha256,
+			Source:   source,
 		}); err != nil {
 			return err
 		}

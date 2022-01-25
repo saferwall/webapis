@@ -19,4 +19,7 @@ type Activity struct {
 	Username string `json:"username,omitempty"`
 	// Target could be a sha256, username or a comment id.
 	Target string `json:"target,omitempty"`
+	// Source describes weather the activity was generated from
+	// a real web browser or a script.
+	Source string `json:"src,omitempty"`
 }

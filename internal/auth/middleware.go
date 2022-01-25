@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -60,6 +61,11 @@ func successHandler(c echo.Context) {
 		token.Claims.(jwt.MapClaims)["id"].(string),
 		token.Claims.(jwt.MapClaims)["isAdmin"].(bool),
 	)
+
+	// determines the source of the API request
+	src := reqSource(c.Request().UserAgent())
+	c.SetRequest(c.Request().WithContext(ctx))
+	ctx = WithSource(c.Request().Context(), src)
 	c.SetRequest(c.Request().WithContext(ctx))
 }
 
@@ -107,4 +113,31 @@ func CurrentUser(ctx context.Context) Identity {
 		return user
 	}
 	return nil
+}
+
+// WithSource returns a context that contains the source of the HTTP request.
+func WithSource(ctx context.Context, src string) context.Context {
+	return context.WithValue(ctx, entity.SourceKey, src)
+}
+
+// isBrowser returns true when the HTTP request is coming from a known user agent.
+func isBrowser(userAgent string) bool {
+	browserList := []string{
+		"Chrome", "Chromium", "Mozilla", "Opera", "Safari", "Edge", "MSIE",
+	}
+
+	for _, browserName := range browserList {
+		if strings.Contains(userAgent, browserName) {
+			return true
+		}
+	}
+	return false
+}
+
+func reqSource(userAgent string) string {
+	if isBrowser(userAgent) {
+		return "web"
+	} else {
+		return "api"
+	}
 }

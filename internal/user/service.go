@@ -362,6 +362,9 @@ func (s service) Follow(ctx context.Context, id string) error {
 		return err
 	}
 
+	// Get the source of the HTTP request from the ctx.
+	source, _ := ctx.Value(entity.SourceKey).(string)
+
 	curUsername := curUser.ID()
 	targetUsername := targetUser.ID()
 
@@ -378,6 +381,7 @@ func (s service) Follow(ctx context.Context, id string) error {
 			Kind:     "follow",
 			Username: curUser.Username,
 			Target:   targetUser.Username,
+			Source:   source,
 		}); err != nil {
 			return err
 		}
