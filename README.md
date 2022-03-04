@@ -109,13 +109,13 @@ DELETE - Delete (remove record from the database)
 Rules for HTTP status codes:
 
 ```http
-* Create something            - 201 (Created)
-* Read something              - 200 (OK)
-* Update something            - 200 (OK)
-* Delete something            - 200 (OK)
-* Missing request information - 400 (Bad Request)
-* Unauthorized operation      - 401 (Unauthorized)
-* Any other error             - 500 (Internal Server Error)
+Create something            - 201 (Created)
+Read something              - 200 (OK)
+Update something            - 200 (OK)
+Delete something            - 200 (OK)
+Missing request information - 400 (Bad Request)
+Unauthorized operation      - 401 (Unauthorized)
+Any other error             - 500 (Internal Server Error)
 ```
 
 ## Folder Structure

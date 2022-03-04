@@ -18,6 +18,7 @@ type SMTPServer struct {
 type SMTPClient struct {
 	client *mail.SMTPClient
 	logger log.Logger
+	quit   chan struct{}
 }
 
 // New creates a new SMTP client using the default configuration.
@@ -46,10 +47,6 @@ func New(host string, port int, username, password string) SMTPServer {
 	// Timeout for send the data and wait respond
 	server.SendTimeout = 10 * time.Second
 
-	// Set TLSConfig to provide custom TLS configuration. For example,
-	// to skip TLS verification (useful for testing):
-	// server.TLSConfig = &tls.Config{InsecureSkipVerify: true}
-
 	return SMTPServer{server}
 }
 
@@ -58,7 +55,28 @@ func (s SMTPServer) Connect(logger log.Logger) (SMTPClient, error) {
 	if err != nil {
 		return SMTPClient{}, err
 	}
-	return SMTPClient{c, logger}, nil
+
+	// NOOP command, optional, used for avoid timeout when KeepAlive is true and
+	// you aren't sending mails. Execute this command each 30 seconds is ideal
+	// for persistent connection
+	ticker := time.NewTicker(30 * time.Second)
+	quit := make(chan struct{})
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				err = c.Noop()
+				if err != nil {
+					logger.Error("failed to noop smtp, reason: %v", err)
+				}
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+
+	return SMTPClient{c, logger, quit}, nil
 }
 
 func (c SMTPClient) Send(htmlBody, subject, from, to string) error {
