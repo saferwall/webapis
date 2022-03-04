@@ -42,7 +42,7 @@ FROM
   `bucket_name` activity
   LEFT JOIN `bucket_name` f ON KEYS activity.target
 WHERE
-  activity.type = 'activity'
+  activity.type = 'activity' AND activity.src = "web"
 ORDER BY
   activity.timestamp DESC OFFSET $offset
 LIMIT

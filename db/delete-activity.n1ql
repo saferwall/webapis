@@ -1,7 +1,7 @@
 /* N1QL query to delete user's activity. */
 
 DELETE
- FROM `sfw`
+ FROM `bucket_name`
 WHERE
  `type` = "activity"
 AND kind = $kind
