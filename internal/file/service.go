@@ -209,7 +209,6 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			SHA256:      sha256,
 			Type:        "file",
 			FirstSeen:   now,
-			LastScanned: now,
 			Submissions: append(file.Submissions, submission),
 			Status:      queued,
 		})
