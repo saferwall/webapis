@@ -24,6 +24,7 @@ type Comment struct {
 type Service interface {
 	Get(ctx context.Context, id string) (Comment, error)
 	Create(ctx context.Context, input CreateCommentRequest) (Comment, error)
+	Delete(ctx context.Context, id string) (Comment, error)
 }
 
 type service struct {
@@ -107,4 +108,16 @@ func (s service) Get(ctx context.Context, id string) (Comment, error) {
 		return Comment{}, err
 	}
 	return Comment{com}, nil
+}
+
+// Delete deletes the comment with the specified ID.
+func (s service) Delete(ctx context.Context, id string) (Comment, error) {
+	com, err := s.Get(ctx, id)
+	if err != nil {
+		return Comment{}, err
+	}
+	if err = s.repo.Delete(ctx, id); err != nil {
+		return Comment{}, err
+	}
+	return com, nil
 }

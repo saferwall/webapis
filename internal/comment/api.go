@@ -9,6 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
+	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -22,9 +23,9 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	res := resource{service, logger}
 
-	g.POST("/comments/", res.create, requireLogin)
 	g.GET("/comments/:id/", res.get)
-
+	g.POST("/comments/", res.create, requireLogin)
+	g.DELETE("/comments/:id/", res.delete, requireLogin)
 }
 
 func (r resource) create(c echo.Context) error {
@@ -52,5 +53,30 @@ func (r resource) get(c echo.Context) error {
 		return err
 	}
 
+	return c.JSON(http.StatusOK, comment)
+}
+
+func (r resource) delete(c echo.Context) error {
+
+	var curUsername string
+	ctx := c.Request().Context()
+
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		curUsername = user.ID()
+	}
+
+	comment, err := r.service.Get(ctx, c.Param("id"))
+	if err != nil {
+		return err
+	}
+
+	if comment.Username != curUsername {
+		return errors.Forbidden("")
+	}
+
+	comment, err = r.service.Delete(ctx, c.Param("id"))
+	if err != nil {
+		return err
+	}
 	return c.JSON(http.StatusOK, comment)
 }
