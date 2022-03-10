@@ -1,7 +1,11 @@
+.devcontainer
 .git
 .gitignore
 .editorconfig
 .github
+.vscode
+build
+docs
 Dockerfile
 AUTHORS.md
 CONTRIBUTING.md
@@ -9,5 +13,7 @@ LICENSE
 Makefile
 NOTICE
 README.md
-.env
+*.env
 coverage
+storage
+__debug_bin

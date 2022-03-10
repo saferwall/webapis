@@ -18,6 +18,7 @@ SELECT
     },
     "sha256": f.sha256,
     "first_seen": f.first_seen,
+    "last_scanned": f.last_scanned,
     "exif": f.exif,
     "submissions": f.submissions,
     "class": f.ml.pe.predicted_class,
