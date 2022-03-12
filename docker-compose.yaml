@@ -13,7 +13,7 @@ services:
       - "8094:8094"
       - "11210:11210"
     volumes:
-      - "./storage/couchbase:/opt/couchbase/var"
+      - couchbase_data:/opt/couchbase/var
 
   nsqlookupd:
     image: nsqio/nsq:v1.2.1

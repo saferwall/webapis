@@ -25,6 +25,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	g.GET("/comments/:id/", res.get)
 	g.POST("/comments/", res.create, requireLogin)
+	g.PATCH("/comments/:id/", res.update, requireLogin)
 	g.DELETE("/comments/:id/", res.delete, requireLogin)
 }
 
@@ -39,11 +40,12 @@ func (r resource) create(c echo.Context) error {
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		input.Username = user.ID()
 	}
-	comment, err := r.service.Create(ctx, input)
+	com, err := r.service.Create(ctx, input)
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusCreated, comment)
+
+	return c.JSON(http.StatusCreated, com)
 }
 
 func (r resource) get(c echo.Context) error {
@@ -53,6 +55,23 @@ func (r resource) get(c echo.Context) error {
 		return err
 	}
 
+	return c.JSON(http.StatusOK, comment)
+}
+
+func (r resource) update(c echo.Context) error {
+	var input UpdateCommentRequest
+
+	ctx := c.Request().Context()
+
+	if err := c.Bind(&input); err != nil {
+		r.logger.With(ctx).Info(err)
+		return err
+	}
+
+	comment, err := r.service.Update(ctx, c.Param("id"), input)
+	if err != nil {
+		return err
+	}
 	return c.JSON(http.StatusOK, comment)
 }
 

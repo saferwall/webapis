@@ -6,10 +6,12 @@ package comment
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/entity"
+	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/internal/file"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
@@ -24,6 +26,7 @@ type Comment struct {
 type Service interface {
 	Get(ctx context.Context, id string) (Comment, error)
 	Create(ctx context.Context, input CreateCommentRequest) (Comment, error)
+	Update(ctx context.Context, id string, input UpdateCommentRequest) (Comment, error)
 	Delete(ctx context.Context, id string) (Comment, error)
 }
 
@@ -40,6 +43,11 @@ type CreateCommentRequest struct {
 	Body     string `json:"body" validate:"required"`
 	SHA256   string `json:"sha256" validate:"required,alphanum,len=64"`
 	Username string
+}
+
+// UpdateCommentRequest represents a comment update request.
+type UpdateCommentRequest struct {
+	Body string `json:"body" validate:"required"`
 }
 
 // NewService creates a new user service.
@@ -70,6 +78,7 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	if err != nil {
 		return Comment{}, err
 	}
+
 	file, err := s.fileSvc.Get(ctx, req.SHA256, nil)
 	if err != nil {
 		return Comment{}, err
@@ -86,6 +95,7 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	if err != nil {
 		return Comment{}, err
 	}
+
 	// Get the source of the HTTP request from the ctx.
 	source, _ := ctx.Value(entity.SourceKey).(string)
 
@@ -93,7 +103,7 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
 		Kind:     "comment",
 		Username: user.Username,
-		Target:   id,
+		Target:   req.SHA256,
 		Source:   source,
 	}); err != nil {
 		return Comment{}, err
@@ -108,6 +118,42 @@ func (s service) Get(ctx context.Context, id string) (Comment, error) {
 		return Comment{}, err
 	}
 	return Comment{com}, nil
+}
+
+// Update updates the comment with the specified ID.
+func (s service) Update(ctx context.Context, id string, input UpdateCommentRequest) (
+	Comment, error) {
+
+	var curUsername string
+
+	comment, err := s.Get(ctx, id)
+	if err != nil {
+		return comment, err
+	}
+
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		curUsername = user.ID()
+	}
+
+	if comment.Username != curUsername {
+		return comment, errors.Forbidden("")
+	}
+
+	data, err := json.Marshal(input)
+	if err != nil {
+		return comment, err
+	}
+
+	err = json.Unmarshal(data, &comment)
+	if err != nil {
+		return comment, err
+	}
+
+	if err := s.repo.Update(ctx, comment.Comment); err != nil {
+		return comment, err
+	}
+
+	return comment, nil
 }
 
 // Delete deletes the comment with the specified ID.

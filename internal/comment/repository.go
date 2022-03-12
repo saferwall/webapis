@@ -19,6 +19,8 @@ type Repository interface {
 	Get(ctx context.Context, id string) (entity.Comment, error)
 	// Create saves a new comment in the storage.
 	Create(ctx context.Context, Comment entity.Comment) error
+	// Update updates the comment with given ID in the storage.
+	Update(ctx context.Context, User entity.Comment) error
 	// Delete removes the comment with given ID from the storage.
 	Delete(ctx context.Context, id string) error
 }
@@ -46,6 +48,11 @@ func (r repository) Get(ctx context.Context, id string) (entity.Comment, error) 
 // It returns the ID of the newly inserted comment record.
 func (r repository) Create(ctx context.Context, comment entity.Comment) error {
 	return r.db.Create(ctx, comment.ID, &comment)
+}
+
+// Update updates the changes to a comment in the database.
+func (r repository) Update(ctx context.Context, comment entity.Comment) error {
+	return r.db.Update(ctx, comment.ID, &comment)
 }
 
 // Delete deletes a file with the specified ID from the database.

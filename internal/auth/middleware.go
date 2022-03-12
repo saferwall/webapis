@@ -61,10 +61,10 @@ func successHandler(c echo.Context) {
 		token.Claims.(jwt.MapClaims)["id"].(string),
 		token.Claims.(jwt.MapClaims)["isAdmin"].(bool),
 	)
+	c.SetRequest(c.Request().WithContext(ctx))
 
 	// determines the source of the API request
 	src := reqSource(c.Request().UserAgent())
-	c.SetRequest(c.Request().WithContext(ctx))
 	ctx = WithSource(c.Request().Context(), src)
 	c.SetRequest(c.Request().WithContext(ctx))
 }

@@ -82,9 +82,9 @@ func (r resource) create(c echo.Context) error {
 	r.logger.With(ctx).Debug("Header is: %v", c.Request().Header)
 
 	input := CreateFileRequest{
-		src:       src,
-		filename:  f.Filename,
-		geoip:     c.Request().Header.Get("X-Geoip-Country"),
+		src:      src,
+		filename: f.Filename,
+		geoip:    c.Request().Header.Get("X-Geoip-Country"),
 	}
 	file, err := r.service.Create(ctx, input)
 	if err != nil {
@@ -115,7 +115,7 @@ func (r resource) update(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusCreated, file)
+	return c.JSON(http.StatusOK, file)
 }
 
 func (r resource) patch(c echo.Context) error {

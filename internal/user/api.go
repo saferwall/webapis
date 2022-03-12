@@ -153,7 +153,7 @@ func (r resource) update(c echo.Context) error {
 	}
 	user.Email = ""
 	user.Password = ""
-	return c.JSON(http.StatusCreated, user)
+	return c.JSON(http.StatusOK, user)
 }
 
 func (r resource) delete(c echo.Context) error {
