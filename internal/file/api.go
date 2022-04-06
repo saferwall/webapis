@@ -52,7 +52,7 @@ func (r resource) get(c echo.Context) error {
 	}
 
 	if len(fields) > 0 {
-		allowed := IsFilterAllowed(GetStructFields(entity.File{}), fields)
+		allowed := isFilterAllowed(getStructFields(entity.File{}), fields)
 		if !allowed {
 			return errors.BadRequest("field not allowed")
 		}

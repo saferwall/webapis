@@ -1,22 +1,24 @@
 package file
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"reflect"
 	"strings"
 )
 
-// IsFilterAllowed check if we are allowed to filter GET with fields
-func IsFilterAllowed(allowed []string, filters []string) bool {
+// isFilterAllowed check if we are allowed to filter GET with fields
+func isFilterAllowed(allowed []string, filters []string) bool {
 	for _, filter := range filters {
-		if !IsStringInSlice(filter, allowed) {
+		if !isStringInSlice(filter, allowed) {
 			return false
 		}
 	}
 	return true
 }
 
-// GetStructFields retrieve json struct fields names
-func GetStructFields(i interface{}) []string {
+// getStructFields retrieve json struct fields names
+func getStructFields(i interface{}) []string {
 
 	val := reflect.ValueOf(i)
 	var temp string
@@ -31,8 +33,8 @@ func GetStructFields(i interface{}) []string {
 	return listFields
 }
 
-// IsStringInSlice check if a string exist in a list of strings
-func IsStringInSlice(a string, list []string) bool {
+// isStringInSlice check if a string exist in a list of strings
+func isStringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
 			return true
@@ -40,4 +42,21 @@ func IsStringInSlice(a string, list []string) bool {
 	}
 
 	return false
+}
+
+// removeStringFromSlice removes a string item from a list of strings.
+func removeStringFromSlice(s []string, r string) []string {
+	for i, v := range s {
+		if v == r {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
+}
+
+// hash calculates the sha256 hash over a stream of bytes.
+func hash(b []byte) string {
+	h := sha256.New()
+	h.Write(b)
+	return hex.EncodeToString(h.Sum(nil))
 }
