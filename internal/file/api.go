@@ -28,7 +28,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/files/", res.getFiles)
 	g.POST("/files/", res.create, requireLogin)
 
-	g.GET("/files/:sha256/", res.get)
+	g.GET("/files/:sha256/", res.get, verifyHash)
 	g.PUT("/files/:sha256/", res.update, requireLogin)
 	g.PATCH("/files/:sha256/", res.patch, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, requireLogin)
@@ -49,6 +49,13 @@ func (r resource) get(c echo.Context) error {
 	var fields []string
 	if fieldsParam := c.QueryParam("fields"); fieldsParam != "" {
 		fields = strings.Split(fieldsParam, ",")
+	}
+
+	if len(fields) > 0 {
+		allowed := IsFilterAllowed(GetStructFields(entity.File{}), fields)
+		if !allowed {
+			return errors.BadRequest("field not allowed")
+		}
 	}
 
 	file, err := r.service.Get(c.Request().Context(), c.Param("sha256"), fields)
