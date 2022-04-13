@@ -84,8 +84,6 @@ type SMTPConfig struct {
 type Config struct {
 	// The IP:Port. Defaults to 8080.
 	Address string `mapstructure:"address"`
-	// Debug mode.
-	Debug bool `mapstructure:"debug"`
 	// Log level. Defaults to info.
 	LogLevel string `mapstructure:"log_level"`
 	// JWT signing key.

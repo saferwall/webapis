@@ -88,6 +88,21 @@ func (r resource) create(c echo.Context) error {
 		}
 	}
 
+	// Hide sensible data,
+	user.Password = ""
+
+	// No need to generate a confirmation email when smtp
+	// is not configured.
+	if len(r.templater.EmailRequestTemplate) == 0 {
+		user.Confirmed = true
+		err = r.service.Patch(ctx, user.ID(), "confirmed", true)
+		if err != nil {
+			r.logger.With(ctx).Errorf("failed to confirm user: %v", err)
+			return err
+		}
+		return c.JSON(http.StatusCreated, user)
+	}
+
 	resp, err := r.service.GenerateConfirmationEmail(ctx, user)
 	if err != nil {
 		r.logger.With(ctx).Errorf("generate confirmation email failed: %v", err)
@@ -118,13 +133,9 @@ func (r resource) create(c echo.Context) error {
 		return err
 	}
 
-	if r.mailer != nil {
-		go r.mailer.Send(body.String(),
-			confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
-	}
+	go r.mailer.Send(body.String(),
+		confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
 
-	user.Email = ""
-	user.Password = ""
 	return c.JSON(http.StatusCreated, user)
 }
 

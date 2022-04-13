@@ -105,15 +105,19 @@ func run(logger log.Logger) error {
 
 	// Create email client.
 	var smtpClient mailer.SMTPClient
-	smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
-		cfg.SMTP.Password)
-	smtpClient, err = smtpServer.Connect(logger)
-	if err != nil {
-		logger.Infof("failed to connect to smtp server: %v", err)
-	}
-	emailTemplates, err := tpl.New(*flagTplFiles)
-	if err != nil {
-		return err
+	var emailTemplates tpl.Service
+	if cfg.SMTP.Server != "" {
+		smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
+			cfg.SMTP.Password)
+		smtpClient, err = smtpServer.Connect(logger)
+		if err != nil {
+			logger.Infof("failed to connect to smtp server: %v", err)
+		} else {
+			emailTemplates, err = tpl.New(*flagTplFiles)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	// Build HTTP server.
