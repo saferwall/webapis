@@ -26,6 +26,62 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/files/": {
+            "get": {
+                "description": "List files",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Retrieves a pagined list of files",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of files per page",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Specify the page number",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.File"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Upload file for analysis",
                 "consumes": [
@@ -164,7 +220,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "List files",
+                "description": "Deletes a file by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -174,29 +230,21 @@ const docTemplate = `{
                 "tags": [
                     "file"
                 ],
-                "summary": "Retrieves a pagined list of files",
+                "summary": "Deletes a file",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Number of files per page",
-                        "name": "per_page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Specify the page number",
-                        "name": "page",
-                        "in": "query"
+                        "type": "string",
+                        "description": "File SHA256",
+                        "name": "sha256",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "204": {
+                        "description": "No Content",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.File"
-                            }
+                            "$ref": "#/definitions/entity.File"
                         }
                     },
                     "403": {
@@ -261,6 +309,50 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{username}": {
+            "get": {
+                "description": "Retrieves the information about a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get a user information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -381,6 +473,83 @@ const docTemplate = `{
                 },
                 "timestamp": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.User": {
+            "type": "object",
+            "properties": {
+                "admin": {
+                    "type": "boolean"
+                },
+                "bio": {
+                    "type": "string"
+                },
+                "comments_count": {
+                    "type": "integer"
+                },
+                "confirmed": {
+                    "type": "boolean"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "followers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "followers_count": {
+                    "type": "integer"
+                },
+                "following": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "following_count": {
+                    "type": "integer"
+                },
+                "has_avatar": {
+                    "type": "boolean"
+                },
+                "last_seen": {
+                    "type": "integer"
+                },
+                "likes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "likes_count": {
+                    "type": "integer"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "member_since": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "submissions_count": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

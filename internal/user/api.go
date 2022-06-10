@@ -54,6 +54,17 @@ type resource struct {
 	templater tpl.Service
 }
 
+// GetUser godoc
+// @Summary Get a user information
+// @Description Retrieves the information about a user
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "User ID"
+// @Success 200 {object} entity.User
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Router /users/{username} [get]
 func (r resource) get(c echo.Context) error {
 	ctx := c.Request().Context()
 	user, err := r.service.Get(c.Request().Context(), c.Param("username"))

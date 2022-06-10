@@ -226,7 +226,7 @@ func (r resource) delete(c echo.Context) error {
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /files/{sha256} [delete]
+// @Router /files/ [get]
 func (r resource) getFiles(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()

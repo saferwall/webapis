@@ -77,6 +77,57 @@ definitions:
       timestamp:
         type: integer
     type: object
+  entity.User:
+    properties:
+      admin:
+        type: boolean
+      bio:
+        type: string
+      comments_count:
+        type: integer
+      confirmed:
+        type: boolean
+      email:
+        type: string
+      followers:
+        items:
+          type: string
+        type: array
+      followers_count:
+        type: integer
+      following:
+        items:
+          type: string
+        type: array
+      following_count:
+        type: integer
+      has_avatar:
+        type: boolean
+      last_seen:
+        type: integer
+      likes:
+        items:
+          type: string
+        type: array
+      likes_count:
+        type: integer
+      location:
+        type: string
+      member_since:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      submissions_count:
+        type: integer
+      type:
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    type: object
   errors.ErrorResponse:
     properties:
       details: {}
@@ -100,38 +151,7 @@ info:
   version: "1.0"
 paths:
   /files/:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload file for analysis
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/entity.File'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errors.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errors.ErrorResponse'
-        "413":
-          description: Request Entity Too Large
-          schema:
-            $ref: '#/definitions/errors.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errors.ErrorResponse'
-      summary: Submit a new file for scanning
-      tags:
-      - file
-  /files/{sha256}:
-    delete:
+    get:
       consumes:
       - application/json
       description: List files
@@ -166,6 +186,69 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Retrieves a pagined list of files
+      tags:
+      - file
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload file for analysis
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Submit a new file for scanning
+      tags:
+      - file
+  /files/{sha256}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a file by ID
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/entity.File'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Deletes a file
       tags:
       - file
     get:
@@ -260,6 +343,35 @@ paths:
       summary: Update a file report (full update)
       tags:
       - file
+  /users/{username}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the information about a user
+      parameters:
+      - description: User ID
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Get a user information
+      tags:
+      - user
 schemes:
 - https
 swagger: "2.0"
