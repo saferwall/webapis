@@ -1,0 +1,157 @@
+basePath: /v1
+definitions:
+  entity.File:
+    properties:
+      byte_entropy:
+        items:
+          type: integer
+        type: array
+      comments_count:
+        type: integer
+      crc32:
+        type: string
+      exif:
+        additionalProperties:
+          type: string
+        type: object
+      fileformat:
+        type: string
+      first_seen:
+        type: integer
+      histogram:
+        items:
+          type: integer
+        type: array
+      last_scanned:
+        type: integer
+      magic:
+        type: string
+      md5:
+        type: string
+      ml:
+        additionalProperties: true
+        type: object
+      multiav:
+        additionalProperties: true
+        type: object
+      packer:
+        items:
+          type: string
+        type: array
+      pe: {}
+      sha1:
+        type: string
+      sha256:
+        type: string
+      sha512:
+        type: string
+      size:
+        type: integer
+      ssdeep:
+        type: string
+      status:
+        type: integer
+      strings: {}
+      submissions:
+        items:
+          $ref: '#/definitions/entity.Submission'
+        type: array
+      tags:
+        additionalProperties: true
+        type: object
+      trid:
+        items:
+          type: string
+        type: array
+      type:
+        type: string
+    type: object
+  entity.Submission:
+    properties:
+      country:
+        type: string
+      filename:
+        type: string
+      src:
+        type: string
+      timestamp:
+        type: integer
+    type: object
+  errors.ErrorResponse:
+    properties:
+      details: {}
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+host: api.saferwall.com
+info:
+  contact:
+    email: support@saferwall.com
+    name: API Support
+    url: https://about.saferwall.com/contact.html
+  description: Interact with Saferwall Malware Analysis Platform
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://about.saferwall.com/tos
+  title: Saferwall Web API
+  version: "1.0"
+paths:
+  /files/:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Submit a new file for scanning
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Create a file
+      tags:
+      - file
+      - scan
+  /files/{sha256}:
+    get:
+      consumes:
+      - application/json
+      description: Get a file report
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Get file
+      tags:
+      - file
+schemes:
+- https
+swagger: "2.0"

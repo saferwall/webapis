@@ -42,6 +42,16 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/files/:sha256/comments/", res.comments, optionalLogin)
 }
 
+// get godoc
+// @Summary Get file
+// @Description Get a file report
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Router /files/{sha256} [get]
 func (r resource) get(c echo.Context) error {
 
 	// the `fields` query parameter is used to limit the fields
@@ -65,6 +75,17 @@ func (r resource) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
+// create godoc
+// @Summary Create a file
+// @Description Submit a new file for scanning
+// @Tags file,scan
+// @Accept mpfd
+// @Produce json
+// @Success 201 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 413 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/ [post]
 func (r resource) create(c echo.Context) error {
 
 	ctx := c.Request().Context()
@@ -99,6 +120,19 @@ func (r resource) create(c echo.Context) error {
 	}
 	return c.JSON(http.StatusCreated, file)
 }
+
+// update godoc
+// @Summary update a file report (full update)
+// @Description Replace a file report with a new report
+// @Tags file,update
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 413 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [put]
 
 func (r resource) update(c echo.Context) error {
 

@@ -38,6 +38,22 @@ var flagConfig = flag.String("config", "./../configs/", "path to the config file
 var flagN1QLFiles = flag.String("db", "./../db/", "path to the n1ql files")
 var flagTplFiles = flag.String("tpl", "./../templates/", "path to html templates")
 
+// @title Saferwall Web API
+// @version 1.0
+// @description Interact with Saferwall Malware Analysis Platform
+// @termsOfService https://about.saferwall.com/tos
+
+// @contact.name API Support
+// @contact.url https://about.saferwall.com/contact.html
+// @contact.email support@saferwall.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host api.saferwall.com
+// @BasePath /v1
+
+// @schemes https
 func main() {
 
 	flag.Parse()
