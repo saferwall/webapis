@@ -51,6 +51,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Router /files/{sha256} [get]
 func (r resource) get(c echo.Context) error {
 
@@ -83,6 +84,7 @@ func (r resource) get(c echo.Context) error {
 // @Produce json
 // @Success 201 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Failure 413 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/ [post]
@@ -130,6 +132,7 @@ func (r resource) create(c echo.Context) error {
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [put]
 func (r resource) update(c echo.Context) error {
@@ -165,9 +168,10 @@ func (r resource) update(c echo.Context) error {
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} entity.File
-// @Failure 400 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /files/{sha256} [put]
+// @Router /files/{sha256} [patch]
 func (r resource) patch(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()
@@ -188,10 +192,10 @@ func (r resource) patch(c echo.Context) error {
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 204 {object} entity.File
-// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /files/{sha256} [put]
-
+// @Router /files/{sha256} [delete]
 func (r resource) delete(c echo.Context) error {
 
 	var isAdmin bool
@@ -210,6 +214,19 @@ func (r resource) delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
+// GetFiles godoc
+// @Summary Retrieves a pagined list of files
+// @Description List files
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param per_page query int false "Number of files per page"
+// @Param page query int false "Specify the page number"
+// @Success 200 {array} entity.File
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [delete]
 func (r resource) getFiles(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()

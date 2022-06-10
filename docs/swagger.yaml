@@ -115,6 +115,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "413":
           description: Request Entity Too Large
           schema:
@@ -127,6 +131,43 @@ paths:
       tags:
       - file
   /files/{sha256}:
+    delete:
+      consumes:
+      - application/json
+      description: List files
+      parameters:
+      - description: Number of files per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.File'
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Retrieves a pagined list of files
+      tags:
+      - file
     get:
       consumes:
       - application/json
@@ -148,13 +189,49 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Get a file report
+      tags:
+      - file
+    patch:
+      consumes:
+      - application/json
+      description: Patch a portion of a file report
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update a file report (partial update)
       tags:
       - file
     put:
       consumes:
       - application/json
-      description: Patch a portion of a file report
+      description: Replace a file report with a new report
       parameters:
       - description: File SHA256
         in: path
@@ -172,11 +249,15 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Update a file report (partial update)
+      summary: Update a file report (full update)
       tags:
       - file
 schemes:
