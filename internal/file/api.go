@@ -43,8 +43,8 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 }
 
 // get godoc
-// @Summary Get file
-// @Description Get a file report
+// @Summary Get a file report
+// @Description Retrieves the content of a file report.
 // @Tags file
 // @Accept json
 // @Produce json
@@ -76,8 +76,8 @@ func (r resource) get(c echo.Context) error {
 }
 
 // create godoc
-// @Summary Create a file
-// @Description Submit a new file for scanning
+// @Summary Submit a new file for scanning
+// @Description Upload file for analysis
 // @Tags file,scan
 // @Accept mpfd
 // @Produce json
@@ -123,7 +123,7 @@ func (r resource) create(c echo.Context) error {
 
 // update godoc
 // @Summary update a file report (full update)
-// @Description Replace a file report with a new report
+// @Description replace a file report with a new report
 // @Tags file,update
 // @Accept json
 // @Produce json
@@ -133,7 +133,6 @@ func (r resource) create(c echo.Context) error {
 // @Failure 413 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [put]
-
 func (r resource) update(c echo.Context) error {
 
 	var isAdmin bool
@@ -159,6 +158,18 @@ func (r resource) update(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
+// patch godoc
+// @Summary update a file report (partial update)
+// @Description patch a portion of a file report
+// @Tags file,patch
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 413 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [put]
 func (r resource) patch(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()

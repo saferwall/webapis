@@ -27,7 +27,7 @@ const docTemplate = `{
     "paths": {
         "/files/": {
             "post": {
-                "description": "Submit a new file for scanning",
+                "description": "Upload file for analysis",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -38,7 +38,7 @@ const docTemplate = `{
                     "file",
                     "scan"
                 ],
-                "summary": "Create a file",
+                "summary": "Submit a new file for scanning",
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -69,7 +69,7 @@ const docTemplate = `{
         },
         "/files/{sha256}": {
             "get": {
-                "description": "Get a file report",
+                "description": "Retrieves the content of a file report.",
                 "consumes": [
                     "application/json"
                 ],
@@ -79,7 +79,7 @@ const docTemplate = `{
                 "tags": [
                     "file"
                 ],
-                "summary": "Get file",
+                "summary": "Get a file report",
                 "parameters": [
                     {
                         "type": "string",
@@ -98,6 +98,55 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "patch a portion of a file report",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file",
+                    "patch"
+                ],
+                "summary": "update a file report (partial update)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File SHA256",
+                        "name": "sha256",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "413": {
+                        "description": "Request Entity Too Large",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
