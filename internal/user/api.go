@@ -67,15 +67,19 @@ type resource struct {
 // @Router /users/{username} [get]
 func (r resource) get(c echo.Context) error {
 	ctx := c.Request().Context()
-	user, err := r.service.Get(c.Request().Context(), c.Param("username"))
+	user, err := r.service.Get(ctx, c.Param("username"))
 	if err != nil {
 		return err
 	}
 
+	// Hide the email unless the logged-in user is asking its own
+	// information.
 	curUser, ok := ctx.Value(entity.UserKey).(entity.User)
 	if !ok || curUser.ID() != strings.ToLower(c.Param("username")) {
 		user.Email = ""
 	}
+
+	// Always hide the apssword.
 	user.Password = ""
 	return c.JSON(http.StatusOK, user)
 }

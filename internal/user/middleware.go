@@ -2,7 +2,7 @@
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
-package file
+package user
 
 import (
 	"regexp"
@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	sha256reg = regexp.MustCompile(`^[a-f0-9]{64}$`)
+	userReg = regexp.MustCompile(`^[a-zA-Z0-9]{1,20}$`)
 )
 
 type middleware struct {
@@ -23,21 +23,21 @@ type middleware struct {
 	logger  log.Logger
 }
 
-// NewMiddleware creates a new file Middleware.
+// NewMiddleware creates a new user Middleware.
 func NewMiddleware(service Service, logger log.Logger) middleware {
 	return middleware{service, logger}
 }
 
-// VerifyHash is the middleware function.
-func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
+// VerifyUser is the middleware function.
+func (m middleware) VerifyUser(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		sha256 := strings.ToLower(c.Param("sha256"))
-		if !sha256reg.MatchString(sha256) {
-			m.logger.Error("failed to match sha256 regex for doc %v", sha256)
-			return e.BadRequest("invalid sha256 hash")
+		username := strings.ToLower(c.Param("username"))
+		if !userReg.MatchString(username) {
+			m.logger.Error("failed to match regex for username %v", username)
+			return e.BadRequest("invalid username string")
 		}
-		docExists, err := m.service.Exists(c.Request().Context(), sha256)
+		docExists, err := m.service.Exists(c.Request().Context(), username)
 		if err != nil {
 			return err
 		}

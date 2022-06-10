@@ -107,9 +107,11 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
 		actSvc, userSvc, fileSvc)
 
-	// Create the file middleware.
+	// Create the file and user middleware.
 	fileMiddleware := file.NewMiddleware(fileSvc, logger)
+	userMiddleware := user.NewMiddleware(userSvc, logger)
 
+	// Register the handlers.
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler,
 		logger, smtpClient, emailTpl)
