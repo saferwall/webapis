@@ -35,8 +35,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file",
-                    "scan"
+                    "file"
                 ],
                 "summary": "Submit a new file for scanning",
                 "responses": {
@@ -69,7 +68,7 @@ const docTemplate = `{
         },
         "/files/{sha256}": {
             "get": {
-                "description": "Retrieves the content of a file report.",
+                "description": "Retrieves the content of a file report",
                 "consumes": [
                     "application/json"
                 ],
@@ -105,7 +104,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "patch a portion of a file report",
+                "description": "Patch a portion of a file report",
                 "consumes": [
                     "application/json"
                 ],
@@ -113,10 +112,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file",
-                    "patch"
+                    "file"
                 ],
-                "summary": "update a file report (partial update)",
+                "summary": "Update a file report (partial update)",
                 "parameters": [
                     {
                         "type": "string",
@@ -135,12 +133,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ErrorResponse"
-                        }
-                    },
-                    "413": {
-                        "description": "Request Entity Too Large",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }

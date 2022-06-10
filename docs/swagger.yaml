@@ -126,12 +126,11 @@ paths:
       summary: Submit a new file for scanning
       tags:
       - file
-      - scan
   /files/{sha256}:
     get:
       consumes:
       - application/json
-      description: Retrieves the content of a file report.
+      description: Retrieves the content of a file report
       parameters:
       - description: File SHA256
         in: path
@@ -155,7 +154,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: patch a portion of a file report
+      description: Patch a portion of a file report
       parameters:
       - description: File SHA256
         in: path
@@ -173,18 +172,13 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-        "413":
-          description: Request Entity Too Large
-          schema:
-            $ref: '#/definitions/errors.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: update a file report (partial update)
+      summary: Update a file report (partial update)
       tags:
       - file
-      - patch
 schemes:
 - https
 swagger: "2.0"

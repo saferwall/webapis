@@ -42,9 +42,9 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/files/:sha256/comments/", res.comments, optionalLogin)
 }
 
-// get godoc
+// GetFile godoc
 // @Summary Get a file report
-// @Description Retrieves the content of a file report.
+// @Description Retrieves the content of a file report
 // @Tags file
 // @Accept json
 // @Produce json
@@ -75,10 +75,10 @@ func (r resource) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
-// create godoc
+// CreateFile godoc
 // @Summary Submit a new file for scanning
 // @Description Upload file for analysis
-// @Tags file,scan
+// @Tags file
 // @Accept mpfd
 // @Produce json
 // @Success 201 {object} entity.File
@@ -121,16 +121,15 @@ func (r resource) create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, file)
 }
 
-// update godoc
-// @Summary update a file report (full update)
-// @Description replace a file report with a new report
-// @Tags file,update
+// UpdateFile godoc
+// @Summary Update a file report (full update)
+// @Description Replace a file report with a new report
+// @Tags file
 // @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
-// @Failure 413 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [put]
 func (r resource) update(c echo.Context) error {
@@ -158,16 +157,15 @@ func (r resource) update(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
-// patch godoc
-// @Summary update a file report (partial update)
-// @Description patch a portion of a file report
-// @Tags file,patch
+// PatchFile godoc
+// @Summary Update a file report (partial update)
+// @Description Patch a portion of a file report
+// @Tags file
 // @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
-// @Failure 413 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [put]
 func (r resource) patch(c echo.Context) error {
@@ -181,6 +179,18 @@ func (r resource) patch(c echo.Context) error {
 	}
 	return nil
 }
+
+// DeleteFile godoc
+// @Summary Deletes a file
+// @Description Deletes a file by ID
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 204 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [put]
 
 func (r resource) delete(c echo.Context) error {
 
