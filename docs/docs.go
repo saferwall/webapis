@@ -83,7 +83,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Upload file for analysis",
+                "description": "Upload file for analysis.",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -94,6 +94,15 @@ const docTemplate = `{
                     "file"
                 ],
                 "summary": "Submit a new file for scanning",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "binary file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -130,7 +139,7 @@ const docTemplate = `{
         },
         "/files/{sha256}": {
             "get": {
-                "description": "Retrieves the content of a file report",
+                "description": "Retrieves the content of a file report.",
                 "consumes": [
                     "application/json"
                 ],
@@ -318,7 +327,7 @@ const docTemplate = `{
         },
         "/users/{username}": {
             "get": {
-                "description": "Retrieves the information about a user",
+                "description": "Retrieves information about a user",
                 "consumes": [
                     "application/json"
                 ],
@@ -328,7 +337,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Get a user information",
+                "summary": "Get user information by user ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -353,6 +362,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -562,6 +577,44 @@ const docTemplate = `{
                 },
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "github.com_saferwall_saferwall-api_internal_auth.loginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 8
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
+                }
+            }
+        },
+        "internal_auth.loginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 8
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1
                 }
             }
         }

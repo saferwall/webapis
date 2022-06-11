@@ -39,6 +39,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 	res := resource{service, logger, mailer, templater, UIAddress}
 
+	// login handles authentication request.
 	g.POST("/auth/login/", res.login)
 	g.DELETE("/auth/logout/", res.logout)
 	g.POST("/auth/reset-password/", res.resetPassword)
@@ -46,13 +47,27 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/auth/verify-account/", res.verifyAccount)
 }
 
-// login handles authentication request.
+// loginRequest describes a login authtentication request.
+type loginRequest struct {
+	Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
+	Password string `json:"password" validate:"required,min=8,max=30"`
+}
+
+// Login godoc
+// @Summary Log in
+// @Description Users logins by username and password.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param aurh-request body loginRequest true "Username and password"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username} [get]
 func (r resource) login(c echo.Context) error {
-	var req struct {
-		Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
-		Password string `json:"password" validate:"required,min=8,max=30"`
-	}
 	ctx := c.Request().Context()
+	req := loginRequest{}
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Errorf("invalid request: %v", err)
 		return errors.BadRequest("Invalid username or password")
