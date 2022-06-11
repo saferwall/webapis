@@ -143,12 +143,20 @@ definitions:
         minLength: 8
         type: string
       username:
+        example: mike
         maxLength: 20
         minLength: 1
         type: string
     required:
     - password
     - username
+    type: object
+  github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
     type: object
   internal_auth.loginRequest:
     properties:
@@ -157,12 +165,20 @@ definitions:
         minLength: 8
         type: string
       username:
+        example: mike
         maxLength: 20
         minLength: 1
         type: string
     required:
     - password
     - username
+    type: object
+  internal_auth.resetPwdRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
     type: object
 host: api.saferwall.com
 info:
@@ -186,10 +202,10 @@ paths:
       parameters:
       - description: Username and password
         in: body
-        name: aurh-request
+        name: auth-request
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.loginRequest'
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest'
       produces:
       - application/json
       responses:
@@ -213,14 +229,80 @@ paths:
       tags:
       - auth
   /auth/logout/:
-    post:
-      consumes:
-      - application/json
-      description: Users logout from current session.
+    delete:
+      description: Delete the cookie used for authentication.
       responses:
         "204":
           description: logout success
-      summary: Log out
+      summary: Log out from current session
+      tags:
+      - auth
+  /auth/password/:
+    post:
+      consumes:
+      - application/json
+      description: Request a reset password for anonymous users.
+      parameters:
+      - description: Email used during account sign-up
+        in: body
+        name: reset-pwd
+        required: true
+        schema:
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Reset password for non-logged users by email
+      tags:
+      - auth
+  /auth/reset-password/:
+    post:
+      consumes:
+      - application/json
+      description: Request a reset password for anonymous users.
+      parameters:
+      - description: Email used during account sign-up
+        in: body
+        name: reset-pwd
+        required: true
+        schema:
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Reset password for non-logged users by email
       tags:
       - auth
   /files/:

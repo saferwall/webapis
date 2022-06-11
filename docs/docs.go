@@ -41,11 +41,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Username and password",
-                        "name": "aurh-request",
+                        "name": "auth-request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.loginRequest"
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest"
                         }
                     }
                 ],
@@ -78,18 +78,119 @@ const docTemplate = `{
             }
         },
         "/auth/logout/": {
+            "delete": {
+                "description": "Delete the cookie used for authentication.",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Log out from current session",
+                "responses": {
+                    "204": {
+                        "description": "logout success"
+                    }
+                }
+            }
+        },
+        "/auth/password/": {
             "post": {
-                "description": "Users logout from current session.",
+                "description": "Request a reset password for anonymous users.",
                 "consumes": [
+                    "application/json"
+                ],
+                "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "auth"
                 ],
-                "summary": "Log out",
+                "summary": "Reset password for non-logged users by email",
+                "parameters": [
+                    {
+                        "description": "Email used during account sign-up",
+                        "name": "reset-pwd",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest"
+                        }
+                    }
+                ],
                 "responses": {
-                    "204": {
-                        "description": "logout success"
+                    "200": {
+                        "description": "{\"token\": \"value\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password/": {
+            "post": {
+                "description": "Request a reset password for anonymous users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Reset password for non-logged users by email",
+                "parameters": [
+                    {
+                        "description": "Email used during account sign-up",
+                        "name": "reset-pwd",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"token\": \"value\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -664,7 +765,19 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "maxLength": 20,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "mike"
+                }
+            }
+        },
+        "github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
                 }
             }
         },
@@ -683,7 +796,19 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "maxLength": 20,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "mike"
+                }
+            }
+        },
+        "internal_auth.resetPwdRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
                 }
             }
         }

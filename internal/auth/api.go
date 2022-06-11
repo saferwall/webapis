@@ -49,8 +49,21 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 // loginRequest describes a login authtentication request.
 type loginRequest struct {
-	Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
-	Password string `json:"password" validate:"required,min=8,max=30"`
+	Username string `json:"username" validate:"required,alphanum,min=1,max=20" example:"mike"`
+	Password string `json:"password" validate:"required,min=8,max=30", example:"control123"`
+}
+
+// resetPasswordRequest describes a password reet request for anonymous users.
+type resetPwdRequest struct {
+	Email string `json:"email" validate:"required,email", example:"mike@protonmail.com"`
+}
+
+// createNewPwdRequest describes a request to create a new password via a JWT token
+// received in email.
+type createNewPwdRequest struct {
+	Token    string `json:"token" validate:"required"`
+	GUID     string `json:"guid" validate:"required", example: "f47ac10b-58cc-8372-8567-0e02b2c3d479"`
+	Password string `json:"password" validate:"required,min=8,max=30", example:"secretControl"`
 }
 
 // Login godoc
@@ -59,7 +72,7 @@ type loginRequest struct {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param aurh-request body loginRequest true "Username and password"
+// @Param auth-request body loginRequest true "Username and password"
 // @Success 200 {string} json "{"token": "value"}"
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 401 {object} errors.ErrorResponse
@@ -96,12 +109,11 @@ func (r resource) login(c echo.Context) error {
 }
 
 // Logout godoc
-// @Summary Log out
-// @Description Users logout from current session.
+// @Summary Log out from current session
+// @Description Delete the cookie used for authentication.
 // @Tags auth
-// @Accept json
 // @Success 204 "logout success"
-// @Router /auth/logout/ [post]
+// @Router /auth/logout/ [delete]
 func (r resource) logout(c echo.Context) error {
 
 	// Delete the cookie by setting a cookie with
@@ -137,11 +149,21 @@ func (r resource) verifyAccount(c echo.Context) error {
 
 }
 
+// ResetPassword godoc
+// @Summary Reset password for non-logged users by email
+// @Description Request a reset password for anonymous users.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param reset-pwd body resetPwdRequest true "Email used during account sign-up"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /auth/reset-password/ [post]
 func (r resource) resetPassword(c echo.Context) error {
-	var req struct {
-		Email string `json:"email" validate:"required,email"`
-	}
 	ctx := c.Request().Context()
+	req := resetPwdRequest{}
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Infof("invalid request: %v", err)
 		return errors.BadRequest(err.Error())
@@ -192,6 +214,18 @@ func (r resource) resetPassword(c echo.Context) error {
 
 }
 
+// createNewPassword godoc
+// @Summary Reset password for non-logged users by email
+// @Description Request a reset password for anonymous users.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param reset-pwd body resetPwdRequest true "Email used during account sign-up"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /auth/password/ [post]
 func (r resource) createNewPassword(c echo.Context) error {
 	var req struct {
 		Token    string `json:"token" validate:"required"`
