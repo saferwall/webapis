@@ -30,6 +30,7 @@ type Service interface {
 	Update(ctx context.Context, id string, input interface{}) (User, error)
 	Patch(ctx context.Context, id, path string, input interface{}) error
 	Delete(ctx context.Context, id string) (User, error)
+	Exists(ctx context.Context, id string) (bool, error)
 	Activities(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	Likes(ctx context.Context, id string, offset, limit int) (
@@ -217,6 +218,11 @@ func (s service) Delete(ctx context.Context, id string) (User, error) {
 		return User{}, err
 	}
 	return user, nil
+}
+
+// Exists checks if a document exists for the given id.
+func (s service) Exists(ctx context.Context, id string) (bool, error) {
+	return s.repo.Exists(ctx, id)
 }
 
 // Count returns the number of users.

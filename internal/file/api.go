@@ -29,9 +29,9 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.POST("/files/", res.create, requireLogin)
 
 	g.GET("/files/:sha256/", res.get, verifyHash)
-	g.PUT("/files/:sha256/", res.update, requireLogin)
-	g.PATCH("/files/:sha256/", res.patch, requireLogin)
-	g.DELETE("/files/:sha256/", res.delete, requireLogin)
+	g.PUT("/files/:sha256/", res.update, verifyHash, requireLogin)
+	g.PATCH("/files/:sha256/", res.patch, verifyHash, requireLogin)
+	g.DELETE("/files/:sha256/", res.delete, verifyHash, requireLogin)
 
 	g.GET("/files/:sha256/strings/", res.strings, verifyHash)
 	g.GET("/files/:sha256/summary/", res.summary, verifyHash, optionalLogin)
@@ -44,7 +44,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 // GetFile godoc
 // @Summary Get a file report
-// @Description Retrieves the content of a file report
+// @Description Retrieves the content of a file report.
 // @Tags file
 // @Accept json
 // @Produce json
@@ -78,10 +78,11 @@ func (r resource) get(c echo.Context) error {
 
 // CreateFile godoc
 // @Summary Submit a new file for scanning
-// @Description Upload file for analysis
+// @Description Upload file for analysis.
 // @Tags file
 // @Accept mpfd
 // @Produce json
+// @Param  file formData file true  "binary file"
 // @Success 201 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
@@ -152,8 +153,7 @@ func (r resource) update(c echo.Context) error {
 		return errors.BadRequest("")
 	}
 
-	file, err := r.service.Update(c.Request().Context(),
-		c.Param("sha256"), input)
+	file, err := r.service.Update(ctx, c.Param("sha256"), input)
 	if err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func (r resource) delete(c echo.Context) error {
 		return errors.Forbidden("")
 	}
 
-	file, err := r.service.Delete(c.Request().Context(), c.Param("sha256"))
+	file, err := r.service.Delete(ctx, c.Param("sha256"))
 	if err != nil {
 		return err
 	}

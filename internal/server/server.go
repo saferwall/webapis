@@ -113,7 +113,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 
 	// Register the handlers.
 	healthcheck.RegisterHandlers(e, version)
-	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler,
+	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, userMiddleware.VerifyUser,
 		logger, smtpClient, emailTpl)
 	auth.RegisterHandlers(g, authSvc, logger, smtpClient, emailTpl, cfg.UI.Address)
 	file.RegisterHandlers(g, fileSvc, logger, authHandler, optAuthHandler, fileMiddleware.VerifyHash)

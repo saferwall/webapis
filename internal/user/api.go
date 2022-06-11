@@ -18,13 +18,13 @@ import (
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
-	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
+	requireLogin, optionalLogin, verifyUser echo.MiddlewareFunc,
 	logger log.Logger, mailer Mailer, templater tpl.Service) {
 
 	res := resource{service, logger, mailer, templater}
 
 	g.POST("/users/", res.create)
-	g.GET("/users/:username/", res.get, optionalLogin)
+	g.GET("/users/:username/", res.get, optionalLogin, verifyUser)
 	g.PATCH("/users/:username/", res.update, requireLogin)
 	g.PATCH("/users/:username/password/", res.password, requireLogin)
 	g.PATCH("/users/:username/email/", res.email, requireLogin)
@@ -55,8 +55,8 @@ type resource struct {
 }
 
 // GetUser godoc
-// @Summary Get a user information
-// @Description Retrieves the information about a user
+// @Summary Get user information by user ID
+// @Description Retrieves information about a user
 // @Tags user
 // @Accept json
 // @Produce json
@@ -64,6 +64,7 @@ type resource struct {
 // @Success 200 {object} entity.User
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username} [get]
 func (r resource) get(c echo.Context) error {
 	ctx := c.Request().Context()
