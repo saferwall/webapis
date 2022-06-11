@@ -139,6 +139,7 @@ definitions:
   github.com_saferwall_saferwall-api_internal_auth.loginRequest:
     properties:
       password:
+        example: control123
         maxLength: 30
         minLength: 8
         type: string
@@ -161,6 +162,7 @@ definitions:
   internal_auth.loginRequest:
     properties:
       password:
+        example: control123
         maxLength: 30
         minLength: 8
         type: string
@@ -205,7 +207,7 @@ paths:
         name: auth-request
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest'
+          $ref: '#/definitions/internal_auth.loginRequest'
       produces:
       - application/json
       responses:
@@ -241,6 +243,40 @@ paths:
     post:
       consumes:
       - application/json
+      description: Update the password from the auth token received in email.
+      parameters:
+      - description: Email used during account sign-up
+        in: body
+        name: reset-pwd
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.resetPwdRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Create a new password from a token received in email
+      tags:
+      - auth
+  /auth/reset-password/:
+    post:
+      consumes:
+      - application/json
       description: Request a reset password for anonymous users.
       parameters:
       - description: Email used during account sign-up
@@ -248,7 +284,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
+          $ref: '#/definitions/internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -271,20 +307,20 @@ paths:
       summary: Reset password for non-logged users by email
       tags:
       - auth
-  /auth/reset-password/:
-    post:
-      consumes:
-      - application/json
-      description: Request a reset password for anonymous users.
+  /auth/verify-account/:
+    get:
+      description: Verify the JWT token received during account creation.
       parameters:
-      - description: Email used during account sign-up
-        in: body
-        name: reset-pwd
+      - description: GUID to identify the token
+        in: query
+        name: guid
         required: true
-        schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
-      produces:
-      - application/json
+        type: string
+      - description: JWT token generated for account creation
+        in: query
+        name: token
+        required: true
+        type: string
       responses:
         "200":
           description: '{"token": "value"}'
@@ -302,7 +338,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Reset password for non-logged users by email
+      summary: Confirm a new account creation
       tags:
       - auth
   /files/:

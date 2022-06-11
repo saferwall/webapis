@@ -45,7 +45,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest"
+                            "$ref": "#/definitions/internal_auth.loginRequest"
                         }
                     }
                 ],
@@ -93,7 +93,7 @@ const docTemplate = `{
         },
         "/auth/password/": {
             "post": {
-                "description": "Request a reset password for anonymous users.",
+                "description": "Update the password from the auth token received in email.",
                 "consumes": [
                     "application/json"
                 ],
@@ -103,7 +103,7 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Reset password for non-logged users by email",
+                "summary": "Create a new password from a token received in email",
                 "parameters": [
                     {
                         "description": "Email used during account sign-up",
@@ -111,7 +111,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest"
+                            "$ref": "#/definitions/internal_auth.resetPwdRequest"
                         }
                     }
                 ],
@@ -163,8 +163,59 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest"
+                            "$ref": "#/definitions/internal_auth.resetPwdRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"token\": \"value\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verify-account/": {
+            "get": {
+                "description": "Verify the JWT token received during account creation.",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Confirm a new account creation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "GUID to identify the token",
+                        "name": "guid",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "JWT token generated for account creation",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -760,7 +811,8 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "maxLength": 30,
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "control123"
                 },
                 "username": {
                     "type": "string",
@@ -791,7 +843,8 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "maxLength": 30,
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "control123"
                 },
                 "username": {
                     "type": "string",

@@ -50,7 +50,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 // loginRequest describes a login authtentication request.
 type loginRequest struct {
 	Username string `json:"username" validate:"required,alphanum,min=1,max=20" example:"mike"`
-	Password string `json:"password" validate:"required,min=8,max=30", example:"control123"`
+	Password string `json:"password" validate:"required,min=8,max=30" example:"control123"`
 }
 
 // resetPasswordRequest describes a password reet request for anonymous users.
@@ -62,8 +62,8 @@ type resetPwdRequest struct {
 // received in email.
 type createNewPwdRequest struct {
 	Token    string `json:"token" validate:"required"`
-	GUID     string `json:"guid" validate:"required", example: "f47ac10b-58cc-8372-8567-0e02b2c3d479"`
-	Password string `json:"password" validate:"required,min=8,max=30", example:"secretControl"`
+	GUID     string `json:"guid" validate:"required" example: "f47ac10b-58cc-8372-8567-0e02b2c3d479"`
+	Password string `json:"password" validate:"required,min=8,max=30" example:"secretControl"`
 }
 
 // Login godoc
@@ -131,6 +131,17 @@ func (r resource) logout(c echo.Context) error {
 	return c.NoContent(204)
 }
 
+// VerifyAccount godoc
+// @Summary Confirm a new account creation
+// @Description Verify the JWT token received during account creation.
+// @Tags auth
+// @Param guid query string true "GUID to identify the token"
+// @Param token query string true "JWT token generated for account creation"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /auth/verify-account/ [get]
 func (r resource) verifyAccount(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.VerifyAccount(ctx, c.QueryParam("guid"), c.QueryParam("token"))
@@ -215,8 +226,8 @@ func (r resource) resetPassword(c echo.Context) error {
 }
 
 // createNewPassword godoc
-// @Summary Reset password for non-logged users by email
-// @Description Request a reset password for anonymous users.
+// @Summary Create a new password from a token received in email
+// @Description Update the password from the auth token received in email.
 // @Tags auth
 // @Accept json
 // @Produce json
