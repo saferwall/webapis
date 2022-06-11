@@ -178,6 +178,51 @@ info:
   title: Saferwall Web API
   version: "1.0"
 paths:
+  /auth/login/:
+    post:
+      consumes:
+      - application/json
+      description: Users logins by username and password.
+      parameters:
+      - description: Username and password
+        in: body
+        name: aurh-request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_auth.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Log in
+      tags:
+      - auth
+  /auth/logout/:
+    post:
+      consumes:
+      - application/json
+      description: Users logout from current session.
+      responses:
+        "204":
+          description: logout success
+      summary: Log out
+      tags:
+      - auth
   /files/:
     get:
       consumes:

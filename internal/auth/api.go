@@ -64,7 +64,7 @@ type loginRequest struct {
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 401 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /users/{username} [get]
+// @Router /auth/login/ [post]
 func (r resource) login(c echo.Context) error {
 	ctx := c.Request().Context()
 	req := loginRequest{}
@@ -95,8 +95,17 @@ func (r resource) login(c echo.Context) error {
 	}{token})
 }
 
+// Logout godoc
+// @Summary Log out
+// @Description Users logout from current session.
+// @Tags auth
+// @Accept json
+// @Success 204 "logout success"
+// @Router /auth/logout/ [post]
 func (r resource) logout(c echo.Context) error {
 
+	// Delete the cookie by setting a cookie with
+	// the same name and an expired date.
 	cookie := &http.Cookie{
 		Value:    "",
 		HttpOnly: true,
