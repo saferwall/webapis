@@ -45,7 +45,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.loginRequest"
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest"
                         }
                     }
                 ],
@@ -111,7 +111,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.resetPwdRequest"
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest"
                         }
                     }
                 ],
@@ -163,7 +163,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.resetPwdRequest"
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest"
                         }
                     }
                 ],
@@ -248,7 +248,7 @@ const docTemplate = `{
         },
         "/files/": {
             "get": {
-                "description": "List files",
+                "description": "List strings of a file.",
                 "consumes": [
                     "application/json"
                 ],
@@ -258,11 +258,11 @@ const docTemplate = `{
                 "tags": [
                     "file"
                 ],
-                "summary": "Retrieves a pagined list of files",
+                "summary": "Returns a paginated list of strings",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Number of files per page",
+                        "description": "Number of strings per page",
                         "name": "per_page",
                         "in": "query"
                     },
@@ -277,10 +277,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.File"
-                            }
+                            "$ref": "#/definitions/pagination.Pages"
                         }
                     },
                     "403": {
@@ -398,6 +395,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
                     }
                 }
             },
@@ -450,7 +453,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Deletes a file by ID",
+                "description": "Deletes a file by ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -498,7 +501,7 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "Patch a portion of a file report",
+                "description": "Patch a portion of a file report.",
                 "consumes": [
                     "application/json"
                 ],
@@ -862,6 +865,24 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string"
+                }
+            }
+        },
+        "pagination.Pages": {
+            "type": "object",
+            "properties": {
+                "items": {},
+                "page": {
+                    "type": "integer"
+                },
+                "page_count": {
+                    "type": "integer"
+                },
+                "per_page": {
+                    "type": "integer"
+                },
+                "total_count": {
+                    "type": "integer"
                 }
             }
         }

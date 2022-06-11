@@ -182,6 +182,18 @@ definitions:
     required:
     - email
     type: object
+  pagination.Pages:
+    properties:
+      items: {}
+      page:
+        type: integer
+      page_count:
+        type: integer
+      per_page:
+        type: integer
+      total_count:
+        type: integer
+    type: object
 host: api.saferwall.com
 info:
   contact:
@@ -207,7 +219,7 @@ paths:
         name: auth-request
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.loginRequest'
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest'
       produces:
       - application/json
       responses:
@@ -250,7 +262,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.resetPwdRequest'
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -284,7 +296,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.resetPwdRequest'
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -345,9 +357,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: List files
+      description: List strings of a file.
       parameters:
-      - description: Number of files per page
+      - description: Number of strings per page
         in: query
         name: per_page
         type: integer
@@ -361,9 +373,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entity.File'
-            type: array
+            $ref: '#/definitions/pagination.Pages'
         "403":
           description: Forbidden
           schema:
@@ -376,7 +386,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Retrieves a pagined list of files
+      summary: Returns a paginated list of strings
       tags:
       - file
     post:
@@ -419,7 +429,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Deletes a file by ID
+      description: Deletes a file by ID.
       parameters:
       - description: File SHA256
         in: path
@@ -473,13 +483,17 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Get a file report
       tags:
       - file
     patch:
       consumes:
       - application/json
-      description: Patch a portion of a file report
+      description: Patch a portion of a file report.
       parameters:
       - description: File SHA256
         in: path

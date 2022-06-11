@@ -25,24 +25,21 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 	res := resource{service, logger}
 
-	g.GET("/files/", res.getFiles)
+	g.GET("/files/", res.list)
 	g.POST("/files/", res.create, requireLogin)
-
 	g.GET("/files/:sha256/", res.get, verifyHash)
 	g.PUT("/files/:sha256/", res.update, verifyHash, requireLogin)
 	g.PATCH("/files/:sha256/", res.patch, verifyHash, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, verifyHash, requireLogin)
-
 	g.GET("/files/:sha256/strings/", res.strings, verifyHash)
 	g.GET("/files/:sha256/summary/", res.summary, verifyHash, optionalLogin)
+	g.GET("/files/:sha256/comments/", res.comments, verifyHash, optionalLogin)
 	g.POST("/files/:sha256/like/", res.like, verifyHash, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, verifyHash, requireLogin)
 	g.POST("/files/:sha256/rescan/", res.rescan, verifyHash, requireLogin)
-	g.GET("/files/:sha256/download/", res.download, requireLogin)
-	g.GET("/files/:sha256/comments/", res.comments, optionalLogin)
+	g.GET("/files/:sha256/download/", res.download, verifyHash, requireLogin)
 }
 
-// GetFile godoc
 // @Summary Get a file report
 // @Description Retrieves the content of a file report.
 // @Tags file
@@ -52,6 +49,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 // @Success 200 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [get]
 func (r resource) get(c echo.Context) error {
 
@@ -76,13 +74,12 @@ func (r resource) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
-// CreateFile godoc
 // @Summary Submit a new file for scanning
 // @Description Upload file for analysis.
 // @Tags file
 // @Accept mpfd
 // @Produce json
-// @Param  file formData file true  "binary file"
+// @Param file formData file true  "binary file"
 // @Success 201 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
@@ -124,7 +121,6 @@ func (r resource) create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, file)
 }
 
-// UpdateFile godoc
 // @Summary Update a file report (full update)
 // @Description Replace a file report with a new report
 // @Tags file
@@ -160,9 +156,8 @@ func (r resource) update(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
-// PatchFile godoc
 // @Summary Update a file report (partial update)
-// @Description Patch a portion of a file report
+// @Description Patch a portion of a file report.
 // @Tags file
 // @Accept json
 // @Produce json
@@ -186,14 +181,14 @@ func (r resource) patch(c echo.Context) error {
 
 // DeleteFile godoc
 // @Summary Deletes a file
-// @Description Deletes a file by ID
+// @Description Deletes a file by ID.
 // @Tags file
 // @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 204 {object} entity.File
-// @Failure 404 {object} errors.ErrorResponse
 // @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [delete]
 func (r resource) delete(c echo.Context) error {
@@ -214,20 +209,19 @@ func (r resource) delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
-// GetFiles godoc
 // @Summary Retrieves a pagined list of files
 // @Description List files
 // @Tags file
 // @Accept json
 // @Produce json
-// @Param per_page query int false "Number of files per page"
-// @Param page query int false "Specify the page number"
-// @Success 200 {array} entity.File
+// @Param per_page query uint false "Number of files per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages{items=[]entity.File}
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/ [get]
-func (r resource) getFiles(c echo.Context) error {
+func (r resource) list(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
@@ -250,6 +244,19 @@ func (r resource) getFiles(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of strings
+// @Description List strings of a file.
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Param per_page query uint false "Number of strings per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [get]
 func (r resource) strings(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountStrings(ctx, c.Param("sha256"))
@@ -266,6 +273,17 @@ func (r resource) strings(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary File summary and metadata
+// @Description File metadata returned in the summary view of a file.
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [get]
 func (r resource) summary(c echo.Context) error {
 	ctx := c.Request().Context()
 	fileSummary, err := r.service.Summary(ctx, c.Param("sha256"))
@@ -273,6 +291,23 @@ func (r resource) summary(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, fileSummary)
+}
+
+func (r resource) comments(c echo.Context) error {
+	ctx := c.Request().Context()
+	file, err := r.service.Get(ctx, c.Param("sha256"), nil)
+	if err != nil {
+		return err
+	}
+	count := file.CommentsCount
+	pages := pagination.NewFromRequest(c.Request(), count)
+	comments, err := r.service.Comments(
+		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = comments
+	return c.JSON(http.StatusOK, pages)
 }
 
 func (r resource) like(c echo.Context) error {
@@ -324,21 +359,4 @@ func (r resource) download(c echo.Context) error {
 		}
 	}
 	return c.File(zippedFile)
-}
-
-func (r resource) comments(c echo.Context) error {
-	ctx := c.Request().Context()
-	file, err := r.service.Get(ctx, c.Param("sha256"), nil)
-	if err != nil {
-		return err
-	}
-	count := file.CommentsCount
-	pages := pagination.NewFromRequest(c.Request(), count)
-	comments, err := r.service.Comments(
-		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
-	if err != nil {
-		return err
-	}
-	pages.Items = comments
-	return c.JSON(http.StatusOK, pages)
 }
