@@ -37,10 +37,12 @@ func (m middleware) VerifyUser(next echo.HandlerFunc) echo.HandlerFunc {
 			m.logger.Error("failed to match regex for username %v", username)
 			return e.BadRequest("invalid username string")
 		}
+
 		docExists, err := m.service.Exists(c.Request().Context(), username)
 		if err != nil {
 			return err
 		}
+
 		if !docExists {
 			return db.ErrDocumentNotFound
 		}

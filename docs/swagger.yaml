@@ -180,6 +180,28 @@ definitions:
     - password
     - username
     type: object
+  github.com_saferwall_saferwall-api_internal_user.UpdateUserRequest:
+    properties:
+      bio:
+        example: What really counts are good endings, not flawed beginnings.
+        maxLength: 64
+        minLength: 1
+        type: string
+      location:
+        example: Damascus
+        maxLength: 16
+        minLength: 1
+        type: string
+      name:
+        example: Ibn Taymiyyah
+        maxLength: 32
+        minLength: 1
+        type: string
+      url:
+        example: https://en.wikipedia.org/wiki/Ibn_Taymiyyah
+        maxLength: 64
+        type: string
+    type: object
   internal_auth.loginRequest:
     properties:
       password:
@@ -224,6 +246,28 @@ definitions:
     - password
     - username
     type: object
+  internal_user.UpdateUserRequest:
+    properties:
+      bio:
+        example: What really counts are good endings, not flawed beginnings.
+        maxLength: 64
+        minLength: 1
+        type: string
+      location:
+        example: Damascus
+        maxLength: 16
+        minLength: 1
+        type: string
+      name:
+        example: Ibn Taymiyyah
+        maxLength: 32
+        minLength: 1
+        type: string
+      url:
+        example: https://en.wikipedia.org/wiki/Ibn_Taymiyyah
+        maxLength: 64
+        type: string
+    type: object
   pagination.Pages:
     properties:
       items: {}
@@ -261,7 +305,7 @@ paths:
         name: auth-request
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest'
+          $ref: '#/definitions/internal_auth.loginRequest'
       produces:
       - application/json
       responses:
@@ -304,7 +348,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
+          $ref: '#/definitions/internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -338,7 +382,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
+          $ref: '#/definitions/internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -676,7 +720,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: json
+            type: object
         "403":
           description: Forbidden
           schema:
@@ -819,6 +863,48 @@ paths:
       tags:
       - file
   /users/:
+    get:
+      consumes:
+      - application/json
+      description: List users
+      parameters:
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pagination.Pages'
+            - properties:
+                items:
+                  items:
+                    $ref: '#/definitions/entity.User'
+                  type: array
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Retrieves a pagined list of users
+      tags:
+      - user
     post:
       consumes:
       - application/json
@@ -889,6 +975,37 @@ paths:
       summary: Get user information by user ID
       tags:
       - user
+  /users/{username}/:
+    delete:
+      description: Deletes a user by ID.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/entity.User'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Deletes a user
+      tags:
+      - user
     put:
       consumes:
       - application/json
@@ -899,6 +1016,12 @@ paths:
         name: username
         required: true
         type: string
+      - description: New user data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_user.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -919,6 +1042,211 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update a user object (full update)
+      tags:
+      - user
+  /users/{username}/comments/:
+    get:
+      consumes:
+      - application/json
+      description: List of comments by a user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's comments.
+      tags:
+      - user
+  /users/{username}/followers/:
+    get:
+      consumes:
+      - application/json
+      description: List of users who follow a user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's followers.
+      tags:
+      - user
+  /users/{username}/following/:
+    get:
+      consumes:
+      - application/json
+      description: List of users a user follows.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's following.
+      tags:
+      - user
+  /users/{username}/likes/:
+    get:
+      consumes:
+      - application/json
+      description: List of likes of a user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of users' likes.
+      tags:
+      - user
+  /users/{username}/submissions/:
+    get:
+      consumes:
+      - application/json
+      description: List of submissions by a user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's submissions.
       tags:
       - user
 schemes:
