@@ -94,17 +94,17 @@ type service struct {
 
 // CreateUserRequest represents a user creation request.
 type CreateUserRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
-	Password string `json:"password" validate:"required,min=8,max=30"`
+	Email    string `json:"email" validate:"required,email" example:"mike@protonmail.com"`
+	Username string `json:"username" validate:"required,alphanum,min=1,max=20" example:"mike"`
+	Password string `json:"password" validate:"required,min=8,max=30" example:"control123"`
 }
 
 // UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
-	Name     string `json:"name" validate:"omitempty,min=1,max=32"`
-	Location string `json:"location" validate:"omitempty,min=1,max=16"`
-	URL      string `json:"url" validate:"omitempty,url,max=64"`
-	Bio      string `json:"bio" validate:"omitempty,min=1,max=64"`
+	Name     string `json:"name" validate:"omitempty,min=1,max=32" example:"Ibn Taymiyyah"`
+	Location string `json:"location" validate:"omitempty,min=1,max=16" example:"Damascus"`
+	URL      string `json:"url" validate:"omitempty,url,max=64" example:"https://en.wikipedia.org/wiki/Ibn_Taymiyyah"`
+	Bio      string `json:"bio" validate:"omitempty,min=1,max=64" example:"What really counts are good endings, not flawed beginnings."`
 }
 
 // UpdatePasswordRequest represents a password update request.

@@ -45,7 +45,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.loginRequest"
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest"
                         }
                     }
                 ],
@@ -111,7 +111,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.resetPwdRequest"
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest"
                         }
                     }
                 ],
@@ -163,7 +163,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.resetPwdRequest"
+                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest"
                         }
                     }
                 ],
@@ -910,7 +910,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github.com_saferwall_saferwall-api_internal_user.CreateUserRequest"
+                            "$ref": "#/definitions/internal_user.CreateUserRequest"
                         }
                     }
                 ],
@@ -965,6 +965,54 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "User ID",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Replace a user document with a new user's document",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update a user object (full update)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
                         "name": "username",
                         "in": "path",
                         "required": true
@@ -1245,17 +1293,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "mike@protonmail.com"
                 },
                 "password": {
                     "type": "string",
                     "maxLength": 30,
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "control123"
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 20,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "mike"
                 }
             }
         },
@@ -1301,17 +1352,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "mike@protonmail.com"
                 },
                 "password": {
                     "type": "string",
                     "maxLength": 30,
-                    "minLength": 8
+                    "minLength": 8,
+                    "example": "control123"
                 },
                 "username": {
                     "type": "string",
                     "maxLength": 20,
-                    "minLength": 1
+                    "minLength": 1,
+                    "example": "mike"
                 }
             }
         },

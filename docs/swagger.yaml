@@ -163,12 +163,15 @@ definitions:
   github.com_saferwall_saferwall-api_internal_user.CreateUserRequest:
     properties:
       email:
+        example: mike@protonmail.com
         type: string
       password:
+        example: control123
         maxLength: 30
         minLength: 8
         type: string
       username:
+        example: mike
         maxLength: 20
         minLength: 1
         type: string
@@ -204,12 +207,15 @@ definitions:
   internal_user.CreateUserRequest:
     properties:
       email:
+        example: mike@protonmail.com
         type: string
       password:
+        example: control123
         maxLength: 30
         minLength: 8
         type: string
       username:
+        example: mike
         maxLength: 20
         minLength: 1
         type: string
@@ -255,7 +261,7 @@ paths:
         name: auth-request
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.loginRequest'
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest'
       produces:
       - application/json
       responses:
@@ -298,7 +304,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.resetPwdRequest'
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -332,7 +338,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.resetPwdRequest'
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -823,7 +829,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_user.CreateUserRequest'
+          $ref: '#/definitions/internal_user.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -881,6 +887,38 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Get user information by user ID
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Replace a user document with a new user's document
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update a user object (full update)
       tags:
       - user
 schemes:
