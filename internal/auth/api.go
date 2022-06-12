@@ -55,13 +55,13 @@ type loginRequest struct {
 
 // resetPasswordRequest describes a password reet request for anonymous users.
 type resetPwdRequest struct {
-	Email string `json:"email" validate:"required,email", example:"mike@protonmail.com"`
+	Email string `json:"email" validate:"required,email" example:"mike@protonmail.com"`
 }
 
 // createNewPwdRequest describes a request to create a new password via a JWT token
 // received in email.
 type createNewPwdRequest struct {
-	Token    string `json:"token" validate:"required"`
+	Token    string `json:"token" validate:"required" example:"eyJhbGciOiJIUzI1Ni"`
 	GUID     string `json:"guid" validate:"required" example: "f47ac10b-58cc-8372-8567-0e02b2c3d479"`
 	Password string `json:"password" validate:"required,min=8,max=30" example:"secretControl"`
 }

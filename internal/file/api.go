@@ -324,7 +324,7 @@ func (r resource) comments(c echo.Context) error {
 // @Tags file
 // @Produce json
 // @Param sha256 path string true "File SHA256"
-// @Success 200 {object} object{}
+// @Success 200 {json} json{'message'= string}
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse

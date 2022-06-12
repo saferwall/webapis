@@ -155,9 +155,27 @@ definitions:
   github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest:
     properties:
       email:
+        example: mike@protonmail.com
         type: string
     required:
     - email
+    type: object
+  github.com_saferwall_saferwall-api_internal_user.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - email
+    - password
+    - username
     type: object
   internal_auth.loginRequest:
     properties:
@@ -178,9 +196,27 @@ definitions:
   internal_auth.resetPwdRequest:
     properties:
       email:
+        example: mike@protonmail.com
         type: string
     required:
     - email
+    type: object
+  internal_user.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - email
+    - password
+    - username
     type: object
   pagination.Pages:
     properties:
@@ -634,7 +670,7 @@ paths:
         "200":
           description: OK
           schema:
-            type: object
+            type: json
         "403":
           description: Forbidden
           schema:
@@ -776,6 +812,44 @@ paths:
       summary: Unlike a file
       tags:
       - file
+  /users/:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user.
+      parameters:
+      - description: User data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_user.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - user
   /users/{username}:
     get:
       consumes:
