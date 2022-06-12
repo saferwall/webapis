@@ -256,7 +256,7 @@ func (r resource) list(c echo.Context) error {
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /files/{sha256} [get]
+// @Router /files/{sha256}/strings/ [get]
 func (r resource) strings(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountStrings(ctx, c.Param("sha256"))
@@ -276,14 +276,13 @@ func (r resource) strings(c echo.Context) error {
 // @Summary File summary and metadata
 // @Description File metadata returned in the summary view of a file.
 // @Tags file
-// @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} pagination.Pages
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /files/{sha256} [get]
+// @Router /files/{sha256}/summary/ [get]
 func (r resource) summary(c echo.Context) error {
 	ctx := c.Request().Context()
 	fileSummary, err := r.service.Summary(ctx, c.Param("sha256"))
@@ -293,6 +292,16 @@ func (r resource) summary(c echo.Context) error {
 	return c.JSON(http.StatusOK, fileSummary)
 }
 
+// @Summary Returns a paginated list of file comments
+// @Description List of comments for a given file.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/comments/ [get]
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
 	file, err := r.service.Get(ctx, c.Param("sha256"), nil)
@@ -310,6 +319,16 @@ func (r resource) comments(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Like a file
+// @Description Adds a file to the like list.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/like/ [post]
 func (r resource) like(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Like(ctx, c.Param("sha256"))
@@ -322,6 +341,15 @@ func (r resource) like(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// @Summary Unlike a file
+// @Description Removes a file from the like list.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/unlike/ [post]
 func (r resource) unlike(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Unlike(ctx, c.Param("sha256"))
@@ -334,6 +362,15 @@ func (r resource) unlike(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// @Summary Rescan an existing file
+// @Description Rescan an existing file.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/rescan/ [post]
 func (r resource) rescan(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Rescan(ctx, c.Param("sha256"))
@@ -346,6 +383,15 @@ func (r resource) rescan(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// @Summary Download a file
+// @Description Download a binary file. Files are in zip format and password protected.
+// @Tags file
+// @Produce mpfd
+// @Param sha256 path string true "File SHA256"
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/download/ [get]
 func (r resource) download(c echo.Context) error {
 	ctx := c.Request().Context()
 	var zippedFile string

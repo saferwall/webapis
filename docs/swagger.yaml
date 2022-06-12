@@ -219,7 +219,7 @@ paths:
         name: auth-request
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.loginRequest'
+          $ref: '#/definitions/internal_auth.loginRequest'
       produces:
       - application/json
       responses:
@@ -262,7 +262,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
+          $ref: '#/definitions/internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -296,7 +296,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest'
+          $ref: '#/definitions/internal_auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -357,9 +357,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: List strings of a file.
+      description: List files
       parameters:
-      - description: Number of strings per page
+      - description: Number of files per page
         in: query
         name: per_page
         type: integer
@@ -373,7 +373,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/pagination.Pages'
+            allOf:
+            - $ref: '#/definitions/pagination.Pages'
+            - properties:
+                items:
+                  items:
+                    $ref: '#/definitions/entity.File'
+                  type: array
+              type: object
         "403":
           description: Forbidden
           schema:
@@ -386,7 +393,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Returns a paginated list of strings
+      summary: Retrieves a pagined list of files
       tags:
       - file
     post:
@@ -552,6 +559,221 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update a file report (full update)
+      tags:
+      - file
+  /files/{sha256}/comments/:
+    get:
+      description: List of comments for a given file.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of file comments
+      tags:
+      - file
+  /files/{sha256}/download/:
+    get:
+      description: Download a binary file. Files are in zip format and password protected.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Download a file
+      tags:
+      - file
+  /files/{sha256}/like/:
+    post:
+      description: Adds a file to the like list.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Like a file
+      tags:
+      - file
+  /files/{sha256}/rescan/:
+    post:
+      description: Rescan an existing file.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Rescan an existing file
+      tags:
+      - file
+  /files/{sha256}/strings/:
+    get:
+      consumes:
+      - application/json
+      description: List strings of a file.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      - description: Number of strings per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of strings
+      tags:
+      - file
+  /files/{sha256}/summary/:
+    get:
+      description: File metadata returned in the summary view of a file.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: File summary and metadata
+      tags:
+      - file
+  /files/{sha256}/unlike/:
+    post:
+      description: Removes a file from the like list.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Unlike a file
       tags:
       - file
   /users/{username}:
