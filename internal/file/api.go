@@ -80,6 +80,7 @@ func (r resource) get(c echo.Context) error {
 // @Accept mpfd
 // @Produce json
 // @Param file formData file true  "binary file"
+// @Security ApiKeyAuth || {}
 // @Success 201 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse

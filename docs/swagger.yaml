@@ -463,6 +463,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        ApiKeyAuth: []
       summary: Submit a new file for scanning
       tags:
       - file
@@ -1390,4 +1393,9 @@ paths:
       - user
 schemes:
 - https
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

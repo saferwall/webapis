@@ -53,6 +53,10 @@ var flagTplFiles = flag.String("tpl", "./../templates/", "path to html templates
 // @host api.saferwall.com
 // @BasePath /v1
 
+// @securityDefinitions.apiKey Bearer
+// @in header
+// @name Authorization
+
 // @schemes https
 func main() {
 

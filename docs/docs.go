@@ -316,6 +316,12 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": [],
+                        "{}": []
+                    }
+                ],
                 "description": "Upload file for analysis.",
                 "consumes": [
                     "multipart/form-data"
@@ -2097,6 +2103,13 @@ const docTemplate = `{
                     "example": "https://en.wikipedia.org/wiki/Ibn_Taymiyyah"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
