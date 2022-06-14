@@ -168,7 +168,7 @@ func (r resource) create(c echo.Context) error {
 }
 
 // @Summary Update a user object (full update)
-// @Description Replace a user document with a new user's document
+// @Description Replace a user document with a new user's document.
 // @Tags user
 // @Accept json
 // @Produce json
@@ -238,7 +238,7 @@ func (r resource) delete(c echo.Context) error {
 }
 
 // @Summary Retrieves a pagined list of users
-// @Description List users
+// @Description List users.
 // @Tags user
 // @Accept json
 // @Produce json
@@ -292,7 +292,7 @@ func (r resource) activities(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
-// @Summary Returns a paginated list of users' likes.
+// @Summary Returns a paginated list of users' likes
 // @Description List of likes of a user.
 // @Tags user
 // @Accept json
@@ -321,7 +321,7 @@ func (r resource) likes(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
-// @Summary Returns a paginated list of a user's following.
+// @Summary Returns a paginated list of a user's following
 // @Description List of users a user follows.
 // @Tags user
 // @Accept json
@@ -350,7 +350,7 @@ func (r resource) following(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
-// @Summary Returns a paginated list of a user's followers.
+// @Summary Returns a paginated list of a user's followers
 // @Description List of users who follow a user.
 // @Tags user
 // @Accept json
@@ -379,7 +379,7 @@ func (r resource) followers(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
-// @Summary Returns a paginated list of a user's submissions.
+// @Summary Returns a paginated list of a user's submissions
 // @Description List of submissions by a user.
 // @Tags user
 // @Accept json
@@ -408,7 +408,7 @@ func (r resource) submissions(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
-// @Summary Returns a paginated list of a user's comments.
+// @Summary Returns a paginated list of a user's comments
 // @Description List of comments by a user.
 // @Tags user
 // @Accept json
@@ -540,16 +540,17 @@ func (r resource) avatar(c echo.Context) error {
 }
 
 // @Summary Update password for authenticated users
-// @Description Changee password for logged-in users.
+// @Description Change password for logged-in users.
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param username path string true "Target user to unfollow"
+// @Param username path string true "Username"
+// @Param data body UpdateUserRequest true "User data"
 // @Success 200 {object} object{}
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /users/{username}/unfollow/ [post]
+// @Router /users/{username}/password/ [post]
 func (r resource) password(c echo.Context) error {
 	var req UpdatePasswordRequest
 	ctx := c.Request().Context()
@@ -583,7 +584,18 @@ func (r resource) password(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
-// email handle update email request for authenticated users.
+// @Summary Update email for authenticated users
+// @Description Change email for logged-in users.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param data body UpdateEmailRequest true "User data"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/email/ [post]
 func (r resource) email(c echo.Context) error {
 	var req UpdateEmailRequest
 	ctx := c.Request().Context()

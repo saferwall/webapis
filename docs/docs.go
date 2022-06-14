@@ -892,7 +892,7 @@ const docTemplate = `{
         },
         "/users/": {
             "get": {
-                "description": "List users",
+                "description": "List users.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1068,7 +1068,7 @@ const docTemplate = `{
         },
         "/users/{username}/": {
             "put": {
-                "description": "Replace a user document with a new user's document",
+                "description": "Replace a user document with a new user's document.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1182,7 +1182,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Returns a paginated list of a user's comments.",
+                "summary": "Returns a paginated list of a user's comments",
                 "parameters": [
                     {
                         "type": "string",
@@ -1209,6 +1209,65 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/pagination.Pages"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{username}/email/": {
+            "post": {
+                "description": "Change email for logged-in users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update email for authenticated users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpdateEmailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
                         }
                     },
                     "403": {
@@ -1294,7 +1353,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Returns a paginated list of a user's followers.",
+                "summary": "Returns a paginated list of a user's followers",
                 "parameters": [
                     {
                         "type": "string",
@@ -1356,7 +1415,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Returns a paginated list of a user's following.",
+                "summary": "Returns a paginated list of a user's following",
                 "parameters": [
                     {
                         "type": "string",
@@ -1418,7 +1477,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Returns a paginated list of users' likes.",
+                "summary": "Returns a paginated list of users' likes",
                 "parameters": [
                     {
                         "type": "string",
@@ -1468,6 +1527,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/{username}/password/": {
+            "post": {
+                "description": "Change password for logged-in users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update password for authenticated users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{username}/submissions/": {
             "get": {
                 "description": "List of submissions by a user.",
@@ -1480,7 +1598,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Returns a paginated list of a user's submissions.",
+                "summary": "Returns a paginated list of a user's submissions",
                 "parameters": [
                     {
                         "type": "string",
@@ -1532,7 +1650,7 @@ const docTemplate = `{
         },
         "/users/{username}/unfollow/": {
             "post": {
-                "description": "Changee password for logged-in users.",
+                "description": "Stop following a user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1542,7 +1660,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Update password for authenticated users",
+                "summary": "Unfollow a user",
                 "parameters": [
                     {
                         "type": "string",
@@ -1859,6 +1977,25 @@ const docTemplate = `{
                     "maxLength": 20,
                     "minLength": 1,
                     "example": "mike"
+                }
+            }
+        },
+        "user.UpdateEmailRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "mike@proton.me"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 8,
+                    "example": "control123"
                 }
             }
         },

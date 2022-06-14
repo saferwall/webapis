@@ -192,6 +192,20 @@ definitions:
     - password
     - username
     type: object
+  user.UpdateEmailRequest:
+    properties:
+      email:
+        example: mike@proton.me
+        type: string
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
   user.UpdateUserRequest:
     properties:
       bio:
@@ -800,7 +814,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: List users
+      description: List users.
       parameters:
       - description: Number of items per page
         in: query
@@ -943,7 +957,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Replace a user document with a new user's document
+      description: Replace a user document with a new user's document.
       parameters:
       - description: Username
         in: path
@@ -1016,7 +1030,46 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Returns a paginated list of a user's comments.
+      summary: Returns a paginated list of a user's comments
+      tags:
+      - user
+  /users/{username}/email/:
+    post:
+      consumes:
+      - application/json
+      description: Change email for logged-in users.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update email for authenticated users
       tags:
       - user
   /users/{username}/follow/:
@@ -1090,7 +1143,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Returns a paginated list of a user's followers.
+      summary: Returns a paginated list of a user's followers
       tags:
       - user
   /users/{username}/following/:
@@ -1131,7 +1184,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Returns a paginated list of a user's following.
+      summary: Returns a paginated list of a user's following
       tags:
       - user
   /users/{username}/likes/:
@@ -1172,7 +1225,46 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Returns a paginated list of users' likes.
+      summary: Returns a paginated list of users' likes
+      tags:
+      - user
+  /users/{username}/password/:
+    post:
+      consumes:
+      - application/json
+      description: Change password for logged-in users.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update password for authenticated users
       tags:
       - user
   /users/{username}/submissions/:
@@ -1213,14 +1305,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Returns a paginated list of a user's submissions.
+      summary: Returns a paginated list of a user's submissions
       tags:
       - user
   /users/{username}/unfollow/:
     post:
       consumes:
       - application/json
-      description: Changee password for logged-in users.
+      description: Stop following a user.
       parameters:
       - description: Target user to unfollow
         in: path
@@ -1246,7 +1338,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Update password for authenticated users
+      summary: Unfollow a user
       tags:
       - user
 schemes:
