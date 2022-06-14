@@ -45,7 +45,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.loginRequest"
+                            "$ref": "#/definitions/auth.loginRequest"
                         }
                     }
                 ],
@@ -111,7 +111,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.resetPwdRequest"
+                            "$ref": "#/definitions/auth.resetPwdRequest"
                         }
                     }
                 ],
@@ -163,7 +163,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_auth.resetPwdRequest"
+                            "$ref": "#/definitions/auth.resetPwdRequest"
                         }
                     }
                 ],
@@ -978,7 +978,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_user.CreateUserRequest"
+                            "$ref": "#/definitions/user.CreateUserRequest"
                         }
                     }
                 ],
@@ -1093,7 +1093,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_user.UpdateUserRequest"
+                            "$ref": "#/definitions/user.UpdateUserRequest"
                         }
                     }
                 ],
@@ -1209,6 +1209,56 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/pagination.Pages"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{username}/follow/": {
+            "post": {
+                "description": "Start following a user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Follow a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target user to follow",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
                         }
                     },
                     "403": {
@@ -1479,9 +1529,92 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{username}/unfollow/": {
+            "post": {
+                "description": "Changee password for logged-in users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Update password for authenticated users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target user to unfollow",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "auth.loginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 8,
+                    "example": "control123"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1,
+                    "example": "mike"
+                }
+            }
+        },
+        "auth.resetPwdRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "mike@protonmail.com"
+                }
+            }
+        },
         "entity.File": {
             "type": "object",
             "properties": {
@@ -1685,180 +1818,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github.com_saferwall_saferwall-api_internal_auth.loginRequest": {
-            "type": "object",
-            "required": [
-                "password",
-                "username"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "minLength": 8,
-                    "example": "control123"
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 1,
-                    "example": "mike"
-                }
-            }
-        },
-        "github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "mike@protonmail.com"
-                }
-            }
-        },
-        "github.com_saferwall_saferwall-api_internal_user.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password",
-                "username"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "mike@protonmail.com"
-                },
-                "password": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "minLength": 8,
-                    "example": "control123"
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 1,
-                    "example": "mike"
-                }
-            }
-        },
-        "github.com_saferwall_saferwall-api_internal_user.UpdateUserRequest": {
-            "type": "object",
-            "properties": {
-                "bio": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 1,
-                    "example": "What really counts are good endings, not flawed beginnings."
-                },
-                "location": {
-                    "type": "string",
-                    "maxLength": 16,
-                    "minLength": 1,
-                    "example": "Damascus"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 32,
-                    "minLength": 1,
-                    "example": "Ibn Taymiyyah"
-                },
-                "url": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "example": "https://en.wikipedia.org/wiki/Ibn_Taymiyyah"
-                }
-            }
-        },
-        "internal_auth.loginRequest": {
-            "type": "object",
-            "required": [
-                "password",
-                "username"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "minLength": 8,
-                    "example": "control123"
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 1,
-                    "example": "mike"
-                }
-            }
-        },
-        "internal_auth.resetPwdRequest": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "mike@protonmail.com"
-                }
-            }
-        },
-        "internal_user.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password",
-                "username"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "mike@protonmail.com"
-                },
-                "password": {
-                    "type": "string",
-                    "maxLength": 30,
-                    "minLength": 8,
-                    "example": "control123"
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 20,
-                    "minLength": 1,
-                    "example": "mike"
-                }
-            }
-        },
-        "internal_user.UpdateUserRequest": {
-            "type": "object",
-            "properties": {
-                "bio": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "minLength": 1,
-                    "example": "What really counts are good endings, not flawed beginnings."
-                },
-                "location": {
-                    "type": "string",
-                    "maxLength": 16,
-                    "minLength": 1,
-                    "example": "Damascus"
-                },
-                "name": {
-                    "type": "string",
-                    "maxLength": 32,
-                    "minLength": 1,
-                    "example": "Ibn Taymiyyah"
-                },
-                "url": {
-                    "type": "string",
-                    "maxLength": 64,
-                    "example": "https://en.wikipedia.org/wiki/Ibn_Taymiyyah"
-                }
-            }
-        },
         "pagination.Pages": {
             "type": "object",
             "properties": {
@@ -1874,6 +1833,60 @@ const docTemplate = `{
                 },
                 "total_count": {
                     "type": "integer"
+                }
+            }
+        },
+        "user.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "mike@protonmail.com"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 8,
+                    "example": "control123"
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 1,
+                    "example": "mike"
+                }
+            }
+        },
+        "user.UpdateUserRequest": {
+            "type": "object",
+            "properties": {
+                "bio": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1,
+                    "example": "What really counts are good endings, not flawed beginnings."
+                },
+                "location": {
+                    "type": "string",
+                    "maxLength": 16,
+                    "minLength": 1,
+                    "example": "Damascus"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 32,
+                    "minLength": 1,
+                    "example": "Ibn Taymiyyah"
+                },
+                "url": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "example": "https://en.wikipedia.org/wiki/Ibn_Taymiyyah"
                 }
             }
         }

@@ -437,6 +437,17 @@ func (r resource) comments(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Follow a user
+// @Description Start following a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Target user to follow"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/follow/ [post]
 func (r resource) follow(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Follow(ctx, c.Param("username"))
@@ -453,6 +464,17 @@ func (r resource) follow(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// @Summary Unfollow a user
+// @Description Stop following a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Target user to unfollow"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/unfollow/ [post]
 func (r resource) unfollow(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Unfollow(ctx, c.Param("username"))
@@ -517,7 +539,17 @@ func (r resource) avatar(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
-// password handle update password request for authenticated users.
+// @Summary Update password for authenticated users
+// @Description Changee password for logged-in users.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Target user to unfollow"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/unfollow/ [post]
 func (r resource) password(c echo.Context) error {
 	var req UpdatePasswordRequest
 	ctx := c.Request().Context()

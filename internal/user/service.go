@@ -109,14 +109,14 @@ type UpdateUserRequest struct {
 
 // UpdatePasswordRequest represents a password update request.
 type UpdatePasswordRequest struct {
-	OldPassword string `json:"old" validate:"required,min=8,max=30"`
-	NewPassword string `json:"new" validate:"required,necsfield=OldPassword,min=8,max=30"`
+	OldPassword string `json:"old" validate:"required,min=8,max=30" example:"control123"`
+	NewPassword string `json:"new" validate:"required,necsfield=OldPassword,min=8,max=30" exam ple:"secretControl"`
 }
 
 // UpdateEmailRequest represents an email update request.
 type UpdateEmailRequest struct {
-	Password string `json:"password" validate:"required,min=8,max=30"`
-	NewEmail string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=30" example:"control123"`
+	NewEmail string `json:"email" validate:"required,email" example:"mike@proton.me"`
 }
 
 // ConfirmAccountResponse holds data coming from the token generator.

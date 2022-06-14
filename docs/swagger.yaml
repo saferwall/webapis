@@ -1,5 +1,29 @@
 basePath: /v1
 definitions:
+  auth.loginRequest:
+    properties:
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        example: mike
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  auth.resetPwdRequest:
+    properties:
+      email:
+        example: mike@protonmail.com
+        type: string
+    required:
+    - email
+    type: object
   entity.File:
     properties:
       byte_entropy:
@@ -136,138 +160,6 @@ definitions:
       status:
         type: integer
     type: object
-  github.com_saferwall_saferwall-api_internal_auth.loginRequest:
-    properties:
-      password:
-        example: control123
-        maxLength: 30
-        minLength: 8
-        type: string
-      username:
-        example: mike
-        maxLength: 20
-        minLength: 1
-        type: string
-    required:
-    - password
-    - username
-    type: object
-  github.com_saferwall_saferwall-api_internal_auth.resetPwdRequest:
-    properties:
-      email:
-        example: mike@protonmail.com
-        type: string
-    required:
-    - email
-    type: object
-  github.com_saferwall_saferwall-api_internal_user.CreateUserRequest:
-    properties:
-      email:
-        example: mike@protonmail.com
-        type: string
-      password:
-        example: control123
-        maxLength: 30
-        minLength: 8
-        type: string
-      username:
-        example: mike
-        maxLength: 20
-        minLength: 1
-        type: string
-    required:
-    - email
-    - password
-    - username
-    type: object
-  github.com_saferwall_saferwall-api_internal_user.UpdateUserRequest:
-    properties:
-      bio:
-        example: What really counts are good endings, not flawed beginnings.
-        maxLength: 64
-        minLength: 1
-        type: string
-      location:
-        example: Damascus
-        maxLength: 16
-        minLength: 1
-        type: string
-      name:
-        example: Ibn Taymiyyah
-        maxLength: 32
-        minLength: 1
-        type: string
-      url:
-        example: https://en.wikipedia.org/wiki/Ibn_Taymiyyah
-        maxLength: 64
-        type: string
-    type: object
-  internal_auth.loginRequest:
-    properties:
-      password:
-        example: control123
-        maxLength: 30
-        minLength: 8
-        type: string
-      username:
-        example: mike
-        maxLength: 20
-        minLength: 1
-        type: string
-    required:
-    - password
-    - username
-    type: object
-  internal_auth.resetPwdRequest:
-    properties:
-      email:
-        example: mike@protonmail.com
-        type: string
-    required:
-    - email
-    type: object
-  internal_user.CreateUserRequest:
-    properties:
-      email:
-        example: mike@protonmail.com
-        type: string
-      password:
-        example: control123
-        maxLength: 30
-        minLength: 8
-        type: string
-      username:
-        example: mike
-        maxLength: 20
-        minLength: 1
-        type: string
-    required:
-    - email
-    - password
-    - username
-    type: object
-  internal_user.UpdateUserRequest:
-    properties:
-      bio:
-        example: What really counts are good endings, not flawed beginnings.
-        maxLength: 64
-        minLength: 1
-        type: string
-      location:
-        example: Damascus
-        maxLength: 16
-        minLength: 1
-        type: string
-      name:
-        example: Ibn Taymiyyah
-        maxLength: 32
-        minLength: 1
-        type: string
-      url:
-        example: https://en.wikipedia.org/wiki/Ibn_Taymiyyah
-        maxLength: 64
-        type: string
-    type: object
   pagination.Pages:
     properties:
       items: {}
@@ -279,6 +171,48 @@ definitions:
         type: integer
       total_count:
         type: integer
+    type: object
+  user.CreateUserRequest:
+    properties:
+      email:
+        example: mike@protonmail.com
+        type: string
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        example: mike
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  user.UpdateUserRequest:
+    properties:
+      bio:
+        example: What really counts are good endings, not flawed beginnings.
+        maxLength: 64
+        minLength: 1
+        type: string
+      location:
+        example: Damascus
+        maxLength: 16
+        minLength: 1
+        type: string
+      name:
+        example: Ibn Taymiyyah
+        maxLength: 32
+        minLength: 1
+        type: string
+      url:
+        example: https://en.wikipedia.org/wiki/Ibn_Taymiyyah
+        maxLength: 64
+        type: string
     type: object
 host: api.saferwall.com
 info:
@@ -305,7 +239,7 @@ paths:
         name: auth-request
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.loginRequest'
+          $ref: '#/definitions/auth.loginRequest'
       produces:
       - application/json
       responses:
@@ -348,7 +282,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.resetPwdRequest'
+          $ref: '#/definitions/auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -382,7 +316,7 @@ paths:
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/internal_auth.resetPwdRequest'
+          $ref: '#/definitions/auth.resetPwdRequest'
       produces:
       - application/json
       responses:
@@ -915,7 +849,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/internal_user.CreateUserRequest'
+          $ref: '#/definitions/user.CreateUserRequest'
       produces:
       - application/json
       responses:
@@ -1021,7 +955,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/internal_user.UpdateUserRequest'
+          $ref: '#/definitions/user.UpdateUserRequest'
       produces:
       - application/json
       responses:
@@ -1083,6 +1017,39 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of a user's comments.
+      tags:
+      - user
+  /users/{username}/follow/:
+    post:
+      consumes:
+      - application/json
+      description: Start following a user.
+      parameters:
+      - description: Target user to follow
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Follow a user
       tags:
       - user
   /users/{username}/followers/:
@@ -1247,6 +1214,39 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of a user's submissions.
+      tags:
+      - user
+  /users/{username}/unfollow/:
+    post:
+      consumes:
+      - application/json
+      description: Changee password for logged-in users.
+      parameters:
+      - description: Target user to unfollow
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update password for authenticated users
       tags:
       - user
 schemes:
