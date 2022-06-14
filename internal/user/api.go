@@ -490,6 +490,20 @@ func (r resource) unfollow(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// @Summary Update user avatar
+// @Description Change user avatarr
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param data body UpdateEmailRequest true "User data"
+// @Success 200 {object} object{}
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 413 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/avatar/ [post]
 func (r resource) avatar(c echo.Context) error {
 	var curUsername string
 	ctx := c.Request().Context()

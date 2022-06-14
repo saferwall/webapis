@@ -992,6 +992,53 @@ paths:
       summary: Update a user object (full update)
       tags:
       - user
+  /users/{username}/avatar/:
+    post:
+      consumes:
+      - application/json
+      description: Change user avatarr
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update user avatar
+      tags:
+      - user
   /users/{username}/comments/:
     get:
       consumes:
