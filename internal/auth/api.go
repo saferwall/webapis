@@ -61,7 +61,7 @@ type resetPwdRequest struct {
 // received in email.
 type createNewPwdRequest struct {
 	Token    string `json:"token" validate:"required" example:"eyJhbGciOiJIUzI1Ni"`
-	GUID     string `json:"guid" validate:"required" example: "f47ac10b-58cc-8372-8567-0e02b2c3d479"`
+	GUID     string `json:"guid" validate:"required" example:"f47ac10b-58cc-8372-8567-0e02b2c3d479"`
 	Password string `json:"password" validate:"required,min=8,max=30" example:"secretControl"`
 }
 

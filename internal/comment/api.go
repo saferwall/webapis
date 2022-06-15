@@ -29,6 +29,18 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.DELETE("/comments/:id/", res.delete, requireLogin)
 }
 
+// @Summary Create a new comment
+// @Description Create a new comment.
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param data body CreateCommentRequest true "Comment body"
+// @Success 201 {object} entity.Comment
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 413 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /comments/ [post]
 func (r resource) create(c echo.Context) error {
 
 	var input CreateCommentRequest
@@ -48,6 +60,17 @@ func (r resource) create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, com)
 }
 
+// @Summary Get comment by ID
+// @Description Retrieves information about a comment.
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param id path string true "Comment ID"
+// @Success 200 {object} entity.Comment
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /comments/{id} [get]
 func (r resource) get(c echo.Context) error {
 	ctx := c.Request().Context()
 	comment, err := r.service.Get(ctx, c.Param("id"))
@@ -58,6 +81,18 @@ func (r resource) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, comment)
 }
 
+// @Summary Update a comment object (full update)
+// @Description Replace a cocument with a new comment's document.
+// @Tags comment
+// @Accept json
+// @Produce json
+// @Param id path string true "Comment ID"
+// @Param data body UpdateCommentRequest true "New comment data"
+// @Success 200 {object} entity.Comment
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /comments/{id}/ [put]
 func (r resource) update(c echo.Context) error {
 	var input UpdateCommentRequest
 
@@ -75,6 +110,16 @@ func (r resource) update(c echo.Context) error {
 	return c.JSON(http.StatusOK, comment)
 }
 
+// @Summary Deletes a comment
+// @Description Deletes a comment by ID.
+// @Tags comment
+// @Produce json
+// @Param id path string true "Comment ID"
+// @Success 204 {object} entity.Comment
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /comments/{id}/ [delete]
 func (r resource) delete(c echo.Context) error {
 
 	var curUsername string

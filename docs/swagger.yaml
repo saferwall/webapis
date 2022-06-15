@@ -3,6 +3,7 @@ definitions:
   auth.createNewPwdRequest:
     properties:
       guid:
+        example: f47ac10b-58cc-8372-8567-0e02b2c3d479
         type: string
       password:
         example: secretControl
@@ -40,6 +41,48 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  comment.CreateCommentRequest:
+    properties:
+      body:
+        type: string
+      sha256:
+        type: string
+      username:
+        type: string
+    required:
+    - body
+    - sha256
+    type: object
+  comment.UpdateCommentRequest:
+    properties:
+      body:
+        type: string
+    required:
+    - body
+    type: object
+  entity.Comment:
+    properties:
+      body:
+        description: Body represents the content of the comment.
+        type: string
+      id:
+        description: ID represents the activity identifier.
+        type: string
+      sha256:
+        description: |-
+          SHA256 references the hash of the file
+          where the comment has been made.
+        type: string
+      timestamp:
+        description: Timestamp when this activity happened.
+        type: integer
+      type:
+        description: Type represents the document type.
+        type: string
+      username:
+        description: Username represents the author of the comment.
+        type: string
     type: object
   entity.File:
     properties:
@@ -404,6 +447,146 @@ paths:
       summary: Confirm a new account creation
       tags:
       - auth
+  /comments/:
+    post:
+      consumes:
+      - application/json
+      description: Create a new comment.
+      parameters:
+      - description: Comment body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/comment.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Create a new comment
+      tags:
+      - comment
+  /comments/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves information about a comment.
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Get comment by ID
+      tags:
+      - comment
+  /comments/{id}/:
+    delete:
+      description: Deletes a comment by ID.
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Deletes a comment
+      tags:
+      - comment
+    put:
+      consumes:
+      - application/json
+      description: Replace a cocument with a new comment's document.
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New comment data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/comment.UpdateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update a comment object (full update)
+      tags:
+      - comment
   /files/:
     get:
       consumes:
