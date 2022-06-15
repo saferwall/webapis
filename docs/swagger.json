@@ -102,12 +102,12 @@
                 "summary": "Create a new password from a token received in email",
                 "parameters": [
                     {
-                        "description": "Email used during account sign-up",
+                        "description": "New password request",
                         "name": "reset-pwd",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.resetPwdRequest"
+                            "$ref": "#/definitions/auth.createNewPwdRequest"
                         }
                     }
                 ],
@@ -1018,9 +1018,64 @@
                 }
             }
         },
+        "/users/activities/": {
+            "get": {
+                "description": "List of activities of a user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "activity"
+                ],
+                "summary": "Returns a paginated list of a user's activities",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Specify the page number",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pagination.Pages"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{username}": {
             "get": {
-                "description": "Retrieves information about a user",
+                "description": "Retrieves information about a user.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1550,7 +1605,7 @@
                 "tags": [
                     "user"
                 ],
-                "summary": "Returns a paginated list of users' likes",
+                "summary": "Returns a paginated list of a user's likes",
                 "parameters": [
                     {
                         "type": "string",
@@ -1773,6 +1828,29 @@
         }
     },
     "definitions": {
+        "auth.createNewPwdRequest": {
+            "type": "object",
+            "required": [
+                "guid",
+                "password",
+                "token"
+            ],
+            "properties": {
+                "guid": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 8,
+                    "example": "secretControl"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1Ni"
+                }
+            }
+        },
         "auth.loginRequest": {
             "type": "object",
             "required": [

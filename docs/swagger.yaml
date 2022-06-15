@@ -1,5 +1,22 @@
 basePath: /v1
 definitions:
+  auth.createNewPwdRequest:
+    properties:
+      guid:
+        type: string
+      password:
+        example: secretControl
+        maxLength: 30
+        minLength: 8
+        type: string
+      token:
+        example: eyJhbGciOiJIUzI1Ni
+        type: string
+    required:
+    - guid
+    - password
+    - token
+    type: object
   auth.loginRequest:
     properties:
       password:
@@ -291,12 +308,12 @@ paths:
       - application/json
       description: Update the password from the auth token received in email.
       parameters:
-      - description: Email used during account sign-up
+      - description: New password request
         in: body
         name: reset-pwd
         required: true
         schema:
-          $ref: '#/definitions/auth.resetPwdRequest'
+          $ref: '#/definitions/auth.createNewPwdRequest'
       produces:
       - application/json
       responses:
@@ -897,7 +914,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieves information about a user
+      description: Retrieves information about a user.
       parameters:
       - description: User ID
         in: path
@@ -1275,7 +1292,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Returns a paginated list of users' likes
+      summary: Returns a paginated list of a user's likes
       tags:
       - user
   /users/{username}/password/:
@@ -1391,6 +1408,42 @@ paths:
       summary: Unfollow a user
       tags:
       - user
+  /users/activities/:
+    get:
+      consumes:
+      - application/json
+      description: List of activities of a user.
+      parameters:
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's activities
+      tags:
+      - activity
 schemes:
 - https
 securityDefinitions:

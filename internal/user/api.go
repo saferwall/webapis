@@ -56,7 +56,7 @@ type resource struct {
 }
 
 // @Summary Get user information by user ID
-// @Description Retrieves information about a user
+// @Description Retrieves information about a user.
 // @Tags user
 // @Accept json
 // @Produce json
@@ -272,6 +272,18 @@ func (r resource) list(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of a user's activities
+// @Description List of activities of a user.
+// @Tags activity
+// @Accept json
+// @Produce json
+// @Param per_page query uint false "Number of items per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/activities/ [get]
 func (r resource) activities(c echo.Context) error {
 	ctx := c.Request().Context()
 	var id string
@@ -292,7 +304,7 @@ func (r resource) activities(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
-// @Summary Returns a paginated list of users' likes
+// @Summary Returns a paginated list of a user's likes
 // @Description List of likes of a user.
 // @Tags user
 // @Accept json

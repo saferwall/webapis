@@ -39,7 +39,6 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 	res := resource{service, logger, mailer, templater, UIAddress}
 
-	// login handles authentication request.
 	g.POST("/auth/login/", res.login)
 	g.DELETE("/auth/logout/", res.logout)
 	g.POST("/auth/reset-password/", res.resetPassword)
@@ -66,7 +65,6 @@ type createNewPwdRequest struct {
 	Password string `json:"password" validate:"required,min=8,max=30" example:"secretControl"`
 }
 
-// Login godoc
 // @Summary Log in
 // @Description Users logins by username and password.
 // @Tags auth
@@ -108,7 +106,6 @@ func (r resource) login(c echo.Context) error {
 	}{token})
 }
 
-// Logout godoc
 // @Summary Log out from current session
 // @Description Delete the cookie used for authentication.
 // @Tags auth
@@ -131,7 +128,6 @@ func (r resource) logout(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-// VerifyAccount godoc
 // @Summary Confirm a new account creation
 // @Description Verify the JWT token received during account creation.
 // @Tags auth
@@ -160,7 +156,6 @@ func (r resource) verifyAccount(c echo.Context) error {
 
 }
 
-// ResetPassword godoc
 // @Summary Reset password for non-logged users by email
 // @Description Request a reset password for anonymous users.
 // @Tags auth
@@ -225,24 +220,19 @@ func (r resource) resetPassword(c echo.Context) error {
 
 }
 
-// createNewPassword godoc
 // @Summary Create a new password from a token received in email
 // @Description Update the password from the auth token received in email.
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param reset-pwd body resetPwdRequest true "Email used during account sign-up"
+// @Param reset-pwd body createNewPwdRequest true "New password request"
 // @Success 200 {string} json "{"token": "value"}"
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 401 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /auth/password/ [post]
 func (r resource) createNewPassword(c echo.Context) error {
-	var req struct {
-		Token    string `json:"token" validate:"required"`
-		GUID     string `json:"guid" validate:"required"`
-		Password string `json:"password" validate:"required,min=8,max=30"`
-	}
+	req := createNewPwdRequest{}
 	ctx := c.Request().Context()
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Errorf("invalid request: %v", err)
