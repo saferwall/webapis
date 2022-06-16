@@ -80,6 +80,7 @@ func run(logger log.Logger) error {
 	if err != nil {
 		return err
 	}
+	logger.Info("successfully loaded config")
 
 	// Connect to the database.
 	dbx, err := db.Open(cfg.DB.Server, cfg.DB.Username,
@@ -87,6 +88,7 @@ func run(logger log.Logger) error {
 	if err != nil {
 		return err
 	}
+	logger.Info("connection to database has been established")
 
 	// N1QL queries are stored separately from go code as the statement are
 	// relatively complexe and large.
