@@ -46,13 +46,39 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/auth/verify-account/", res.verifyAccount)
 }
 
-// login handles authentication request.
+// loginRequest describes a login authtentication request.
+type loginRequest struct {
+	Username string `json:"username" validate:"required,alphanum,min=1,max=20" example:"mike"`
+	Password string `json:"password" validate:"required,min=8,max=30" example:"control123"`
+}
+
+// resetPasswordRequest describes a password reet request for anonymous users.
+type resetPwdRequest struct {
+	Email string `json:"email" validate:"required,email" example:"mike@protonmail.com"`
+}
+
+// createNewPwdRequest describes a request to create a new password via a JWT token
+// received in email.
+type createNewPwdRequest struct {
+	Token    string `json:"token" validate:"required" example:"eyJhbGciOiJIUzI1Ni"`
+	GUID     string `json:"guid" validate:"required" example:"f47ac10b-58cc-8372-8567-0e02b2c3d479"`
+	Password string `json:"password" validate:"required,min=8,max=30" example:"secretControl"`
+}
+
+// @Summary Log in
+// @Description Users logins by username and password.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param auth-request body loginRequest true "Username and password"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /auth/login/ [post]
 func (r resource) login(c echo.Context) error {
-	var req struct {
-		Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
-		Password string `json:"password" validate:"required,min=8,max=30"`
-	}
 	ctx := c.Request().Context()
+	req := loginRequest{}
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Errorf("invalid request: %v", err)
 		return errors.BadRequest("Invalid username or password")
@@ -80,8 +106,15 @@ func (r resource) login(c echo.Context) error {
 	}{token})
 }
 
+// @Summary Log out from current session
+// @Description Delete the cookie used for authentication.
+// @Tags auth
+// @Success 204 "logout success"
+// @Router /auth/logout/ [delete]
 func (r resource) logout(c echo.Context) error {
 
+	// Delete the cookie by setting a cookie with
+	// the same name and an expired date.
 	cookie := &http.Cookie{
 		Value:    "",
 		HttpOnly: true,
@@ -95,6 +128,16 @@ func (r resource) logout(c echo.Context) error {
 	return c.NoContent(204)
 }
 
+// @Summary Confirm a new account creation
+// @Description Verify the JWT token received during account creation.
+// @Tags auth
+// @Param guid query string true "GUID to identify the token"
+// @Param token query string true "JWT token generated for account creation"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /auth/verify-account/ [get]
 func (r resource) verifyAccount(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.VerifyAccount(ctx, c.QueryParam("guid"), c.QueryParam("token"))
@@ -113,11 +156,20 @@ func (r resource) verifyAccount(c echo.Context) error {
 
 }
 
+// @Summary Reset password for non-logged users by email
+// @Description Request a reset password for anonymous users.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param reset-pwd body resetPwdRequest true "Email used during account sign-up"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /auth/reset-password/ [post]
 func (r resource) resetPassword(c echo.Context) error {
-	var req struct {
-		Email string `json:"email" validate:"required,email"`
-	}
 	ctx := c.Request().Context()
+	req := resetPwdRequest{}
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Infof("invalid request: %v", err)
 		return errors.BadRequest(err.Error())
@@ -168,12 +220,19 @@ func (r resource) resetPassword(c echo.Context) error {
 
 }
 
+// @Summary Create a new password from a token received in email
+// @Description Update the password from the auth token received in email.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param reset-pwd body createNewPwdRequest true "New password request"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /auth/password/ [post]
 func (r resource) createNewPassword(c echo.Context) error {
-	var req struct {
-		Token    string `json:"token" validate:"required"`
-		GUID     string `json:"guid" validate:"required"`
-		Password string `json:"password" validate:"required,min=8,max=30"`
-	}
+	req := createNewPwdRequest{}
 	ctx := c.Request().Context()
 	if err := c.Bind(&req); err != nil {
 		r.logger.With(ctx).Errorf("invalid request: %v", err)

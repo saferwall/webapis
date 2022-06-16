@@ -30,6 +30,8 @@ type Repository interface {
 	Patch(ctx context.Context, key, path string, val interface{}) error
 	// Delete removes the user with given ID from the storage.
 	Delete(ctx context.Context, id string) error
+	// Exists checks if a user exists with a given ID.
+	Exists(ctx context.Context, id string) (bool, error)
 	EmailExists(ctx context.Context, email string) (bool, error)
 	GetByEmail(ctx context.Context, email string) (entity.User, error)
 	Likes(ctx context.Context, id string, offset, limit int) (
@@ -89,6 +91,14 @@ func (r repository) Patch(ctx context.Context, key, path string,
 func (r repository) Delete(ctx context.Context, id string) error {
 	key := strings.ToLower(id)
 	return r.db.Delete(ctx, key)
+}
+
+// Exists checks if a document exists for the given id.
+func (r repository) Exists(ctx context.Context, id string) (bool, error) {
+	docExists := false
+	key := strings.ToLower(id)
+	err := r.db.Exists(ctx, key, &docExists)
+	return docExists, err
 }
 
 // Count returns the number of the user records in the database.

@@ -30,6 +30,7 @@ type Service interface {
 	Update(ctx context.Context, id string, input interface{}) (User, error)
 	Patch(ctx context.Context, id, path string, input interface{}) error
 	Delete(ctx context.Context, id string) (User, error)
+	Exists(ctx context.Context, id string) (bool, error)
 	Activities(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	Likes(ctx context.Context, id string, offset, limit int) (
@@ -93,29 +94,29 @@ type service struct {
 
 // CreateUserRequest represents a user creation request.
 type CreateUserRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Username string `json:"username" validate:"required,alphanum,min=1,max=20"`
-	Password string `json:"password" validate:"required,min=8,max=30"`
+	Email    string `json:"email" validate:"required,email" example:"mike@protonmail.com"`
+	Username string `json:"username" validate:"required,alphanum,min=1,max=20" example:"mike"`
+	Password string `json:"password" validate:"required,min=8,max=30" example:"control123"`
 }
 
 // UpdateUserRequest represents a user update request.
 type UpdateUserRequest struct {
-	Name     string `json:"name" validate:"omitempty,min=1,max=32"`
-	Location string `json:"location" validate:"omitempty,min=1,max=16"`
-	URL      string `json:"url" validate:"omitempty,url,max=64"`
-	Bio      string `json:"bio" validate:"omitempty,min=1,max=64"`
+	Name     string `json:"name" validate:"omitempty,min=1,max=32" example:"Ibn Taymiyyah"`
+	Location string `json:"location" validate:"omitempty,min=1,max=16" example:"Damascus"`
+	URL      string `json:"url" validate:"omitempty,url,max=64" example:"https://en.wikipedia.org/wiki/Ibn_Taymiyyah"`
+	Bio      string `json:"bio" validate:"omitempty,min=1,max=64" example:"What really counts are good endings, not flawed beginnings."`
 }
 
 // UpdatePasswordRequest represents a password update request.
 type UpdatePasswordRequest struct {
-	OldPassword string `json:"old" validate:"required,min=8,max=30"`
-	NewPassword string `json:"new" validate:"required,necsfield=OldPassword,min=8,max=30"`
+	OldPassword string `json:"old" validate:"required,min=8,max=30" example:"control123"`
+	NewPassword string `json:"new" validate:"required,necsfield=OldPassword,min=8,max=30" example:"secretControl"`
 }
 
 // UpdateEmailRequest represents an email update request.
 type UpdateEmailRequest struct {
-	Password string `json:"password" validate:"required,min=8,max=30"`
-	NewEmail string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=30" example:"control123"`
+	NewEmail string `json:"email" validate:"required,email" example:"mike@proton.me"`
 }
 
 // ConfirmAccountResponse holds data coming from the token generator.
@@ -217,6 +218,11 @@ func (s service) Delete(ctx context.Context, id string) (User, error) {
 		return User{}, err
 	}
 	return user, nil
+}
+
+// Exists checks if a document exists for the given id.
+func (s service) Exists(ctx context.Context, id string) (bool, error) {
+	return s.repo.Exists(ctx, id)
 }
 
 // Count returns the number of users.

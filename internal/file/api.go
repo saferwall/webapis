@@ -25,23 +25,32 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 	res := resource{service, logger}
 
-	g.GET("/files/", res.getFiles)
+	g.GET("/files/", res.list)
 	g.POST("/files/", res.create, requireLogin)
-
 	g.GET("/files/:sha256/", res.get, verifyHash)
-	g.PUT("/files/:sha256/", res.update, requireLogin)
-	g.PATCH("/files/:sha256/", res.patch, requireLogin)
-	g.DELETE("/files/:sha256/", res.delete, requireLogin)
-
+	g.PUT("/files/:sha256/", res.update, verifyHash, requireLogin)
+	g.PATCH("/files/:sha256/", res.patch, verifyHash, requireLogin)
+	g.DELETE("/files/:sha256/", res.delete, verifyHash, requireLogin)
 	g.GET("/files/:sha256/strings/", res.strings, verifyHash)
 	g.GET("/files/:sha256/summary/", res.summary, verifyHash, optionalLogin)
+	g.GET("/files/:sha256/comments/", res.comments, verifyHash, optionalLogin)
 	g.POST("/files/:sha256/like/", res.like, verifyHash, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, verifyHash, requireLogin)
 	g.POST("/files/:sha256/rescan/", res.rescan, verifyHash, requireLogin)
-	g.GET("/files/:sha256/download/", res.download, requireLogin)
-	g.GET("/files/:sha256/comments/", res.comments, optionalLogin)
+	g.GET("/files/:sha256/download/", res.download, verifyHash, requireLogin)
 }
 
+// @Summary Get a file report
+// @Description Retrieves the content of a file report.
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [get]
 func (r resource) get(c echo.Context) error {
 
 	// the `fields` query parameter is used to limit the fields
@@ -65,6 +74,19 @@ func (r resource) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
+// @Summary Submit a new file for scanning
+// @Description Upload file for analysis.
+// @Tags file
+// @Accept mpfd
+// @Produce json
+// @Param file formData file true  "binary file"
+// @Security ApiKeyAuth || {}
+// @Success 201 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 413 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/ [post]
 func (r resource) create(c echo.Context) error {
 
 	ctx := c.Request().Context()
@@ -100,6 +122,17 @@ func (r resource) create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, file)
 }
 
+// @Summary Update a file report (full update)
+// @Description Replace a file report with a new report
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [put]
 func (r resource) update(c echo.Context) error {
 
 	var isAdmin bool
@@ -117,14 +150,24 @@ func (r resource) update(c echo.Context) error {
 		return errors.BadRequest("")
 	}
 
-	file, err := r.service.Update(c.Request().Context(),
-		c.Param("sha256"), input)
+	file, err := r.service.Update(ctx, c.Param("sha256"), input)
 	if err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, file)
 }
 
+// @Summary Update a file report (partial update)
+// @Description Patch a portion of a file report.
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} entity.File
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [patch]
 func (r resource) patch(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()
@@ -137,6 +180,18 @@ func (r resource) patch(c echo.Context) error {
 	return nil
 }
 
+// DeleteFile godoc
+// @Summary Deletes a file
+// @Description Deletes a file by ID.
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 204 {object} entity.File
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [delete]
 func (r resource) delete(c echo.Context) error {
 
 	var isAdmin bool
@@ -148,14 +203,26 @@ func (r resource) delete(c echo.Context) error {
 		return errors.Forbidden("")
 	}
 
-	file, err := r.service.Delete(c.Request().Context(), c.Param("sha256"))
+	file, err := r.service.Delete(ctx, c.Param("sha256"))
 	if err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, file)
 }
 
-func (r resource) getFiles(c echo.Context) error {
+// @Summary Retrieves a pagined list of files
+// @Description List files
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param per_page query uint false "Number of files per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages{items=[]entity.File}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/ [get]
+func (r resource) list(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
@@ -178,6 +245,19 @@ func (r resource) getFiles(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of strings
+// @Description List strings of a file.
+// @Tags file
+// @Accept json
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Param per_page query uint false "Number of strings per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/strings/ [get]
 func (r resource) strings(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountStrings(ctx, c.Param("sha256"))
@@ -194,6 +274,16 @@ func (r resource) strings(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary File summary and metadata
+// @Description File metadata returned in the summary view of a file.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/summary/ [get]
 func (r resource) summary(c echo.Context) error {
 	ctx := c.Request().Context()
 	fileSummary, err := r.service.Summary(ctx, c.Param("sha256"))
@@ -203,57 +293,16 @@ func (r resource) summary(c echo.Context) error {
 	return c.JSON(http.StatusOK, fileSummary)
 }
 
-func (r resource) like(c echo.Context) error {
-	ctx := c.Request().Context()
-	err := r.service.Like(ctx, c.Param("sha256"))
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, struct {
-		Message string `json:"message"`
-		Status  int    `json:"status"`
-	}{"ok", http.StatusOK})
-}
-
-func (r resource) unlike(c echo.Context) error {
-	ctx := c.Request().Context()
-	err := r.service.Unlike(ctx, c.Param("sha256"))
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, struct {
-		Message string `json:"message"`
-		Status  int    `json:"status"`
-	}{"ok", http.StatusOK})
-}
-
-func (r resource) rescan(c echo.Context) error {
-	ctx := c.Request().Context()
-	err := r.service.Rescan(ctx, c.Param("sha256"))
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, struct {
-		Message string `json:"message"`
-		Status  int    `json:"status"`
-	}{"ok", http.StatusOK})
-}
-
-func (r resource) download(c echo.Context) error {
-	ctx := c.Request().Context()
-	var zippedFile string
-	err := r.service.Download(ctx, c.Param("sha256"), &zippedFile)
-	if err != nil {
-		switch err {
-		case ErrObjectNotFound:
-			return errors.NotFound("")
-		default:
-			return err
-		}
-	}
-	return c.File(zippedFile)
-}
-
+// @Summary Returns a paginated list of file comments
+// @Description List of comments for a given file.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/comments/ [get]
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
 	file, err := r.service.Get(ctx, c.Param("sha256"), nil)
@@ -269,4 +318,92 @@ func (r resource) comments(c echo.Context) error {
 	}
 	pages.Items = comments
 	return c.JSON(http.StatusOK, pages)
+}
+
+// @Summary Like a file
+// @Description Adds a file to the like list.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/like/ [post]
+func (r resource) like(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Like(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+// @Summary Unlike a file
+// @Description Removes a file from the like list.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/unlike/ [post]
+func (r resource) unlike(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Unlike(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+// @Summary Rescan an existing file
+// @Description Rescan an existing file.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/rescan/ [post]
+func (r resource) rescan(c echo.Context) error {
+	ctx := c.Request().Context()
+	err := r.service.Rescan(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
+}
+
+// @Summary Download a file
+// @Description Download a binary file. Files are in zip format and password protected.
+// @Tags file
+// @Produce mpfd
+// @Param sha256 path string true "File SHA256"
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/download/ [get]
+func (r resource) download(c echo.Context) error {
+	ctx := c.Request().Context()
+	var zippedFile string
+	err := r.service.Download(ctx, c.Param("sha256"), &zippedFile)
+	if err != nil {
+		switch err {
+		case ErrObjectNotFound:
+			return errors.NotFound("")
+		default:
+			return err
+		}
+	}
+	return c.File(zippedFile)
 }

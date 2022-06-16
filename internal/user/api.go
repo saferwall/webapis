@@ -18,28 +18,29 @@ import (
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
-	requireLogin echo.MiddlewareFunc, optionalLogin echo.MiddlewareFunc,
+	requireLogin, optionalLogin, verifyUser echo.MiddlewareFunc,
 	logger log.Logger, mailer Mailer, templater tpl.Service) {
 
 	res := resource{service, logger, mailer, templater}
 
 	g.POST("/users/", res.create)
-	g.GET("/users/:username/", res.get, optionalLogin)
-	g.PATCH("/users/:username/", res.update, requireLogin)
-	g.PATCH("/users/:username/password/", res.password, requireLogin)
-	g.PATCH("/users/:username/email/", res.email, requireLogin)
-	g.DELETE("/users/:username/", res.delete, requireLogin)
-	g.GET("/users/", res.getUsers, requireLogin)
+	g.GET("/users/", res.list, requireLogin)
+
+	g.GET("/users/:username/", res.get, verifyUser, optionalLogin)
+	g.PATCH("/users/:username/", res.update, verifyUser, requireLogin)
+	g.PATCH("/users/:username/password/", res.password, verifyUser, requireLogin)
+	g.PATCH("/users/:username/email/", res.email, verifyUser, requireLogin)
+	g.DELETE("/users/:username/", res.delete, verifyUser, requireLogin)
 	g.POST("/users/resend-confirmation/", res.resendConfirmation)
 	g.GET("/users/activities/", res.activities, optionalLogin)
-	g.GET("/users/:username/likes/", res.likes, optionalLogin)
-	g.GET("/users/:username/following/", res.following, optionalLogin)
-	g.GET("/users/:username/followers/", res.followers, optionalLogin)
-	g.GET("/users/:username/submissions/", res.submissions, optionalLogin)
-	g.GET("/users/:username/comments/", res.comments, optionalLogin)
-	g.POST("/users/:username/follow/", res.follow, requireLogin)
-	g.POST("/users/:username/unfollow/", res.unfollow, requireLogin)
-	g.POST("/users/:username/avatar/", res.avatar, requireLogin)
+	g.GET("/users/:username/likes/", res.likes, verifyUser, optionalLogin)
+	g.GET("/users/:username/following/", res.following, verifyUser, optionalLogin)
+	g.GET("/users/:username/followers/", res.followers, verifyUser, optionalLogin)
+	g.GET("/users/:username/submissions/", res.submissions, verifyUser, optionalLogin)
+	g.GET("/users/:username/comments/", res.comments, verifyUser, optionalLogin)
+	g.POST("/users/:username/follow/", res.follow, verifyUser, requireLogin)
+	g.POST("/users/:username/unfollow/", res.unfollow, verifyUser, requireLogin)
+	g.POST("/users/:username/avatar/", res.avatar, verifyUser, requireLogin)
 }
 
 // Mailer represents the mailer interface.
@@ -54,21 +55,48 @@ type resource struct {
 	templater tpl.Service
 }
 
+// @Summary Get user information by user ID
+// @Description Retrieves information about a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "User ID"
+// @Success 200 {object} entity.User
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username} [get]
 func (r resource) get(c echo.Context) error {
 	ctx := c.Request().Context()
-	user, err := r.service.Get(c.Request().Context(), c.Param("username"))
+	user, err := r.service.Get(ctx, c.Param("username"))
 	if err != nil {
 		return err
 	}
 
+	// Hide the email unless the logged-in user is asking its own
+	// information.
 	curUser, ok := ctx.Value(entity.UserKey).(entity.User)
 	if !ok || curUser.ID() != strings.ToLower(c.Param("username")) {
 		user.Email = ""
 	}
+
+	// Always hide the apssword.
 	user.Password = ""
 	return c.JSON(http.StatusOK, user)
 }
 
+// @Summary Create a new user
+// @Description Create a new user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param data body CreateUserRequest true "User data"
+// @Success 201 {object} entity.User
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 413 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/ [post]
 func (r resource) create(c echo.Context) error {
 	var input CreateUserRequest
 	ctx := c.Request().Context()
@@ -139,6 +167,18 @@ func (r resource) create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, user)
 }
 
+// @Summary Update a user object (full update)
+// @Description Replace a user document with a new user's document.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param data body UpdateUserRequest true "New user data"
+// @Success 200 {object} entity.User
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/ [put]
 func (r resource) update(c echo.Context) error {
 	var input UpdateUserRequest
 	var curUser string
@@ -167,6 +207,16 @@ func (r resource) update(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// @Summary Deletes a user
+// @Description Deletes a user by ID.
+// @Tags user
+// @Produce json
+// @Param username path string true "Username"
+// @Success 204 {object} entity.User
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/ [delete]
 func (r resource) delete(c echo.Context) error {
 
 	var isAdmin bool
@@ -178,7 +228,7 @@ func (r resource) delete(c echo.Context) error {
 		return errors.Forbidden("")
 	}
 
-	user, err := r.service.Delete(c.Request().Context(), c.Param("username"))
+	user, err := r.service.Delete(ctx, c.Param("username"))
 	if err != nil {
 		return err
 	}
@@ -187,7 +237,19 @@ func (r resource) delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-func (r resource) getUsers(c echo.Context) error {
+// @Summary Retrieves a pagined list of users
+// @Description List users.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param per_page query uint false "Number of items per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages{items=[]entity.User}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/ [get]
+func (r resource) list(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
@@ -210,6 +272,18 @@ func (r resource) getUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of a user's activities
+// @Description List of activities of a user.
+// @Tags activity
+// @Accept json
+// @Produce json
+// @Param per_page query uint false "Number of items per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/activities/ [get]
 func (r resource) activities(c echo.Context) error {
 	ctx := c.Request().Context()
 	var id string
@@ -230,6 +304,19 @@ func (r resource) activities(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of a user's likes
+// @Description List of likes of a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param per_page query uint false "Number of items per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/likes/ [get]
 func (r resource) likes(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountLikes(ctx, c.Param("username"))
@@ -246,6 +333,19 @@ func (r resource) likes(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of a user's following
+// @Description List of users a user follows.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param per_page query uint false "Number of items per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/following/ [get]
 func (r resource) following(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountFollowing(ctx, c.Param("username"))
@@ -262,6 +362,19 @@ func (r resource) following(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of a user's followers
+// @Description List of users who follow a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param per_page query uint false "Number of items per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/followers/ [get]
 func (r resource) followers(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountFollowers(ctx, c.Param("username"))
@@ -278,6 +391,19 @@ func (r resource) followers(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of a user's submissions
+// @Description List of submissions by a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param per_page query uint false "Number of items per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/submissions/ [get]
 func (r resource) submissions(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountSubmissions(ctx, c.Param("username"))
@@ -294,6 +420,19 @@ func (r resource) submissions(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Returns a paginated list of a user's comments
+// @Description List of comments by a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param per_page query uint false "Number of items per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/comments/ [get]
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountComments(ctx, c.Param("username"))
@@ -310,6 +449,17 @@ func (r resource) comments(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary Follow a user
+// @Description Start following a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Target user to follow"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/follow/ [post]
 func (r resource) follow(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Follow(ctx, c.Param("username"))
@@ -326,6 +476,17 @@ func (r resource) follow(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// @Summary Unfollow a user
+// @Description Stop following a user.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Target user to unfollow"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/unfollow/ [post]
 func (r resource) unfollow(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Unfollow(ctx, c.Param("username"))
@@ -341,6 +502,20 @@ func (r resource) unfollow(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// @Summary Update user avatar
+// @Description Change user avatarr
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param data body UpdateEmailRequest true "User data"
+// @Success 200 {object} object{}
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 413 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/avatar/ [post]
 func (r resource) avatar(c echo.Context) error {
 	var curUsername string
 	ctx := c.Request().Context()
@@ -390,7 +565,18 @@ func (r resource) avatar(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
-// password handle update password request for authenticated users.
+// @Summary Update password for authenticated users
+// @Description Change password for logged-in users.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param data body UpdateUserRequest true "User data"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/password/ [post]
 func (r resource) password(c echo.Context) error {
 	var req UpdatePasswordRequest
 	ctx := c.Request().Context()
@@ -424,7 +610,18 @@ func (r resource) password(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
-// email handle update email request for authenticated users.
+// @Summary Update email for authenticated users
+// @Description Change email for logged-in users.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param username path string true "Username"
+// @Param data body UpdateEmailRequest true "User data"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /users/{username}/email/ [post]
 func (r resource) email(c echo.Context) error {
 	var req UpdateEmailRequest
 	ctx := c.Request().Context()

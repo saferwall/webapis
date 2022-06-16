@@ -1,0 +1,1637 @@
+basePath: /v1
+definitions:
+  auth.createNewPwdRequest:
+    properties:
+      guid:
+        example: f47ac10b-58cc-8372-8567-0e02b2c3d479
+        type: string
+      password:
+        example: secretControl
+        maxLength: 30
+        minLength: 8
+        type: string
+      token:
+        example: eyJhbGciOiJIUzI1Ni
+        type: string
+    required:
+    - guid
+    - password
+    - token
+    type: object
+  auth.loginRequest:
+    properties:
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        example: mike
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  auth.resetPwdRequest:
+    properties:
+      email:
+        example: mike@protonmail.com
+        type: string
+    required:
+    - email
+    type: object
+  comment.CreateCommentRequest:
+    properties:
+      body:
+        type: string
+      sha256:
+        type: string
+      username:
+        type: string
+    required:
+    - body
+    - sha256
+    type: object
+  comment.UpdateCommentRequest:
+    properties:
+      body:
+        type: string
+    required:
+    - body
+    type: object
+  entity.Comment:
+    properties:
+      body:
+        description: Body represents the content of the comment.
+        type: string
+      id:
+        description: ID represents the activity identifier.
+        type: string
+      sha256:
+        description: |-
+          SHA256 references the hash of the file
+          where the comment has been made.
+        type: string
+      timestamp:
+        description: Timestamp when this activity happened.
+        type: integer
+      type:
+        description: Type represents the document type.
+        type: string
+      username:
+        description: Username represents the author of the comment.
+        type: string
+    type: object
+  entity.File:
+    properties:
+      byte_entropy:
+        items:
+          type: integer
+        type: array
+      comments_count:
+        type: integer
+      crc32:
+        type: string
+      exif:
+        additionalProperties:
+          type: string
+        type: object
+      fileformat:
+        type: string
+      first_seen:
+        type: integer
+      histogram:
+        items:
+          type: integer
+        type: array
+      last_scanned:
+        type: integer
+      magic:
+        type: string
+      md5:
+        type: string
+      ml:
+        additionalProperties: true
+        type: object
+      multiav:
+        additionalProperties: true
+        type: object
+      packer:
+        items:
+          type: string
+        type: array
+      pe: {}
+      sha1:
+        type: string
+      sha256:
+        type: string
+      sha512:
+        type: string
+      size:
+        type: integer
+      ssdeep:
+        type: string
+      status:
+        type: integer
+      strings: {}
+      submissions:
+        items:
+          $ref: '#/definitions/entity.Submission'
+        type: array
+      tags:
+        additionalProperties: true
+        type: object
+      trid:
+        items:
+          type: string
+        type: array
+      type:
+        type: string
+    type: object
+  entity.Submission:
+    properties:
+      country:
+        type: string
+      filename:
+        type: string
+      src:
+        type: string
+      timestamp:
+        type: integer
+    type: object
+  entity.User:
+    properties:
+      admin:
+        type: boolean
+      bio:
+        type: string
+      comments_count:
+        type: integer
+      confirmed:
+        type: boolean
+      email:
+        type: string
+      followers:
+        items:
+          type: string
+        type: array
+      followers_count:
+        type: integer
+      following:
+        items:
+          type: string
+        type: array
+      following_count:
+        type: integer
+      has_avatar:
+        type: boolean
+      last_seen:
+        type: integer
+      likes:
+        items:
+          type: string
+        type: array
+      likes_count:
+        type: integer
+      location:
+        type: string
+      member_since:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      submissions_count:
+        type: integer
+      type:
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    type: object
+  errors.ErrorResponse:
+    properties:
+      details: {}
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  pagination.Pages:
+    properties:
+      items: {}
+      page:
+        type: integer
+      page_count:
+        type: integer
+      per_page:
+        type: integer
+      total_count:
+        type: integer
+    type: object
+  user.CreateUserRequest:
+    properties:
+      email:
+        example: mike@protonmail.com
+        type: string
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        example: mike
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  user.UpdateEmailRequest:
+    properties:
+      email:
+        example: mike@proton.me
+        type: string
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  user.UpdateUserRequest:
+    properties:
+      bio:
+        example: What really counts are good endings, not flawed beginnings.
+        maxLength: 64
+        minLength: 1
+        type: string
+      location:
+        example: Damascus
+        maxLength: 16
+        minLength: 1
+        type: string
+      name:
+        example: Ibn Taymiyyah
+        maxLength: 32
+        minLength: 1
+        type: string
+      url:
+        example: https://en.wikipedia.org/wiki/Ibn_Taymiyyah
+        maxLength: 64
+        type: string
+    type: object
+host: api.saferwall.com
+info:
+  contact:
+    email: support@saferwall.com
+    name: API Support
+    url: https://about.saferwall.com/contact.html
+  description: Interact with Saferwall Malware Analysis Platform
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://about.saferwall.com/tos
+  title: Saferwall Web API
+  version: "1.0"
+paths:
+  /auth/login/:
+    post:
+      consumes:
+      - application/json
+      description: Users logins by username and password.
+      parameters:
+      - description: Username and password
+        in: body
+        name: auth-request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Log in
+      tags:
+      - auth
+  /auth/logout/:
+    delete:
+      description: Delete the cookie used for authentication.
+      responses:
+        "204":
+          description: logout success
+      summary: Log out from current session
+      tags:
+      - auth
+  /auth/password/:
+    post:
+      consumes:
+      - application/json
+      description: Update the password from the auth token received in email.
+      parameters:
+      - description: New password request
+        in: body
+        name: reset-pwd
+        required: true
+        schema:
+          $ref: '#/definitions/auth.createNewPwdRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Create a new password from a token received in email
+      tags:
+      - auth
+  /auth/reset-password/:
+    post:
+      consumes:
+      - application/json
+      description: Request a reset password for anonymous users.
+      parameters:
+      - description: Email used during account sign-up
+        in: body
+        name: reset-pwd
+        required: true
+        schema:
+          $ref: '#/definitions/auth.resetPwdRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Reset password for non-logged users by email
+      tags:
+      - auth
+  /auth/verify-account/:
+    get:
+      description: Verify the JWT token received during account creation.
+      parameters:
+      - description: GUID to identify the token
+        in: query
+        name: guid
+        required: true
+        type: string
+      - description: JWT token generated for account creation
+        in: query
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Confirm a new account creation
+      tags:
+      - auth
+  /comments/:
+    post:
+      consumes:
+      - application/json
+      description: Create a new comment.
+      parameters:
+      - description: Comment body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/comment.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Create a new comment
+      tags:
+      - comment
+  /comments/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves information about a comment.
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Get comment by ID
+      tags:
+      - comment
+  /comments/{id}/:
+    delete:
+      description: Deletes a comment by ID.
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Deletes a comment
+      tags:
+      - comment
+    put:
+      consumes:
+      - application/json
+      description: Replace a cocument with a new comment's document.
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New comment data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/comment.UpdateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update a comment object (full update)
+      tags:
+      - comment
+  /files/:
+    get:
+      consumes:
+      - application/json
+      description: List files
+      parameters:
+      - description: Number of files per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pagination.Pages'
+            - properties:
+                items:
+                  items:
+                    $ref: '#/definitions/entity.File'
+                  type: array
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Retrieves a pagined list of files
+      tags:
+      - file
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload file for analysis.
+      parameters:
+      - description: binary file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        ApiKeyAuth: []
+      summary: Submit a new file for scanning
+      tags:
+      - file
+  /files/{sha256}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a file by ID.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/entity.File'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Deletes a file
+      tags:
+      - file
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the content of a file report.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Get a file report
+      tags:
+      - file
+    patch:
+      consumes:
+      - application/json
+      description: Patch a portion of a file report.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update a file report (partial update)
+      tags:
+      - file
+    put:
+      consumes:
+      - application/json
+      description: Replace a file report with a new report
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update a file report (full update)
+      tags:
+      - file
+  /files/{sha256}/comments/:
+    get:
+      description: List of comments for a given file.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of file comments
+      tags:
+      - file
+  /files/{sha256}/download/:
+    get:
+      description: Download a binary file. Files are in zip format and password protected.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Download a file
+      tags:
+      - file
+  /files/{sha256}/like/:
+    post:
+      description: Adds a file to the like list.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Like a file
+      tags:
+      - file
+  /files/{sha256}/rescan/:
+    post:
+      description: Rescan an existing file.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Rescan an existing file
+      tags:
+      - file
+  /files/{sha256}/strings/:
+    get:
+      consumes:
+      - application/json
+      description: List strings of a file.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      - description: Number of strings per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of strings
+      tags:
+      - file
+  /files/{sha256}/summary/:
+    get:
+      description: File metadata returned in the summary view of a file.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: File summary and metadata
+      tags:
+      - file
+  /files/{sha256}/unlike/:
+    post:
+      description: Removes a file from the like list.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Unlike a file
+      tags:
+      - file
+  /users/:
+    get:
+      consumes:
+      - application/json
+      description: List users.
+      parameters:
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/pagination.Pages'
+            - properties:
+                items:
+                  items:
+                    $ref: '#/definitions/entity.User'
+                  type: array
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Retrieves a pagined list of users
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Create a new user.
+      parameters:
+      - description: User data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - user
+  /users/{username}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves information about a user.
+      parameters:
+      - description: User ID
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Get user information by user ID
+      tags:
+      - user
+  /users/{username}/:
+    delete:
+      description: Deletes a user by ID.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/entity.User'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Deletes a user
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Replace a user document with a new user's document.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: New user data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update a user object (full update)
+      tags:
+      - user
+  /users/{username}/avatar/:
+    post:
+      consumes:
+      - application/json
+      description: Change user avatarr
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update user avatar
+      tags:
+      - user
+  /users/{username}/comments/:
+    get:
+      consumes:
+      - application/json
+      description: List of comments by a user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's comments
+      tags:
+      - user
+  /users/{username}/email/:
+    post:
+      consumes:
+      - application/json
+      description: Change email for logged-in users.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update email for authenticated users
+      tags:
+      - user
+  /users/{username}/follow/:
+    post:
+      consumes:
+      - application/json
+      description: Start following a user.
+      parameters:
+      - description: Target user to follow
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Follow a user
+      tags:
+      - user
+  /users/{username}/followers/:
+    get:
+      consumes:
+      - application/json
+      description: List of users who follow a user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's followers
+      tags:
+      - user
+  /users/{username}/following/:
+    get:
+      consumes:
+      - application/json
+      description: List of users a user follows.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's following
+      tags:
+      - user
+  /users/{username}/likes/:
+    get:
+      consumes:
+      - application/json
+      description: List of likes of a user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's likes
+      tags:
+      - user
+  /users/{username}/password/:
+    post:
+      consumes:
+      - application/json
+      description: Change password for logged-in users.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: User data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Update password for authenticated users
+      tags:
+      - user
+  /users/{username}/submissions/:
+    get:
+      consumes:
+      - application/json
+      description: List of submissions by a user.
+      parameters:
+      - description: Username
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's submissions
+      tags:
+      - user
+  /users/{username}/unfollow/:
+    post:
+      consumes:
+      - application/json
+      description: Stop following a user.
+      parameters:
+      - description: Target user to unfollow
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Unfollow a user
+      tags:
+      - user
+  /users/activities/:
+    get:
+      consumes:
+      - application/json
+      description: List of activities of a user.
+      parameters:
+      - description: Number of items per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Specify the page number
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Returns a paginated list of a user's activities
+      tags:
+      - activity
+schemes:
+- https
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
