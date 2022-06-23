@@ -44,7 +44,7 @@ type Server struct {
 func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	cfg *config.Config, version string, trans ut.Translator,
 	updown storage.UploadDownloader, p queue.Producer,
-	smtpClient mailer.SMTPClient, arch archive.Archiver,
+	smtpMailer mailer.SMTPMailer, arch archive.Archiver,
 	tokenGen token.Service,
 	emailTpl tpl.Service) http.Handler {
 
@@ -114,8 +114,8 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	// Register the handlers.
 	healthcheck.RegisterHandlers(e, version)
 	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, userMiddleware.VerifyUser,
-		logger, smtpClient, emailTpl)
-	auth.RegisterHandlers(g, authSvc, logger, smtpClient, emailTpl, cfg.UI.Address)
+		logger, smtpMailer, emailTpl)
+	auth.RegisterHandlers(g, authSvc, logger, smtpMailer, emailTpl, cfg.UI.Address)
 	file.RegisterHandlers(g, fileSvc, logger, authHandler, optAuthHandler, fileMiddleware.VerifyHash)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 	comment.RegisterHandlers(g, commentSvc, authHandler, logger)

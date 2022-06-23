@@ -126,12 +126,11 @@ func run(logger log.Logger) error {
 	archiver := archive.New(zip.AES256Encryption)
 
 	// Create email client.
-	var smtpClient mailer.SMTPClient
+	var smtpMailer mailer.SMTPMailer
 	var emailTemplates tpl.Service
 	if cfg.SMTP.Server != "" {
-		smtpServer := mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
+		smtpMailer = mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
 			cfg.SMTP.Password)
-		smtpClient, err = smtpServer.Connect(logger)
 		if err != nil {
 			logger.Infof("failed to connect to smtp server: %v", err)
 		} else {
@@ -146,7 +145,7 @@ func run(logger log.Logger) error {
 	hs := &http.Server{
 		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			updown, producer, smtpClient, archiver, tokenGen, emailTemplates),
+			updown, producer, smtpMailer, archiver, tokenGen, emailTemplates),
 	}
 
 	// Start server.
