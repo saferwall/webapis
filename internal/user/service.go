@@ -429,7 +429,7 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 		curUser.FollowingCount -= 1
 
 		// delete corresponsing activity.
-		if s.repo.DeleteActivity(ctx, "follow", curUser.Username,
+		if s.actSvc.DeleteWith(ctx, "follow", curUser.Username,
 			targetUser.Username); err != nil {
 			return err
 		}

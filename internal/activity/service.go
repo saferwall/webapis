@@ -21,6 +21,7 @@ type Service interface {
 	Create(ctx context.Context, input CreateActivityRequest) (Activity, error)
 	Update(ctx context.Context, id string, input UpdateActivityRequest) (Activity, error)
 	Delete(ctx context.Context, id string) (Activity, error)
+	DeleteWith(ctx context.Context, kind, username, target string) error
 }
 
 // Activity represents the data about an activity.
@@ -133,4 +134,10 @@ func (s service) Query(ctx context.Context, offset, limit int) (
 		return nil, err
 	}
 	return result, nil
+}
+
+// Delete an activity given its kind, username and target.
+func (s service) DeleteWith(ctx context.Context, kind, username, target string) error {
+	err := s.repo.DeleteWith(ctx, kind, username, target)
+	return err
 }

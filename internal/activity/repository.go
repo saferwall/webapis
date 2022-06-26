@@ -29,6 +29,8 @@ type Repository interface {
 	Patch(ctx context.Context, key, path string, val interface{}) error
 	// Delete removes the activity with given ID from the storage.
 	Delete(ctx context.Context, id string) error
+	// Delete an activity given its kind, username and target.
+	DeleteWith(ctx context.Context, kind, username, target string) error
 }
 
 // repository persists users in database.
@@ -136,5 +138,17 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 		return nil, err
 	}
 	return activities.([]interface{}), nil
+}
 
+// Delete an activity given its kind, username and target.
+func (r repository) DeleteWith(ctx context.Context, kind, username,
+	target string) error {
+
+	var result interface{}
+	params := make(map[string]interface{}, 1)
+	params["kind"] = kind
+	params["username"] = username
+	params["target"] = target
+	query := r.db.N1QLQuery[dbcontext.DeleteActivity]
+	return r.db.Query(ctx, query, params, &result)
 }
