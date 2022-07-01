@@ -46,7 +46,6 @@ type Repository interface {
 		[]interface{}, error)
 	Activities(ctx context.Context, id string, offset, limit int) ([]interface{}, error)
 	CountActivities(ctx context.Context) (int, error)
-	DeleteActivity(ctx context.Context, kind, username, target string) error
 }
 
 // repository persists users in database.
@@ -393,16 +392,4 @@ func (r repository) CountActivities(ctx context.Context) (int, error) {
 	}
 
 	return count, nil
-}
-
-func (r repository) DeleteActivity(ctx context.Context, kind, username,
-	target string) error {
-
-	var result interface{}
-	params := make(map[string]interface{}, 1)
-	params["kind"] = kind
-	params["username"] = username
-	params["target"] = target
-	query := r.db.N1QLQuery[dbcontext.DeleteActivity]
-	return r.db.Query(ctx, query, params, &result)
 }
