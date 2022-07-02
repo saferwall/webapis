@@ -31,7 +31,6 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.PATCH("/users/:username/password/", res.password, verifyUser, requireLogin)
 	g.PATCH("/users/:username/email/", res.email, verifyUser, requireLogin)
 	g.DELETE("/users/:username/", res.delete, verifyUser, requireLogin)
-	g.POST("/users/resend-confirmation/", res.resendConfirmation)
 	g.GET("/users/activities/", res.activities, optionalLogin)
 	g.GET("/users/:username/likes/", res.likes, verifyUser, optionalLogin)
 	g.GET("/users/:username/following/", res.following, verifyUser, optionalLogin)
@@ -139,7 +138,7 @@ func (r resource) create(c echo.Context) error {
 
 	body := new(bytes.Buffer)
 	actionURL := c.Request().Host + "/v1/auth/verify-account/?token=" +
-		resp.token + "&guid=" + resp.guid
+		resp.Token + "&guid=" + resp.Guid
 	templateData := struct {
 		Username     string
 		ActionURL    string
@@ -655,69 +654,4 @@ func (r resource) email(c echo.Context) error {
 		Message string `json:"message"`
 		Status  int    `json:"status"`
 	}{"ok", http.StatusOK})
-}
-
-func (r resource) resendConfirmation(c echo.Context) error {
-
-	var req struct {
-		Email string `json:"email" validate:"required,email"`
-	}
-	ctx := c.Request().Context()
-	if err := c.Bind(&req); err != nil {
-		r.logger.With(ctx).Infof("invalid request: %v", err)
-		return errors.BadRequest(err.Error())
-	}
-
-	user, err := r.service.GetByEmail(ctx, req.Email)
-	if err != nil {
-		r.logger.With(ctx).Errorf("get by email failed: %v", err)
-		return c.JSON(http.StatusOK, struct {
-			Message string `json:"message"`
-			Status  int    `json:"status"`
-		}{"ok", http.StatusOK})
-	}
-
-	resp, err := r.service.GenerateConfirmationEmail(ctx, user)
-	if err != nil {
-		r.logger.With(ctx).Errorf("generate confirmation email failed: %v", err)
-		return c.JSON(http.StatusOK, struct {
-			Message string `json:"message"`
-			Status  int    `json:"status"`
-		}{"ok", http.StatusOK})
-	}
-
-	body := new(bytes.Buffer)
-	link := c.Request().Host + "/v1/auth/verify-account/?token=" +
-		resp.token + "&guid=" + resp.guid
-	templateData := struct {
-		Username     string
-		ActionURL    string
-		LoginURL     string
-		LiveChatURL  string
-		HelpURL      string
-		SupportEmail string
-	}{
-		Username:     resp.username,
-		ActionURL:    link,
-		LoginURL:     "https://saferwall.com/auth/login",
-		LiveChatURL:  "https://discord.gg/an37PYHeZP",
-		HelpURL:      "https://about.saferwall.com/",
-		SupportEmail: "contact@saferwall.com",
-	}
-
-	confirmAccountTpl := r.templater.EmailRequestTemplate[tpl.ConfirmAccount]
-	if err = confirmAccountTpl.Execute(templateData, body); err != nil {
-		return err
-	}
-
-	if r.mailer != nil {
-		go r.mailer.Send(body.String(),
-			confirmAccountTpl.Subject, confirmAccountTpl.From, req.Email)
-	}
-
-	return c.JSON(http.StatusOK, struct {
-		Message string `json:"message"`
-		Status  int    `json:"status"`
-	}{"ok", http.StatusOK})
-
 }

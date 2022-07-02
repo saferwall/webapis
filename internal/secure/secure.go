@@ -27,7 +27,7 @@ type TokenGenerator interface {
 	HashMatchesToken(ctx context.Context, hash, token string) bool
 }
 
-// Password is abastract terface for dealing with password security.
+// Password is abstract interface for dealing with password security.
 type Password interface {
 	// HashPassword hashes the password.
 	HashPassword(password string) string
@@ -35,7 +35,7 @@ type Password interface {
 	HashMatchesPassword(hash, password string) bool
 }
 
-// Token represents a token  model in the database.
+// Token represents a token model in the database.
 type Token struct {
 	// Token in non-hashed format.
 	// Useful to return back to the user, but not stored in the DB.
