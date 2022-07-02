@@ -268,7 +268,7 @@ func (r resource) createNewPassword(c echo.Context) error {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param reset-pwd body resendConfirmatironRequest true "Account confirmation request"
+// @Param reset-pwd body confirmAccountRequest true "Account confirmation request"
 // @Success 200 {string} json "{"token": "value"}"
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 401 {object} errors.ErrorResponse

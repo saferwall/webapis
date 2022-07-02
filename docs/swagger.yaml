@@ -1,5 +1,13 @@
 basePath: /v1
 definitions:
+  auth.confirmAccountRequest:
+    properties:
+      email:
+        example: mike@protonmail.com
+        type: string
+    required:
+    - email
+    type: object
   auth.createNewPwdRequest:
     properties:
       guid:
@@ -377,6 +385,40 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Create a new password from a token received in email
+      tags:
+      - auth
+  /auth/resend-confirmation/:
+    post:
+      consumes:
+      - application/json
+      description: Send a new confirmation email link to confirm user's account.
+      parameters:
+      - description: Account confirmation request
+        in: body
+        name: reset-pwd
+        required: true
+        schema:
+          $ref: '#/definitions/auth.confirmAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "value"}'
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Resend a confirmation email
       tags:
       - auth
   /auth/reset-password/:
