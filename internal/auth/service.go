@@ -44,15 +44,15 @@ type Service interface {
 }
 
 type ResetPasswordResponse struct {
-	token string
-	guid  string
-	user  entity.User
+	token    string
+	guid     string
+	username string
 }
 
 type ResendConfirmationResponse struct {
-	token string
-	guid  string
-	user  entity.User
+	token    string
+	guid     string
+	username string
 }
 
 // Identity represents an authenticated user identity.
@@ -164,9 +164,9 @@ func (s service) ResetPassword(ctx context.Context, email string) (
 	}
 
 	resp := ResetPasswordResponse{
-		token: rpt.Token,
-		guid:  rpt.ID,
-		user:  user.User,
+		token:    rpt.Token,
+		guid:     rpt.ID,
+		username: user.Username,
 	}
 
 	return resp, nil
@@ -213,9 +213,9 @@ func (s service) ResendConfirmation(ctx context.Context, email string) (ResendCo
 	}
 
 	r := ResendConfirmationResponse{
-		token: resp.Token,
-		guid:  resp.Guid,
-		user:  user.User,
+		token:    resp.Token,
+		guid:     resp.Guid,
+		username: user.Username,
 	}
 
 	return r, nil

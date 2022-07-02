@@ -44,7 +44,7 @@ func New(host string, port int, username, password string) SMTPMailer {
 }
 
 func (s SMTPMailer) Send(htmlBody, subject, from, to string) error {
-	if s.server.Host == "" {
+	if s.server == nil || s.server.Host == "" {
 		return nil
 	}
 

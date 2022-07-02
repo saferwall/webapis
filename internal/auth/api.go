@@ -204,7 +204,7 @@ func (r resource) resetPassword(c echo.Context) error {
 		HelpURL      string
 		SupportEmail string
 	}{
-		Username:     resp.user.Username,
+		Username:     resp.username,
 		ActionURL:    link,
 		HelpURL:      "https://about.saferwall.com/",
 		SupportEmail: "contact@saferwall.com",
@@ -216,7 +216,7 @@ func (r resource) resetPassword(c echo.Context) error {
 	}
 
 	go r.mailer.Send(body.String(), resetPasswordTpl.Subject,
-		resetPasswordTpl.From, resp.user.Email)
+		resetPasswordTpl.From, req.Email)
 
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
@@ -301,7 +301,7 @@ func (r resource) resendConfirmation(c echo.Context) error {
 		HelpURL      string
 		SupportEmail string
 	}{
-		Username:     resp.user.Username,
+		Username:     resp.username,
 		ActionURL:    link,
 		LoginURL:     "https://saferwall.com/auth/login",
 		LiveChatURL:  "https://discord.gg/an37PYHeZP",
