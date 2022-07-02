@@ -121,9 +121,9 @@ type UpdateEmailRequest struct {
 
 // ConfirmAccountResponse holds data coming from the token generator.
 type ConfirmAccountResponse struct {
-	token    string
-	guid     string
-	username string
+	Token    string
+	Guid     string
+	Username string
 }
 
 // NewService creates a new user service.
@@ -546,9 +546,9 @@ func (s service) GenerateConfirmationEmail(ctx context.Context, user User) (
 	}
 
 	resp := ConfirmAccountResponse{
-		username: user.Username,
-		token:    rpt.Token,
-		guid:     rpt.ID,
+		Username: user.Username,
+		Token:    rpt.Token,
+		Guid:     rpt.ID,
 	}
 
 	return resp, nil

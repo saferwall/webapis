@@ -143,6 +143,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/resend-confirmation/": {
+            "post": {
+                "description": "Send a new confirmation email link to confirm user's account.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Resend a confirmation email",
+                "parameters": [
+                    {
+                        "description": "Account confirmation request",
+                        "name": "reset-pwd",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.confirmAccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"token\": \"value\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/reset-password/": {
             "post": {
                 "description": "Request a reset password for anonymous users.",
@@ -2044,6 +2096,18 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "auth.confirmAccountRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "mike@protonmail.com"
+                }
+            }
+        },
         "auth.createNewPwdRequest": {
             "type": "object",
             "required": [

@@ -132,12 +132,11 @@ func run(logger log.Logger) error {
 		smtpMailer = mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
 			cfg.SMTP.Password)
 		if err != nil {
-			logger.Infof("failed to connect to smtp server: %v", err)
-		} else {
-			emailTemplates, err = tpl.New(*flagTplFiles)
-			if err != nil {
-				return err
-			}
+			logger.Errorf("failed to connect to smtp server: %v", err)
+		}
+		emailTemplates, err = tpl.New(*flagTplFiles)
+		if err != nil {
+			return err
 		}
 	}
 

@@ -44,6 +44,8 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.POST("/auth/reset-password/", res.resetPassword)
 	g.POST("/auth/password/", res.createNewPassword)
 	g.GET("/auth/verify-account/", res.verifyAccount)
+	g.POST("/auth/resend-confirmation/", res.resendConfirmation)
+
 }
 
 // loginRequest describes a login authtentication request.
@@ -63,6 +65,11 @@ type createNewPwdRequest struct {
 	Token    string `json:"token" validate:"required" example:"eyJhbGciOiJIUzI1Ni"`
 	GUID     string `json:"guid" validate:"required" example:"f47ac10b-58cc-8372-8567-0e02b2c3d479"`
 	Password string `json:"password" validate:"required,min=8,max=30" example:"secretControl"`
+}
+
+// confirmAccountRequest describes an acccount confirmation email request.
+type confirmAccountRequest struct {
+	Email string `json:"email" validate:"required,email" example:"mike@protonmail.com"`
 }
 
 // @Summary Log in
@@ -197,7 +204,7 @@ func (r resource) resetPassword(c echo.Context) error {
 		HelpURL      string
 		SupportEmail string
 	}{
-		Username:     resp.user.Username,
+		Username:     resp.username,
 		ActionURL:    link,
 		HelpURL:      "https://about.saferwall.com/",
 		SupportEmail: "contact@saferwall.com",
@@ -208,10 +215,8 @@ func (r resource) resetPassword(c echo.Context) error {
 		return err
 	}
 
-	if r.mailer != nil {
-		go r.mailer.Send(body.String(),
-			resetPasswordTpl.Subject, resetPasswordTpl.From, resp.user.Email)
-	}
+	go r.mailer.Send(body.String(), resetPasswordTpl.Subject,
+		resetPasswordTpl.From, req.Email)
 
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
@@ -255,5 +260,66 @@ func (r resource) createNewPassword(c echo.Context) error {
 		Message string `json:"message"`
 		Status  int    `json:"status"`
 	}{msgEmailSent, http.StatusOK})
+
+}
+
+// @Summary Resend a confirmation email
+// @Description Send a new confirmation email link to confirm user's account.
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param reset-pwd body confirmAccountRequest true "Account confirmation request"
+// @Success 200 {string} json "{"token": "value"}"
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 401 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /auth/resend-confirmation/ [post]
+func (r resource) resendConfirmation(c echo.Context) error {
+	var req confirmAccountRequest
+	ctx := c.Request().Context()
+	if err := c.Bind(&req); err != nil {
+		r.logger.With(ctx).Infof("invalid request: %v", err)
+		return errors.BadRequest(err.Error())
+	}
+
+	resp, err := r.service.ResendConfirmation(ctx, req.Email)
+	if err != nil {
+		return c.JSON(http.StatusOK, struct {
+			Message string `json:"message"`
+			Status  int    `json:"status"`
+		}{msgEmailSent, http.StatusOK})
+	}
+
+	body := new(bytes.Buffer)
+	link := c.Request().Host + "/v1/auth/verify-account/?token=" +
+		resp.token + "&guid=" + resp.guid
+	templateData := struct {
+		Username     string
+		ActionURL    string
+		LoginURL     string
+		LiveChatURL  string
+		HelpURL      string
+		SupportEmail string
+	}{
+		Username:     resp.username,
+		ActionURL:    link,
+		LoginURL:     "https://saferwall.com/auth/login",
+		LiveChatURL:  "https://discord.gg/an37PYHeZP",
+		HelpURL:      "https://about.saferwall.com/",
+		SupportEmail: "contact@saferwall.com",
+	}
+
+	confirmAccountTpl := r.templater.EmailRequestTemplate[tpl.ConfirmAccount]
+	if err = confirmAccountTpl.Execute(templateData, body); err != nil {
+		return err
+	}
+
+	go r.mailer.Send(body.String(), confirmAccountTpl.Subject,
+		confirmAccountTpl.From, req.Email)
+
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
 
 }

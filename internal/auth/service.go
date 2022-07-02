@@ -39,12 +39,20 @@ type Service interface {
 	VerifyAccount(ctx context.Context, id, token string) error
 	// create a new password if the user has already a reset password token.
 	CreateNewPassword(ctx context.Context, id, password, token string) error
+	// resend a new confirmation email for the user's account.
+	ResendConfirmation(ctx context.Context, email string) (ResendConfirmationResponse, error)
 }
 
 type ResetPasswordResponse struct {
-	token string
-	guid  string
-	user  entity.User
+	token    string
+	guid     string
+	username string
+}
+
+type ResendConfirmationResponse struct {
+	token    string
+	guid     string
+	username string
 }
 
 // Identity represents an authenticated user identity.
@@ -156,9 +164,9 @@ func (s service) ResetPassword(ctx context.Context, email string) (
 	}
 
 	resp := ResetPasswordResponse{
-		token: rpt.Token,
-		guid:  rpt.ID,
-		user:  user.User,
+		token:    rpt.Token,
+		guid:     rpt.ID,
+		username: user.Username,
 	}
 
 	return resp, nil
@@ -188,4 +196,27 @@ func (s service) CreateNewPassword(ctx context.Context, id,
 		return err
 	}
 	return s.tokenGen.Delete(ctx, id)
+}
+
+func (s service) ResendConfirmation(ctx context.Context, email string) (ResendConfirmationResponse, error) {
+
+	user, err := s.userSvc.GetByEmail(ctx, email)
+	if err != nil {
+		s.logger.With(ctx).Errorf("get by email failed: %v", err)
+		return ResendConfirmationResponse{}, err
+	}
+
+	resp, err := s.userSvc.GenerateConfirmationEmail(ctx, user)
+	if err != nil {
+		s.logger.With(ctx).Errorf("generate confirmation email failed: %v", err)
+		return ResendConfirmationResponse{}, err
+	}
+
+	r := ResendConfirmationResponse{
+		token:    resp.Token,
+		guid:     resp.Guid,
+		username: user.Username,
+	}
+
+	return r, nil
 }
