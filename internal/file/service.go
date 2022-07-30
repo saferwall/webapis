@@ -199,7 +199,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			Timestamp: now,
 			Filename:  req.filename,
 			Source:    source,
-			Country:   req.geoip,
+			Country:   "CN", //Todo: req.geoip
 		}
 
 		// Create a new file.

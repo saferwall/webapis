@@ -11,6 +11,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"strings"
 	"time"
 
 	"github.com/h2non/filetype"
@@ -168,7 +169,7 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 		Type:        "user",
 		Username:    req.Username,
 		Password:    s.sec.HashPassword(req.Password),
-		Email:       req.Email,
+		Email:       strings.ToLower(req.Email),
 		MemberSince: now.Unix(),
 		LastSeen:    now.Unix(),
 	})
