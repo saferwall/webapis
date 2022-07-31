@@ -24,6 +24,7 @@ type Comment struct {
 
 // Service encapsulates usecase logic for files.
 type Service interface {
+	Exists(ctx context.Context, id string) (bool, error)
 	Get(ctx context.Context, id string) (Comment, error)
 	Create(ctx context.Context, input CreateCommentRequest) (Comment, error)
 	Update(ctx context.Context, id string, input UpdateCommentRequest) (Comment, error)
@@ -54,6 +55,11 @@ type UpdateCommentRequest struct {
 func NewService(repo Repository, logger log.Logger, actSvc activity.Service,
 	userSvc user.Service, fileSvc file.Service) Service {
 	return service{repo, logger, actSvc, userSvc, fileSvc}
+}
+
+// Exists checks if a comment exists for the given id.
+func (s service) Exists(ctx context.Context, id string) (bool, error) {
+	return s.repo.Exists(ctx, id)
 }
 
 // Create creates a new comment.

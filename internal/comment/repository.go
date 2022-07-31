@@ -23,6 +23,8 @@ type Repository interface {
 	Update(ctx context.Context, User entity.Comment) error
 	// Delete removes the comment with given ID from the storage.
 	Delete(ctx context.Context, id string) error
+	// Exists checks if a comment exists with a given ID.
+	Exists(ctx context.Context, id string) (bool, error)
 }
 
 // repository persists comments in database.
@@ -55,7 +57,15 @@ func (r repository) Update(ctx context.Context, comment entity.Comment) error {
 	return r.db.Update(ctx, comment.ID, &comment)
 }
 
-// Delete deletes a file with the specified ID from the database.
+// Delete deletes a comment with the specified ID from the database.
 func (r repository) Delete(ctx context.Context, id string) error {
 	return r.db.Delete(ctx, id)
+}
+
+// Exists checks if a comment exists for the given id.
+func (r repository) Exists(ctx context.Context, id string) (bool, error) {
+	docExists := false
+	key := strings.ToLower(id)
+	err := r.db.Exists(ctx, key, &docExists)
+	return docExists, err
 }
