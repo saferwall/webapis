@@ -142,5 +142,6 @@ func (r resource) delete(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
 	return c.JSON(http.StatusOK, comment)
 }

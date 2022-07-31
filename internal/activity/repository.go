@@ -7,6 +7,7 @@ package activity
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -147,7 +148,7 @@ func (r repository) DeleteWith(ctx context.Context, kind, username,
 	var result interface{}
 	params := make(map[string]interface{}, 1)
 	params["kind"] = kind
-	params["username"] = username
+	params["username"] = strings.ToLower(username)
 	params["target"] = target
 	query := r.db.N1QLQuery[dbcontext.DeleteActivity]
 	return r.db.Query(ctx, query, params, &result)
