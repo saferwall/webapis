@@ -177,7 +177,7 @@ func (r resource) create(c echo.Context) error {
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /users/{username}/ [put]
+// @Router /users/{username}/ [patch]
 func (r resource) update(c echo.Context) error {
 	var input UpdateUserRequest
 	var curUser string
