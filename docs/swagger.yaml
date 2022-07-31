@@ -591,7 +591,7 @@ paths:
       summary: Deletes a comment
       tags:
       - comment
-    put:
+    patch:
       consumes:
       - application/json
       description: Replace a cocument with a new comment's document.
@@ -1199,7 +1199,7 @@ paths:
       summary: Deletes a user
       tags:
       - user
-    put:
+    patch:
       consumes:
       - application/json
       description: Replace a user document with a new user's document.
