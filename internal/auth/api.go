@@ -196,7 +196,7 @@ func (r resource) resetPassword(c echo.Context) error {
 	}
 
 	body := new(bytes.Buffer)
-	link := c.Request().Host + "/v1/auth/password/?token=" +
+	link := r.UIAddress + "/auth/forgot-password/?token=" +
 		resp.token + "&guid=" + resp.guid
 	templateData := struct {
 		Username     string

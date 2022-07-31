@@ -103,7 +103,7 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
 		Kind:     "comment",
 		Username: user.Username,
-		Target:   req.SHA256,
+		Target:   id,
 		Source:   source,
 	}); err != nil {
 		return Comment{}, err
@@ -165,5 +165,11 @@ func (s service) Delete(ctx context.Context, id string) (Comment, error) {
 	if err = s.repo.Delete(ctx, id); err != nil {
 		return Comment{}, err
 	}
+
+	// delete corresponsing activity.
+	if s.actSvc.DeleteWith(ctx, "comment", com.Username, id); err != nil {
+		return Comment{}, err
+	}
+
 	return com, nil
 }

@@ -16,7 +16,6 @@ SELECT
       ) [0]
     },
     "follow": false,
-    "comment": f.body,
     "date": activity.timestamp
   }.*,
   (
@@ -42,7 +41,7 @@ FROM
   `bucket_name` activity
   LEFT JOIN `bucket_name` f ON KEYS activity.target
 WHERE
-  activity.type = 'activity' AND activity.src = "web"
+  activity.type = 'activity' AND activity.src = "web" AND activity.kind != "comment"
 ORDER BY
   activity.timestamp DESC OFFSET $offset
 LIMIT

@@ -121,7 +121,7 @@ func (r repository) EmailExists(ctx context.Context, email string) (bool, error)
 
 	params := make(map[string]interface{}, 1)
 	params["docType"] = "user"
-	params["email"] = email
+	params["email"] = strings.ToLower(email)
 
 	statement :=
 		"SELECT true as docPresent FROM `" + r.db.Bucket.Name() + "` " +
