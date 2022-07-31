@@ -92,7 +92,7 @@ func (r resource) get(c echo.Context) error {
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /comments/{id}/ [put]
+// @Router /comments/{id}/ [patch]
 func (r resource) update(c echo.Context) error {
 	var input UpdateCommentRequest
 
