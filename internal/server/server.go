@@ -1,3 +1,7 @@
+// Copyright 2022 Saferwall. All rights reserved.
+// Use of this source code is governed by Apache v2 license
+// license that can be found in the LICENSE file.
+
 package server
 
 import (
@@ -107,9 +111,10 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
 		actSvc, userSvc, fileSvc)
 
-	// Create the file and user middleware.
+	// Create the file, user and comment middleware.
 	fileMiddleware := file.NewMiddleware(fileSvc, logger)
 	userMiddleware := user.NewMiddleware(userSvc, logger)
+	commentMiddleware := comment.NewMiddleware(commentSvc, logger)
 
 	// Register the handlers.
 	healthcheck.RegisterHandlers(e, version)
@@ -118,7 +123,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	auth.RegisterHandlers(g, authSvc, logger, smtpMailer, emailTpl, cfg.UI.Address)
 	file.RegisterHandlers(g, fileSvc, logger, authHandler, optAuthHandler, fileMiddleware.VerifyHash)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
-	comment.RegisterHandlers(g, commentSvc, authHandler, logger)
+	comment.RegisterHandlers(g, commentSvc, logger, authHandler, commentMiddleware.VerifyID)
 
 	return e
 }

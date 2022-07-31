@@ -19,14 +19,15 @@ type resource struct {
 }
 
 func RegisterHandlers(g *echo.Group, service Service,
-	requireLogin echo.MiddlewareFunc, logger log.Logger) {
+	logger log.Logger, requireLogin echo.MiddlewareFunc,
+	verifyID echo.MiddlewareFunc) {
 
 	res := resource{service, logger}
 
 	g.GET("/comments/:id/", res.get)
-	g.POST("/comments/", res.create, requireLogin)
-	g.PATCH("/comments/:id/", res.update, requireLogin)
-	g.DELETE("/comments/:id/", res.delete, requireLogin)
+	g.POST("/comments/", res.create, verifyID, requireLogin)
+	g.PATCH("/comments/:id/", res.update, verifyID, requireLogin)
+	g.DELETE("/comments/:id/", res.delete, verifyID, requireLogin)
 }
 
 // @Summary Create a new comment

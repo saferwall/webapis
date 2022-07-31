@@ -24,8 +24,8 @@ func NewMiddleware(service Service, logger log.Logger) middleware {
 	return middleware{service, logger}
 }
 
-// VerifyUser is the middleware function.
-func (m middleware) VerifyUser(next echo.HandlerFunc) echo.HandlerFunc {
+// VerifyID validates the comment ID and check if the comment exists.
+func (m middleware) VerifyID(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		commentID := strings.ToLower(c.Param("id"))
