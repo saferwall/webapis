@@ -24,8 +24,8 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	res := resource{service, logger}
 
-	g.GET("/comments/:id/", res.get)
-	g.POST("/comments/", res.create, verifyID, requireLogin)
+	g.GET("/comments/:id/", res.get, verifyID)
+	g.POST("/comments/", res.create, requireLogin)
 	g.PATCH("/comments/:id/", res.update, verifyID, requireLogin)
 	g.DELETE("/comments/:id/", res.delete, verifyID, requireLogin)
 }

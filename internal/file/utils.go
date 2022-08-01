@@ -1,36 +1,27 @@
+// Copyright 2022 Saferwall. All rights reserved.
+// Use of this source code is governed by Apache v2 license
+// license that can be found in the LICENSE file.
+
 package file
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"reflect"
-	"strings"
+	"regexp"
 )
 
-// isFilterAllowed check if we are allowed to filter GET with fields
-func isFilterAllowed(allowed []string, filters []string) bool {
-	for _, filter := range filters {
-		if !isStringInSlice(filter, allowed) {
+var (
+	regPathNotation = regexp.MustCompile(`^[\w.]+$`)
+)
+
+// areFieldsAllowed check if we are allowed to filter GET with fields
+func areFieldsAllowed(fields []string) bool {
+	for _, field := range fields {
+		if !regPathNotation.MatchString(field) {
 			return false
 		}
 	}
 	return true
-}
-
-// getStructFields retrieve json struct fields names
-func getStructFields(i interface{}) []string {
-
-	val := reflect.ValueOf(i)
-	var temp string
-
-	var listFields []string
-	for i := 0; i < val.Type().NumField(); i++ {
-		temp = val.Type().Field(i).Tag.Get("json")
-		temp = strings.Replace(temp, ",omitempty", "", -1)
-		listFields = append(listFields, temp)
-	}
-
-	return listFields
 }
 
 // isStringInSlice check if a string exist in a list of strings
