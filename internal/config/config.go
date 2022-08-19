@@ -23,7 +23,7 @@ type DatabaseCfg struct {
 	BucketName string `mapstructure:"bucket_name"`
 }
 
-// BrokerCfg represents Kafka producer config.
+// BrokerCfg represents the broker producer config.
 type BrokerCfg struct {
 	// the data source name (DSN) for connecting to the broker server.
 	Address string `mapstructure:"address"`
@@ -86,6 +86,8 @@ type Config struct {
 	Address string `mapstructure:"address"`
 	// Log level. Defaults to info.
 	LogLevel string `mapstructure:"log_level"`
+	// Disable CORS policy.
+	DisableCORS bool `mapstructure:"disable_cors"`
 	// JWT signing key.
 	JWTSigningKey string `mapstructure:"jwt_signkey"`
 	// JWT expiration in hours.

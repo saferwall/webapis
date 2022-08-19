@@ -65,8 +65,15 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 		}))
 
 	// CORS middleware.
+	var CORSAllowOrigins []string
+	if cfg.DisableCORS {
+		CORSAllowOrigins = append(CORSAllowOrigins, "*")
+	} else {
+		CORSAllowOrigins = append(CORSAllowOrigins, cfg.UI.Address)
+
+	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{cfg.UI.Address},
+		AllowOrigins: CORSAllowOrigins,
 		AllowMethods: []string{
 			echo.GET, echo.PUT, echo.POST, echo.DELETE, echo.OPTIONS},
 		AllowCredentials: true,
