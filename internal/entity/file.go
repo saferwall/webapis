@@ -32,6 +32,7 @@ type File struct {
 	Ml            map[string]interface{} `json:"ml,omitempty"`
 	CommentsCount int                    `json:"comments_count"`
 	Format        string                 `json:"fileformat,omitempty"`
+	Extension     string                 `json:"file_extension,omitempty"`
 	Status        int                    `json:"status,omitempty"`
 }
 

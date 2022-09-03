@@ -23,7 +23,9 @@ SELECT
     "submissions": f.submissions,
     "class": f.ml.pe.predicted_class,
     "file_format": f.fileformat,
+    "file_extension": f.file_extension,
     "comments_count": f.comments_count,
+    "signature": f.pe.signature,
     "multiav": {
        "value": ARRAY_COUNT(ARRAY_FLATTEN(ARRAY i.infected FOR i IN OBJECT_VALUES(f.multiav.last_scan) WHEN i.infected = TRUE END,1)),
         "count": OBJECT_LENGTH(f.multiav.last_scan)

@@ -67,7 +67,8 @@ func (r resource) get(c echo.Context) error {
 		}
 	}
 
-	file, err := r.service.Get(c.Request().Context(), c.Param("sha256"), fields)
+	ctx := c.Request().Context()
+	file, err := r.service.Get(ctx, c.Param("sha256"), fields)
 	if err != nil {
 		return err
 	}
