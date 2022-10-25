@@ -18,6 +18,7 @@ import (
 
 const (
 	msgEmailSent = "A request to reset your password has been sent to your email address"
+	msgPwdChanged = "You password has been successfully changed."
 )
 
 type resource struct {
@@ -259,7 +260,7 @@ func (r resource) createNewPassword(c echo.Context) error {
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
 		Status  int    `json:"status"`
-	}{msgEmailSent, http.StatusOK})
+	}{msgPwdChanged, http.StatusOK})
 
 }
 

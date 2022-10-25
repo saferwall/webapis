@@ -38,7 +38,7 @@ type Service interface {
 	// VerifyAccount confirms the user account by verifying the token.
 	VerifyAccount(ctx context.Context, id, token string) error
 	// create a new password if the user has already a reset password token.
-	CreateNewPassword(ctx context.Context, id, password, token string) error
+	CreateNewPassword(ctx context.Context, id, token, password string) error
 	// resend a new confirmation email for the user's account.
 	ResendConfirmation(ctx context.Context, email string) (ResendConfirmationResponse, error)
 }
