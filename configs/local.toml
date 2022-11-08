@@ -44,8 +44,8 @@ avatars_container_name = "saferwall-images" # Container name for avatars.
     root_dir = "/saferwall" # Full path to the directory where to store the files.
 
 [smtp]
-server = "" # "smtp.example.com"
-port = 465
+server = "" # for example: smtp.example.com
+port = 587
 user = "user@example.com"
 password = "password"
 identity = "identity"

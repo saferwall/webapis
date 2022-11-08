@@ -64,22 +64,20 @@ type File struct {
 	entity.File
 }
 
-// DynFileScanCfg represents the dynamic malware analysis configuration.
-type DynFileScanCfg struct {
+// FileScanCfg represents a file scanning config.
+type FileScanCfg struct {
+	// SHA256 hash of the file.
+	SHA256 string
 	// Destination path where the sample will be located in the VM.
-	SampleDestPath string `json:"sample_dest_path,omitempty"`
+	DestPath string `json:"dest_path,omitempty"`
 	// Arguments used to run the sample.
 	Arguments string `json:"arguments,omitempty"`
 	// Timeout in seconds for how long to keep the VM running.
 	Timeout int `json:"timeout,omitempty"`
-}
-
-// FileScanCfg represents a file scanning config.
-type FileScanCfg struct {
-	// SHA256 hash of the file.
-	SHA256 string `json:"sha256"`
-	// Dynamic scan configuration.
-	Dynamic DynFileScanCfg `json:"dynamic"`
+	// Country to route traffic through.
+	Country string `json:"country,omitempty"`
+	// Operating System used to run the sample.
+	OS string `json:"os,omitempty"`
 }
 
 type UploadDownloader interface {
@@ -238,8 +236,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		// Serialize the msg to send to the orchestrator.
-		msg, err := json.Marshal(
-			FileScanCfg{SHA256: sha256, Dynamic: DynFileScanCfg{}})
+		msg, err := json.Marshal(FileScanCfg{SHA256: sha256})
 		if err != nil {
 			s.logger.With(ctx).Error(err)
 			return File{}, err
@@ -403,8 +400,7 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 func (s service) Rescan(ctx context.Context, sha256 string) error {
 
 	// Serialize the msg to send to the orchestrator.
-	msg, err := json.Marshal(
-		FileScanCfg{SHA256: sha256, Dynamic: DynFileScanCfg{}})
+	msg, err := json.Marshal(FileScanCfg{SHA256: sha256})
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err
