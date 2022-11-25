@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -27,7 +27,7 @@ var (
 	ErrObjectNotFound = errors.New("object not found")
 	// file upload timeout in seconds.
 	fileUploadTimeout = time.Duration(time.Second * 30)
-	// SamplesPwd represents the pasword used to zip the files during file download.
+	// SamplesPwd represents the password used to zip the files during file download.
 	SamplesPwd = "infected"
 )
 
@@ -64,14 +64,21 @@ type File struct {
 	entity.File
 }
 
-// FileScanCfg represents a file scanning config.
+// FileScanCfg represents a file scanning config. This map to a 1:1 mapping between
+// the config stored in the main saferwall repo.
 type FileScanCfg struct {
 	// SHA256 hash of the file.
-	SHA256 string
+	SHA256 string `json:"sha256,omitempty"`
+	// Config used during dynamic file scan.
+	DynFileScanCfg `json:"dynamic,omitempty"`
+}
+
+// DynFileScanCfg represents the config used to detonate a file.
+type DynFileScanCfg struct {
 	// Destination path where the sample will be located in the VM.
 	DestPath string `json:"dest_path,omitempty"`
 	// Arguments used to run the sample.
-	Arguments string `json:"arguments,omitempty"`
+	Arguments string `json:"args,omitempty"`
 	// Timeout in seconds for how long to keep the VM running.
 	Timeout int `json:"timeout,omitempty"`
 	// Country to route traffic through.
