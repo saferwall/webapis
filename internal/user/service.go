@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"strings"
 	"time"
 
@@ -497,7 +496,7 @@ func (s service) UpdateAvatar(ctx context.Context, id string, src io.Reader) err
 		return err
 	}
 
-	fileContent, err := ioutil.ReadAll(src)
+	fileContent, err := io.ReadAll(src)
 	if err != nil {
 		return err
 	}

@@ -24,12 +24,13 @@ SELECT
     "class": f.ml.pe.predicted_class,
     "file_format": f.fileformat,
     "file_extension": f.file_extension,
-    "comments_count": f.comments_count,
     "signature": f.pe.signature,
+    "comments_count": f.comments_count,
     "multiav": {
        "value": ARRAY_COUNT(ARRAY_FLATTEN(ARRAY i.infected FOR i IN OBJECT_VALUES(f.multiav.last_scan) WHEN i.infected = TRUE END,1)),
         "count": OBJECT_LENGTH(f.multiav.last_scan)
     },
+    "behavior_report_id": f.behavior_report_id,
     "liked": CASE WHEN ARRAY_LENGTH(user_likes) = 0 THEN false
               ELSE ARRAY_BINARY_SEARCH(ARRAY_SORT((user_likes)[0]), f.sha256) >= 0 END
   }.*

@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -12,7 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
@@ -138,14 +137,16 @@ func (s Service) MakeBucket(ctx context.Context, bucketName, location string) er
 func (s Service) Exists(ctx context.Context, bucketName,
 	key string) (bool, error) {
 
-	_, err := s.s3svc.HeadObjectWithContext(ctx, &s3.HeadObjectInput{
+	_, err := s.s3svc.HeadObjectWithContext(ctx, &awss3.HeadObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(key),
 	})
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
-			case "NotFound": // s3.ErrCodeNoSuchKey does not work, aws is missing this error code so we hardwire a string
+			// s3.ErrCodeNoSuchKey does not work, aws is missing this error code
+			// so we hardwire a string
+			case "NotFound":
 				return false, nil
 			default:
 				return false, err
