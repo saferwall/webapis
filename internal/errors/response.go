@@ -118,21 +118,21 @@ func UnsupportedMediaType(msg string) ErrorResponse {
 
 // BuildErrorResponse builds an error response from an error.
 func BuildErrorResponse(err error, trans ut.Translator) ErrorResponse {
-	switch err.(type) {
+	switch err := err.(type) {
 	case ErrorResponse:
-		return err.(ErrorResponse)
+		return err
 	case validator.ValidationErrors:
 		return invalidInput(err, trans)
 	case *echo.HTTPError:
-		switch err.(*echo.HTTPError).Code {
+		switch err.Code {
 		case http.StatusNotFound:
 			return NotFound("")
 		case http.StatusBadRequest:
-			msg := fmt.Sprintf("%v", err.(*echo.HTTPError).Message)
+			msg := fmt.Sprintf("%v", err.Message)
 			return BadRequest(msg)
 		default:
 			return ErrorResponse{
-				Status:  err.(*echo.HTTPError).Code,
+				Status:  err.Code,
 				Message: err.Error(),
 			}
 		}

@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -32,7 +32,7 @@ import (
 )
 
 // Version indicates the current version of the application.
-var Version = "1.0.0"
+var Version = "0.4.0"
 
 var flagConfig = flag.String("config", "./../configs/", "path to the config file")
 var flagN1QLFiles = flag.String("db", "./../db/", "path to the n1ql files")
@@ -63,7 +63,7 @@ func main() {
 	flag.Parse()
 
 	// Create root logger tagged with server version.
-	logger := log.New().With(nil, "version", Version)
+	logger := log.New().With(context.TODO(), "version", Version)
 
 	if err := run(logger); err != nil {
 		logger.Errorf("failed to run the server: %s", err)
@@ -71,7 +71,7 @@ func main() {
 	}
 }
 
-// run was explicitely created to allow main() to receive an error when server
+// run was explicitly created to allow main() to receive an error when server
 // creation fails.
 func run(logger log.Logger) error {
 
@@ -91,7 +91,7 @@ func run(logger log.Logger) error {
 	logger.Info("connection to database has been established")
 
 	// N1QL queries are stored separately from go code as the statement are
-	// relatively complexe and large.
+	// relatively complex and large.
 	err = dbx.PrepareQueries(*flagN1QLFiles, cfg.DB.BucketName)
 	if err != nil {
 		return err

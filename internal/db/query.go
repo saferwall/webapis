@@ -1,11 +1,10 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
 package db
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -56,7 +55,7 @@ var fileQueryMap = map[string]n1qlQuery{
 	"file-summary.n1ql":              FileSummary,
 	"file-comments.n1ql":             FileComments,
 	"file-strings.n1ql":              FileStrings,
-	"count-strings.n1ql":              CountStrings,
+	"count-strings.n1ql":             CountStrings,
 }
 
 // walk returns list of files in directory.
@@ -88,7 +87,7 @@ func (db *DB) PrepareQueries(filePath, bucketName string) error {
 
 	db.N1QLQuery = make(map[n1qlQuery]string)
 	for _, f := range n1qlFiles {
-		c, err := ioutil.ReadFile(f)
+		c, err := os.ReadFile(f)
 		if err != nil {
 			return err
 		}
