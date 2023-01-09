@@ -33,7 +33,7 @@ type File struct {
 	CommentsCount    int                    `json:"comments_count"`
 	Format           string                 `json:"fileformat,omitempty"`
 	Extension        string                 `json:"file_extension,omitempty"`
-	BehaviorReportID string                 `json:"behavior_report_id"`
+	BehaviorReportID string                 `json:"behavior_report_id,omitempty"`
 	Status           int                    `json:"status,omitempty"`
 }
 

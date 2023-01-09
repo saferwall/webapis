@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"path/filepath"
 	"time"
 
@@ -166,7 +165,7 @@ func (s service) Get(ctx context.Context, id string, fields []string) (File, err
 func (s service) Create(ctx context.Context, req CreateFileRequest) (
 	File, error) {
 
-	fileContent, err := ioutil.ReadAll(req.src)
+	fileContent, err := io.ReadAll(req.src)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return File{}, err
@@ -204,7 +203,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			Timestamp: now,
 			Filename:  req.filename,
 			Source:    source,
-			Country:   "CN", //Todo: req.geoip
+			Country:   req.geoip,
 		}
 
 		// Create a new file.
