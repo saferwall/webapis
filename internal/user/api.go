@@ -537,7 +537,7 @@ func (r resource) avatar(c echo.Context) error {
 
 	if f.Size > 1000000 {
 		r.logger.With(ctx).Infof("image size too large: %v", f.Size)
-		return errors.TooLargeEntity("The file size is too large, maximm allowed: 1MB")
+		return errors.TooLargeEntity("The file size is too large, maximum allowed: 1MB")
 	}
 
 	src, err := f.Open()

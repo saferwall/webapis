@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add `HEAD/` request handling for file resource.
+- Add behavior report ID in /summary view.
+- Add PE signature and file extension in /summary view.
 - Swagger API documentation.
 - Add an option to disable CORS policy during debugging.
 

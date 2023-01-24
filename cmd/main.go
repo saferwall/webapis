@@ -140,7 +140,6 @@ func run(logger log.Logger) error {
 		}
 	}
 
-	// Build HTTP server.
 	hs := &http.Server{
 		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,

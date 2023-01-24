@@ -94,6 +94,8 @@ definitions:
     type: object
   entity.File:
     properties:
+      behavior_report_id:
+        type: string
       byte_entropy:
         items:
           type: integer
@@ -106,6 +108,8 @@ definitions:
         additionalProperties:
           type: string
         type: object
+      file_extension:
+        type: string
       fileformat:
         type: string
       first_seen:
@@ -669,7 +673,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Retrieves a pagined list of files
+      summary: Retrieves a paginated list of files
       tags:
       - file
     post:
@@ -774,6 +778,30 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Get a file report
+      tags:
+      - file
+    head:
+      description: Check weather a file exists in the database.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Check if a file exists.
       tags:
       - file
     patch:

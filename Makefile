@@ -93,3 +93,7 @@ couchbase-init:		## Init couchbase database by creating the cluster and required
 			--max-ttl 500000000 \
 			--enable-flush 0 ; \
 	done
+
+
+gen-openapi:	## Generate OpenAPI spec.
+	swag init --parseDepth 2 -g cmd/main.go

@@ -522,7 +522,7 @@ const docTemplate = `{
                 "tags": [
                     "file"
                 ],
-                "summary": "Retrieves a pagined list of files",
+                "summary": "Retrieves a paginated list of files",
                 "parameters": [
                     {
                         "type": "integer",
@@ -773,6 +773,42 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "head": {
+                "description": "Check weather a file exists in the database.",
+                "tags": [
+                    "file"
+                ],
+                "summary": "Check if a file exists.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File SHA256",
+                        "name": "sha256",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.File"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -2226,6 +2262,9 @@ const docTemplate = `{
         "entity.File": {
             "type": "object",
             "properties": {
+                "behavior_report_id": {
+                    "type": "string"
+                },
                 "byte_entropy": {
                     "type": "array",
                     "items": {
@@ -2243,6 +2282,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "file_extension": {
+                    "type": "string"
                 },
                 "fileformat": {
                     "type": "string"

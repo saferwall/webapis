@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -36,13 +36,6 @@ const (
 	errEmptyBody = "You have sent an empty body."
 )
 
-// Server represents our server, it include all dependencies and make it easy
-// to understand what the server needs.
-type Server struct {
-	Echo   *echo.Echo     // HTTP middleware
-	config *config.Config // Configuration
-	db     *dbcontext.DB  // Database connection
-}
 
 // BuildHandler sets up the HTTP routing and builds an HTTP handler.
 func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
@@ -65,7 +58,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 		}))
 
 	// CORS middleware.
-	var CORSAllowOrigins []string
+	CORSAllowOrigins := []string{"next.saferwall.com", "saferwall-next.pages.dev"}
 	if cfg.DisableCORS {
 		CORSAllowOrigins = append(CORSAllowOrigins, "*")
 	} else {

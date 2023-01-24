@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -27,6 +27,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 	g.GET("/files/", res.list)
 	g.POST("/files/", res.create, requireLogin)
+	g.HEAD("/files/:sha256/", res.exists, verifyHash)
 	g.GET("/files/:sha256/", res.get, verifyHash)
 	g.PUT("/files/:sha256/", res.update, verifyHash, requireLogin)
 	g.PATCH("/files/:sha256/", res.patch, verifyHash, requireLogin)
@@ -38,6 +39,29 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.POST("/files/:sha256/unlike/", res.unlike, verifyHash, requireLogin)
 	g.POST("/files/:sha256/rescan/", res.rescan, verifyHash, requireLogin)
 	g.GET("/files/:sha256/download/", res.download, verifyHash, requireLogin)
+}
+
+// @Summary Check if a file exists.
+// @Description Check weather a file exists in the database.
+// @Tags file
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} entity.File
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256} [head]
+func (r resource) exists(c echo.Context) error {
+
+	ctx := c.Request().Context()
+	exists, err := r.service.Exists(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return c.NoContent(http.StatusOK)
+	}
+
+	return c.NoContent(http.StatusNotFound)
 }
 
 // @Summary Get a file report
@@ -181,7 +205,6 @@ func (r resource) patch(c echo.Context) error {
 	return nil
 }
 
-// DeleteFile godoc
 // @Summary Deletes a file
 // @Description Deletes a file by ID.
 // @Tags file
@@ -211,7 +234,7 @@ func (r resource) delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
-// @Summary Retrieves a pagined list of files
+// @Summary Retrieves a paginated list of files
 // @Description List files
 // @Tags file
 // @Accept json
