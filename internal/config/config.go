@@ -88,6 +88,8 @@ type Config struct {
 	LogLevel string `mapstructure:"log_level"`
 	// Disable CORS policy.
 	DisableCORS bool `mapstructure:"disable_cors"`
+	// A list of extra origins to allow for CORS.
+	CORSOrigins []string `mapstructure:"cors_allowed_origins"`
 	// JWT signing key.
 	JWTSigningKey string `mapstructure:"jwt_signkey"`
 	// JWT expiration in hours.

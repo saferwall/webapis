@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add config entry to allow extra CORS origins.
 - Add `HEAD/` request handling for file resource.
 - Add behavior report ID in /summary view.
 - Add PE signature and file extension in /summary view.

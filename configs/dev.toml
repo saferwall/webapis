@@ -3,6 +3,7 @@
 address = ":8080" # The IP:Port. Defaults to 8080.
 log_level = "debug" # Log level. Defaults to info.
 disable_cors = true # Disable CORS policy.
+cors_allowed_origins = [] # A list of extra origins to allow for CORS.
 jwt_signkey = "secret" # JWT sign key secret.
 jwt_expiration = 72 # JWT expiration in hours. Defaults to 72 hours (3 days)
 reset_pwd_token_expiration = 10 # represents the token expiration for reset password and email confirmation requests in minutes.

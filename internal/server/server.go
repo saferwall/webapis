@@ -36,7 +36,6 @@ const (
 	errEmptyBody = "You have sent an empty body."
 )
 
-
 // BuildHandler sets up the HTTP routing and builds an HTTP handler.
 func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	cfg *config.Config, version string, trans ut.Translator,
@@ -58,13 +57,13 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 		}))
 
 	// CORS middleware.
-	CORSAllowOrigins := []string{"next.saferwall.com", "saferwall-next.pages.dev"}
+	CORSAllowOrigins := cfg.CORSOrigins
 	if cfg.DisableCORS {
-		CORSAllowOrigins = append(CORSAllowOrigins, "*")
+		CORSAllowOrigins = []string{"*"}
 	} else {
 		CORSAllowOrigins = append(CORSAllowOrigins, cfg.UI.Address)
-
 	}
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: CORSAllowOrigins,
 		AllowMethods: []string{
