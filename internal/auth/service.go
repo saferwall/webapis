@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -59,7 +59,7 @@ type ResendConfirmationResponse struct {
 type Identity interface {
 	// ID returns the user ID.
 	ID() string
-	// IsAdmin return true if the user have admin priviliges.
+	// IsAdmin return true if the user have admin privileges.
 	IsAdmin() bool
 }
 
@@ -110,7 +110,7 @@ func (s service) authenticate(ctx context.Context, username, password string) (
 	if !user.Confirmed {
 		return nil, errUserNotConfirmed
 	}
-	return entity.User{Username: username}, nil
+	return entity.User{Username: username, Admin: user.Admin}, nil
 }
 
 // generateJWT generates a JWT that encodes an identity.

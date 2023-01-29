@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swagger API documentation.
 - Add an option to disable CORS policy during debugging.
 
+### Fixed
+
+- User identify was missing the `IsAdmin` attribute.
+
 ## [0.3.0] - 2022-01-06
 
 ### Added
