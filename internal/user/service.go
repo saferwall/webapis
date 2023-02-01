@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"time"
@@ -89,7 +90,7 @@ type service struct {
 	sec      secure.Password
 	actSvc   activity.Service
 	bucket   string
-	objsto   Uploader
+	objSto   Uploader
 }
 
 // CreateUserRequest represents a user creation request.
@@ -175,6 +176,22 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 	if err != nil {
 		return User{}, err
 	}
+
+	// Set a default avatar for the user with the help of `Robohash`. A web
+	// service used to generate avatars. Do not fail if these operations returns
+	// an error.
+	id := user.ID()
+	url := fmt.Sprintf("https://robohash.org/%s?set=set1&bgset=bg1&size=200x200", id)
+	buffer, err := downloadURLContent(url)
+	if err != nil {
+		s.logger.Errorf("failed to download user's avatar: %v", err)
+	} else {
+		err = s.objSto.Upload(ctx, s.bucket, id, buffer)
+		if err != nil {
+			s.logger.Errorf("failed to upload user's avatar: %v", err)
+		}
+	}
+
 	return s.Get(ctx, req.Username)
 }
 
@@ -428,7 +445,7 @@ func (s service) Unfollow(ctx context.Context, id string) error {
 			curUser.Following, targetUsername)
 		curUser.FollowingCount -= 1
 
-		// delete corresponsing activity.
+		// delete corresponding activity.
 		if s.actSvc.DeleteWith(ctx, "follow", curUser.Username,
 			targetUser.Username); err != nil {
 			return err
@@ -514,7 +531,7 @@ func (s service) UpdateAvatar(ctx context.Context, id string, src io.Reader) err
 	// See context package for more information, https://golang.org/pkg/context/
 	defer cancelFn()
 
-	err = s.objsto.Upload(uploadCtx, s.bucket, id, bytes.NewReader(fileContent))
+	err = s.objSto.Upload(uploadCtx, s.bucket, id, bytes.NewReader(fileContent))
 	if err != nil {
 		return err
 	}

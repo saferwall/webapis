@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -79,7 +79,7 @@ func (r resource) get(c echo.Context) error {
 		user.Email = ""
 	}
 
-	// Always hide the apssword.
+	// Always hide the password.
 	user.Password = ""
 	return c.JSON(http.StatusOK, user)
 }
@@ -236,7 +236,7 @@ func (r resource) delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
-// @Summary Retrieves a pagined list of users
+// @Summary Retrieves a paginated list of users
 // @Description List users.
 // @Tags user
 // @Accept json
@@ -502,7 +502,7 @@ func (r resource) unfollow(c echo.Context) error {
 }
 
 // @Summary Update user avatar
-// @Description Change user avatarr
+// @Description Change user avatar
 // @Tags user
 // @Accept json
 // @Produce json

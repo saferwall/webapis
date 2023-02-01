@@ -112,7 +112,7 @@ type CreateFileRequest struct {
 type service struct {
 	repo     Repository
 	logger   log.Logger
-	objsto   UploadDownloader
+	objSto   UploadDownloader
 	producer Producer
 	topic    string
 	bucket   string
@@ -189,7 +189,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		// Ensure the context is canceled to prevent leaking.
 		defer cancelFn()
 
-		err = s.objsto.Upload(uploadCtx, s.bucket, sha256,
+		err = s.objSto.Upload(uploadCtx, s.bucket, sha256,
 			bytes.NewReader(fileContent))
 		if err != nil {
 			return File{}, err
@@ -393,7 +393,7 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 			return err
 		}
 
-		// delete corresponsing activity.
+		// delete corresponding activity.
 		if s.actSvc.DeleteWith(ctx, "like", user.ID(),
 			sha256); err != nil {
 			return err
@@ -430,7 +430,7 @@ func (s service) Download(ctx context.Context, sha256 string, zipfile *string) e
 		context.Background(), time.Duration(time.Second*30))
 	defer cancelFn()
 
-	found, err := s.objsto.Exists(ctx, s.bucket, sha256)
+	found, err := s.objSto.Exists(ctx, s.bucket, sha256)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err
@@ -440,7 +440,7 @@ func (s service) Download(ctx context.Context, sha256 string, zipfile *string) e
 		return ErrObjectNotFound
 	}
 	buf := new(bytes.Buffer)
-	err = s.objsto.Download(downloadCtx, s.bucket, sha256, buf)
+	err = s.objSto.Download(downloadCtx, s.bucket, sha256, buf)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err

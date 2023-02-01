@@ -6,7 +6,7 @@ package entity
 
 import "strings"
 
-// User represent a user.
+// User represents a user.
 type User struct {
 	Type             string   `json:"type"`
 	Email            string   `json:"email,omitempty"`
