@@ -31,7 +31,7 @@ type File struct {
 	ByteEntropy      []int                  `json:"byte_entropy,omitempty"`
 	Ml               map[string]interface{} `json:"ml,omitempty"`
 	CommentsCount    int                    `json:"comments_count"`
-	Format           string                 `json:"fileformat,omitempty"`
+	Format           string                 `json:"file_format,omitempty"`
 	Extension        string                 `json:"file_extension,omitempty"`
 	BehaviorReportID string                 `json:"behavior_report_id,omitempty"`
 	Status           int                    `json:"status,omitempty"`

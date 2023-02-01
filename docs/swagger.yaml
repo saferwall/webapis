@@ -110,7 +110,7 @@ definitions:
         type: object
       file_extension:
         type: string
-      fileformat:
+      file_format:
         type: string
       first_seen:
         type: integer
@@ -1123,7 +1123,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
-      summary: Retrieves a pagined list of users
+      summary: Retrieves a paginated list of users
       tags:
       - user
     post:
@@ -1269,7 +1269,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Change user avatarr
+      description: Change user avatar
       parameters:
       - description: Username
         in: path

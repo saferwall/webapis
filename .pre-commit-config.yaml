@@ -9,4 +9,8 @@ repos:
     -   id: detect-private-key
     -   id: end-of-file-fixer
     -   id: pretty-format-json
+        args:
+          - "--autofix"
+          - "--indent=4"
+          - "--no-sort-keys"
     -   id: trailing-whitespace

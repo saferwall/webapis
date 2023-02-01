@@ -22,7 +22,7 @@ SELECT
     "exif": f.exif,
     "submissions": f.submissions,
     "class": f.ml.pe.predicted_class,
-    "file_format": f.fileformat,
+    "file_format": f.file_format,
     "file_extension": f.file_extension,
     "signature": f.pe.signature,
     "comments_count": f.comments_count,

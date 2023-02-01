@@ -1208,7 +1208,7 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "Retrieves a pagined list of users",
+                "summary": "Retrieves a paginated list of users",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1533,7 +1533,7 @@ const docTemplate = `{
         },
         "/users/{username}/avatar/": {
             "post": {
-                "description": "Change user avatarr",
+                "description": "Change user avatar",
                 "consumes": [
                     "application/json"
                 ],
@@ -2286,7 +2286,7 @@ const docTemplate = `{
                 "file_extension": {
                     "type": "string"
                 },
-                "fileformat": {
+                "file_format": {
                     "type": "string"
                 },
                 "first_seen": {
