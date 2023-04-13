@@ -53,6 +53,10 @@ dk-release: ## Build and release in a docker container.
 			DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
 
+dc-up: ##  Start docker-compose (args: SVC: name of the service to exclude)
+	@echo "${GREEN} [*] =============== Docker Compose UP =============== ${RESET}"
+	docker compose config --services | grep -v '${SVC}' | xargs docker compose up
+
 couchbase-start:	## Start Couchbase Server docker container.
 	$(eval COUCHBASE_CONTAINER_STATUS := $(shell docker container inspect -f '{{.State.Status}}' $(COUCHBASE_CONTAINER_NAME)))
 ifeq ($(COUCHBASE_CONTAINER_STATUS),running)
