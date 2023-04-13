@@ -180,7 +180,7 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 	// Set a default avatar for the user with the help of `Robohash`. A web
 	// service used to generate avatars. Do not fail if these operations returns
 	// an error.
-	id := user.ID()
+	id := strings.ToLower(req.Username)
 	url := fmt.Sprintf("https://robohash.org/%s?set=set1&bgset=bg1&size=200x200", id)
 	buffer, err := downloadURLContent(url)
 	if err != nil {

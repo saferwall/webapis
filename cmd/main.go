@@ -56,6 +56,7 @@ var flagTplFiles = flag.String("tpl", "./../templates/", "path to html templates
 // @securityDefinitions.apiKey Bearer
 // @in header
 // @name Authorization
+// @description Enter the token with the `Bearer: ` prefix, e.g. "Bearer abcde12345".
 
 // @schemes https
 func main() {
