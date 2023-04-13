@@ -1701,6 +1701,7 @@ schemes:
 - https
 securityDefinitions:
   Bearer:
+    description: 'Enter the token with the `Bearer: ` prefix, e.g. "Bearer abcde12345".'
     in: header
     name: Authorization
     type: apiKey
