@@ -30,7 +30,7 @@ var (
 type Service interface {
 	// Login authenticates a user using username or email and a password.
 	// It returns a JWT token if authentication succeeds. Otherwise, an error is returned.
-	Login(ctx context.Context, usernameOrEmail, password string) (string, error)
+	Login(ctx context.Context, usernameOrEmail, password string) (LoginResponse, error)
 	// reset password generates a password reset token. The hash of the token
 	// is stored in the database, a GUID is also generated to retrieve the
 	// document when the user send the new password from the html form.
@@ -41,6 +41,11 @@ type Service interface {
 	CreateNewPassword(ctx context.Context, id, token, password string) error
 	// resend a new confirmation email for the user's account.
 	ResendConfirmation(ctx context.Context, email string) (ResendConfirmationResponse, error)
+}
+
+type LoginResponse struct {
+	token    string
+	username string
 }
 
 type ResetPasswordResponse struct {
@@ -82,33 +87,42 @@ func NewService(signingKey string, tokenExpiration int,
 // Login authenticates a user and generates a JWT token if authentication
 // succeeds. Otherwise, an error is returned.
 func (s service) Login(ctx context.Context, username, password string) (
-	string, error) {
+	LoginResponse, error) {
 	logger := s.logger.With(ctx, "user", username)
 	username = strings.ToLower(username)
 	identity, err := s.authenticate(ctx, username, password)
 	if err != nil {
 		logger.Debugf(err.Error())
-		return "", errors.Unauthorized(err.Error())
+		return LoginResponse{}, errors.Unauthorized(err.Error())
+	}
+
+	token, err := s.generateJWT(identity)
+	if err != nil {
+		return LoginResponse{}, err
 	}
 
 	logger.Debug("authentication successful")
-	return s.generateJWT(identity)
+	return LoginResponse{
+		token:    token,
+		username: identity.ID(),
+	}, nil
 }
 
 // Authenticate authenticates a user using its username or email and password.
 // If username and password are correct, an identity is returned.
 // Otherwise, nil is returned.
-func (s service) authenticate(ctx context.Context, username, password string) (
+func (s service) authenticate(ctx context.Context, usernameOrEmail, password string) (
 	Identity, error) {
 
 	var user user.User
 	var err error
 
-	// username can be either a user name or an email.
-	if !strings.Contains(username, "@") {
-		user, err = s.userSvc.Get(ctx, username)
+	// Username can be either a user name or an email. Username are only allowed
+	// to have alphanum characters, so checking for @ is enough.
+	if !strings.Contains(usernameOrEmail, "@") {
+		user, err = s.userSvc.Get(ctx, usernameOrEmail)
 	} else {
-		user, err = s.userSvc.GetByEmail(ctx, username)
+		user, err = s.userSvc.GetByEmail(ctx, usernameOrEmail)
 	}
 
 	if err != nil {
@@ -120,7 +134,7 @@ func (s service) authenticate(ctx context.Context, username, password string) (
 	if !user.Confirmed {
 		return nil, errUserNotConfirmed
 	}
-	return entity.User{Username: username, Admin: user.Admin}, nil
+	return entity.User{Username: user.Username, Admin: user.Admin}, nil
 }
 
 // generateJWT generates a JWT that encodes an identity.

@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	msgEmailSent = "A request to reset your password has been sent to your email address"
+	msgEmailSent  = "A request to reset your password has been sent to your email address"
 	msgPwdChanged = "You password has been successfully changed."
 )
 
@@ -92,13 +92,13 @@ func (r resource) login(c echo.Context) error {
 		return errors.BadRequest("Invalid username or password")
 	}
 
-	token, err := r.service.Login(ctx, req.Username, req.Password)
+	loginResponse, err := r.service.Login(ctx, req.Username, req.Password)
 	if err != nil {
 		return errors.Unauthorized("Invalid username or password")
 	}
 
 	cookie := &http.Cookie{
-		Value:    token,
+		Value:    loginResponse.token,
 		HttpOnly: true,
 		Path:     "/",
 		Name:     jwtCookieName,
@@ -110,8 +110,9 @@ func (r resource) login(c echo.Context) error {
 	c.SetCookie(cookie)
 
 	return c.JSON(http.StatusOK, struct {
-		Token string `json:"token"`
-	}{token})
+		Token    string `json:"token"`
+		Username string `json:"username"`
+	}{loginResponse.token, loginResponse.username})
 }
 
 // @Summary Log out from current session
