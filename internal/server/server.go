@@ -6,6 +6,7 @@ package server
 
 import (
 	"net/http"
+	"regexp"
 	"runtime/debug"
 
 	ut "github.com/go-playground/universal-translator"
@@ -34,6 +35,17 @@ import (
 const (
 	// Returned when request body length is null.
 	errEmptyBody = "You have sent an empty body."
+
+	// Email regex string.
+	emailRegexString = "^(?:(?:(?:(?:[a-zA-Z]|\\d|[!#\\$%&'\\*\\+\\-\\/=\\?\\^_`{\\|}~]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+(?:\\.([a-zA-Z]|\\d|[!#\\$%&'\\*\\+\\-\\/=\\?\\^_`{\\|}~]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+)*)|(?:(?:\\x22)(?:(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(?:\\x20|\\x09)+)?(?:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}]))))*(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(\\x20|\\x09)+)?(?:\\x22))))@(?:(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.|~|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.)+(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.|~|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.?$"
+
+	// Alphanum regex string.
+	usernameRegexString = "^[a-zA-Z0-9]{1,20}$"
+)
+
+var (
+	emailRegex    = regexp.MustCompile(emailRegexString)
+	usernameRegex = regexp.MustCompile(usernameRegexString)
 )
 
 // BuildHandler sets up the HTTP routing and builds an HTTP handler.
@@ -87,7 +99,9 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	optAuthHandler := auth.IsAuthenticated(authHandler)
 
 	// Register a custom fields validator.
-	e.Validator = &CustomValidator{validator: validator.New()}
+	validate := validator.New()
+	validate.RegisterValidation("username_or_email", validateUsernameOrEmail)
+	e.Validator = &CustomValidator{validator: validate}
 
 	// Register a custom binder.
 	e.Binder = &CustomBinder{b: &echo.DefaultBinder{}}
@@ -138,6 +152,15 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 		return err
 	}
 	return nil
+}
+
+// validateUserOrEmail implements validator.Func.
+func validateUsernameOrEmail(fl validator.FieldLevel) bool {
+	usernameOrEmail := fl.Field().String()
+	if !emailRegex.MatchString(usernameOrEmail) && !usernameRegex.MatchString(usernameOrEmail) {
+		return false
+	}
+	return true
 }
 
 // NewBinder initializes custom server binder.

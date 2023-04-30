@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -49,13 +49,13 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 }
 
-// loginRequest describes a login authtentication request.
+// loginRequest describes a login authentication request.
 type loginRequest struct {
-	Username string `json:"username" validate:"required,alphanum,min=1,max=20" example:"mike"`
+	Username string `json:"username" validate:"required,username_or_email" example:"mrrobot or mr-robot@protonmail.com"`
 	Password string `json:"password" validate:"required,min=8,max=30" example:"control123"`
 }
 
-// resetPasswordRequest describes a password reet request for anonymous users.
+// resetPasswordRequest describes a password reset request for anonymous users.
 type resetPwdRequest struct {
 	Email string `json:"email" validate:"required,email" example:"mike@protonmail.com"`
 }
@@ -68,7 +68,7 @@ type createNewPwdRequest struct {
 	Password string `json:"password" validate:"required,min=8,max=30" example:"secretControl"`
 }
 
-// confirmAccountRequest describes an acccount confirmation email request.
+// confirmAccountRequest describes an account confirmation email request.
 type confirmAccountRequest struct {
 	Email string `json:"email" validate:"required,email" example:"mike@protonmail.com"`
 }

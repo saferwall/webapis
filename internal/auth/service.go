@@ -28,9 +28,9 @@ var (
 
 // Service encapsulates the authentication logic.
 type Service interface {
-	// authenticate authenticates a user using username and password.
+	// Login authenticates a user using username or email and a password.
 	// It returns a JWT token if authentication succeeds. Otherwise, an error is returned.
-	Login(ctx context.Context, username, password string) (string, error)
+	Login(ctx context.Context, usernameOrEmail, password string) (string, error)
 	// reset password generates a password reset token. The hash of the token
 	// is stored in the database, a GUID is also generated to retrieve the
 	// document when the user send the new password from the html form.
@@ -95,12 +95,22 @@ func (s service) Login(ctx context.Context, username, password string) (
 	return s.generateJWT(identity)
 }
 
-// authenticate authenticates a user using username and password. If username
-// and password are correct, an identity is returned. Otherwise, nil is returned.
+// Authenticate authenticates a user using its username or email and password.
+// If username and password are correct, an identity is returned.
+// Otherwise, nil is returned.
 func (s service) authenticate(ctx context.Context, username, password string) (
 	Identity, error) {
 
-	user, err := s.userSvc.Get(ctx, username)
+	var user user.User
+	var err error
+
+	// username can be either a user name or an email.
+	if !strings.Contains(username, "@") {
+		user, err = s.userSvc.Get(ctx, username)
+	} else {
+		user, err = s.userSvc.GetByEmail(ctx, username)
+	}
+
 	if err != nil {
 		return nil, errUserNotFound
 	}
