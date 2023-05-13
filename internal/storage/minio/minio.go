@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -7,9 +7,12 @@ package minio
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
+	"net/url"
+	"time"
 
-	miniogo "github.com/minio/minio-go/v7"
+	mio "github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
@@ -21,7 +24,7 @@ var (
 // Service provides abstraction to cloud object storage.
 type Service struct {
 	// s3 client.
-	client *miniogo.Client
+	client *mio.Client
 }
 
 func New(endpoint, accessKey, secretKey string) (Service, error) {
@@ -29,7 +32,7 @@ func New(endpoint, accessKey, secretKey string) (Service, error) {
 	// New returns an Amazon S3 compatible client object.
 	// API compatibility (v2 or v4) is automatically
 	// determined based on the Endpoint value.
-	s3Client, err := miniogo.New(endpoint, &miniogo.Options{
+	s3Client, err := mio.New(endpoint, &mio.Options{
 		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
 		Secure: false,
 	})
@@ -51,7 +54,7 @@ func (s Service) Upload(ctx context.Context, bucket, key string,
 		return err
 	}
 	_, err = s.client.PutObject(ctx, bucket, key, buf, size,
-		miniogo.PutObjectOptions{ContentType: "application/octet-stream"})
+		mio.PutObjectOptions{ContentType: "application/octet-stream"})
 	if err != nil {
 		return err
 	}
@@ -62,7 +65,7 @@ func (s Service) Upload(ctx context.Context, bucket, key string,
 func (s Service) Download(ctx context.Context, bucket, key string,
 	file io.Writer) error {
 
-	reader, err := s.client.GetObject(ctx, bucket, key, miniogo.GetObjectOptions{})
+	reader, err := s.client.GetObject(ctx, bucket, key, mio.GetObjectOptions{})
 	if err != nil {
 		return err
 	}
@@ -84,7 +87,7 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 func (s Service) MakeBucket(ctx context.Context, bucketName,
 	location string) error {
 	err := s.client.MakeBucket(ctx, bucketName,
-		miniogo.MakeBucketOptions{Region: location})
+		mio.MakeBucketOptions{Region: location})
 	if err != nil {
 		// Check to see if we already own this bucket
 		// (which happens if you run this twice)
@@ -101,7 +104,7 @@ func (s Service) MakeBucket(ctx context.Context, bucketName,
 // Exists checks whether an object exists already in the object storage.
 func (s Service) Exists(ctx context.Context, bucketName,
 	key string) (bool, error) {
-	opts := miniogo.GetObjectOptions{}
+	opts := mio.GetObjectOptions{}
 	_, err := s.client.StatObject(ctx, bucketName, key, opts)
 	if err != nil {
 		switch err.Error() {
@@ -112,4 +115,22 @@ func (s Service) Exists(ctx context.Context, bucketName,
 		}
 	}
 	return true, nil
+}
+
+// GeneratePresignedURL creates a presigned URL.
+func (s Service) GeneratePresignedURL(ctx context.Context, bucketName,
+	key string) (string, error) {
+	reqParams := make(url.Values)
+
+	// Set request parameters for content-disposition.
+	attachment := fmt.Sprintf("attachment; filename=\"%s\"", key)
+	reqParams.Set("response-content-disposition", attachment)
+
+	// Generates a presigned url which expires in a day.
+	presignedURL, err := s.client.PresignedGetObject(ctx, bucketName, key,
+		time.Minute*5, reqParams)
+	if err != nil {
+		return "", err
+	}
+	return presignedURL.String(), nil
 }
