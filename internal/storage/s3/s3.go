@@ -6,14 +6,14 @@ package s3
 
 import (
 	"context"
-	"io"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"io"
+	"time"
 )
 
 // Service provides abstraction to cloud object storage.
@@ -155,4 +155,17 @@ func (s Service) Exists(ctx context.Context, bucketName,
 		return false, err
 	}
 	return true, nil
+}
+
+func (s Service) GeneratePresignedURL(ctx context.Context, bucketName, key string) (string, error) {
+	req, _ := s.s3svc.GetObjectRequest(&awss3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(key),
+	})
+	urlStr, err := req.Presign(5 * time.Minute)
+	if err != nil {
+		return "", err
+	}
+
+	return urlStr, nil
 }
