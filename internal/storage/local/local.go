@@ -95,7 +95,7 @@ func (s Service) Exists(ctx context.Context, bucketName, key string) (bool, erro
 }
 
 // GeneratePresignedURL is left here only to satisfy the interface. Pre-signed URLs
-// ; don't make sense for the local storage.
+// don't make sense for the local storage.
 func (s Service) GeneratePresignedURL(ctx context.Context, bucketName, key string) (string, error) {
-	return "", nil
+	return "", errors.New("not implemented")
 }
