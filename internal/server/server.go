@@ -131,10 +131,10 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 
 	// Register the handlers.
 	healthcheck.RegisterHandlers(e, version)
-	user.RegisterHandlers(g, userSvc, authHandler, optAuthHandler, userMiddleware.VerifyUser,
+	user.RegisterHandlers(g, userSvc, cfg.MaxAvatarSize, authHandler, optAuthHandler, userMiddleware.VerifyUser,
 		logger, smtpMailer, emailTpl)
 	auth.RegisterHandlers(g, authSvc, logger, smtpMailer, emailTpl, cfg.UI.Address)
-	file.RegisterHandlers(g, fileSvc, logger, authHandler, optAuthHandler, fileMiddleware.VerifyHash)
+	file.RegisterHandlers(g, fileSvc, logger, cfg.MaxFileSize, authHandler, optAuthHandler, fileMiddleware.VerifyHash)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 	comment.RegisterHandlers(g, commentSvc, logger, authHandler, commentMiddleware.VerifyID)
 

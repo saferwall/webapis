@@ -15,15 +15,21 @@ import (
 	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
 
+const (
+	// 1 mega-byte.
+	MB  = 1 * 1000000
+)
+
 type resource struct {
-	service Service
-	logger  log.Logger
+	service       Service
+	logger        log.Logger
+	maxSampleSize int64 // expressed in bytes.
 }
 
 func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
-	requireLogin, optionalLogin, verifyHash echo.MiddlewareFunc) {
+	maxFileSize int, requireLogin, optionalLogin, verifyHash echo.MiddlewareFunc) {
 
-	res := resource{service, logger}
+	res := resource{service, logger, int64(maxFileSize * MB)}
 
 	g.GET("/files/", res.list)
 	g.POST("/files/", res.create, requireLogin)
@@ -122,7 +128,7 @@ func (r resource) create(c echo.Context) error {
 		return errors.BadRequest("missing file in form request")
 	}
 
-	if f.Size > 60000000 {
+	if f.Size > r.maxSampleSize {
 		r.logger.With(ctx).Info("payload too large")
 		return errors.TooLargeEntity("")
 	}
