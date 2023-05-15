@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	// 1 mega-byte.
-	MB  = 1 * 1000000
+	KB = 1000
+	MB = 1000 * KB
 )
 
 type resource struct {
