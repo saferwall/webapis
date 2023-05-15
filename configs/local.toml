@@ -27,7 +27,7 @@ address = "localhost:4150" # The data source name (DSN) for connecting to the br
 topic = "topic-filescan" # Topic name to produce to.
 
 [storage]
-deployment_kind = "local" # Deployement kind, possible values: aws, minio, local.
+deployment_kind = "minio" # Deployement kind, possible values: aws, minio, local.
 files_container_name = "saferwall-samples" # Container name for samples.
 avatars_container_name = "saferwall-images" # Container name for avatars.
     # Only one storage type has to be provided. `deployment_kind` controls

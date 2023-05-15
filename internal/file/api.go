@@ -39,6 +39,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.POST("/files/:sha256/unlike/", res.unlike, verifyHash, requireLogin)
 	g.POST("/files/:sha256/rescan/", res.rescan, verifyHash, requireLogin)
 	g.GET("/files/:sha256/download/", res.download, verifyHash, requireLogin)
+	g.GET("/files/:sha256/generate-presigned-url/", res.generatePresignedURL, verifyHash, requireLogin)
 }
 
 // @Summary Check if a file exists.
@@ -430,4 +431,31 @@ func (r resource) download(c echo.Context) error {
 		}
 	}
 	return c.File(zippedFile)
+}
+
+// @Summary Generate a pre-signed URL for downloading samples.
+// @Description Generate a pre-signed URL to download samples directly from the object storage.
+// @Tags file
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/generate-presigned-url/ [post]
+func (r resource) generatePresignedURL(c echo.Context) error {
+	ctx := c.Request().Context()
+	preSignedURL, err := r.service.GeneratePresignedURL(ctx, c.Param("sha256"))
+	if err != nil {
+		switch err {
+		case ErrObjectNotFound:
+			return errors.NotFound("")
+		default:
+			return err
+		}
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+		URL     string `json:"url"`
+	}{"ok", http.StatusOK, preSignedURL})
 }
