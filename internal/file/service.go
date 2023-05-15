@@ -51,11 +51,12 @@ type Service interface {
 	Like(ctx context.Context, id string) error
 	Unlike(ctx context.Context, id string) error
 	Rescan(ctx context.Context, id string) error
-	Download(ctx context.Context, id string, zipfile *string) error
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	CountStrings(ctx context.Context, id string) (int, error)
 	Strings(ctx context.Context, id string, offset, limit int) (interface{}, error)
+	Download(ctx context.Context, id string, zipfile *string) error
+	GeneratePresignedURL(ctx context.Context, id string) (string, error)
 }
 
 // File represents the data about a File.
@@ -90,6 +91,7 @@ type UploadDownloader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
 	Download(ctx context.Context, bucket, key string, file io.Writer) error
 	Exists(ctx context.Context, bucket, key string) (bool, error)
+	GeneratePresignedURL(ctx context.Context, bucket, key string) (string, error)
 }
 
 // Producer represents event stream message producer interface.
@@ -439,6 +441,7 @@ func (s service) Download(ctx context.Context, sha256 string, zipfile *string) e
 	if !found {
 		return ErrObjectNotFound
 	}
+
 	buf := new(bytes.Buffer)
 	err = s.objSto.Download(downloadCtx, s.bucket, sha256, buf)
 	if err != nil {
@@ -481,4 +484,19 @@ func (s service) Strings(ctx context.Context, id string, offset, limit int) (
 		return nil, err
 	}
 	return result, nil
+}
+
+func (s service) GeneratePresignedURL(ctx context.Context, id string) (string, error) {
+
+	found, err := s.objSto.Exists(ctx, s.bucket, id)
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return "", err
+	}
+
+	if !found {
+		return "", ErrObjectNotFound
+	}
+
+	return s.objSto.GeneratePresignedURL(ctx, s.bucket, id)
 }

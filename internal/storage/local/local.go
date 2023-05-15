@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -92,4 +92,10 @@ func (s Service) Exists(ctx context.Context, bucketName, key string) (bool, erro
 		return false, nil
 	}
 	return false, err
+}
+
+// GeneratePresignedURL is left here only to satisfy the interface. Pre-signed URLs
+// don't make sense for the local storage.
+func (s Service) GeneratePresignedURL(ctx context.Context, bucketName, key string) (string, error) {
+	return "", errors.New("not implemented")
 }

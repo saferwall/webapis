@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -32,6 +32,8 @@ type UploadDownloader interface {
 	MakeBucket(ctx context.Context, bucket, location string) error
 	// Exists checks whether an object exists.
 	Exists(ctx context.Context, bucket, key string) (bool, error)
+	// GeneratePresignedURL generates a pre-signed URL for downloading samples.
+	GeneratePresignedURL(ctx context.Context, bucket, key string)(string, error)
 }
 
 func New(cfg config.StorageCfg) (UploadDownloader, error) {
