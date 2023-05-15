@@ -536,7 +536,7 @@ func (r resource) avatar(c echo.Context) error {
 
 	f, err := c.FormFile("file")
 	if err != nil {
-		r.logger.With(ctx).Info(err)
+		r.logger.With(ctx).Error(err)
 		return errors.BadRequest("missing file in form request")
 	}
 
