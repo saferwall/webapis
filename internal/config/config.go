@@ -101,6 +101,8 @@ type Config struct {
 	MaxFileSize int `mapstructure:"max_file_size"`
 	// Maximum avatar size to allow for user profile picture.
 	MaxAvatarSize int `mapstructure:"max_avatar_file_size"`
+	// Password used to zip the samples during file download.
+	SamplesZipPwd string `mapstructure:"samples_zip_password"`
 	// Database configuration.
 	DB DatabaseCfg `mapstructure:"db"`
 	// Broker server configuration.

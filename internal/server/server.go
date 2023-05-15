@@ -119,8 +119,8 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
 		sec, userSvc, tokenGen)
 	fileSvc := file.NewService(file.NewRepository(db, logger), logger, updown,
-		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, userSvc, actSvc,
-		arch)
+		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, cfg.SamplesZipPwd,
+		userSvc, actSvc, arch)
 	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
 		actSvc, userSvc, fileSvc)
 

@@ -26,8 +26,6 @@ var (
 	ErrObjectNotFound = errors.New("object not found")
 	// file upload timeout in seconds.
 	fileUploadTimeout = time.Duration(time.Second * 30)
-	// SamplesPwd represents the password used to zip the files during file download.
-	SamplesPwd = "infected"
 )
 
 // Progress of a file scan.
@@ -37,7 +35,7 @@ const (
 	finished   = iota
 )
 
-// Service encapsulates usecase logic for files.
+// Service encapsulates use case logic for files.
 type Service interface {
 	Get(ctx context.Context, id string, fields []string) (File, error)
 	Count(ctx context.Context) (int, error)
@@ -55,7 +53,7 @@ type Service interface {
 		[]interface{}, error)
 	CountStrings(ctx context.Context, id string) (int, error)
 	Strings(ctx context.Context, id string, offset, limit int) (interface{}, error)
-	Download(ctx context.Context, id string, zipfile *string) error
+	Download(ctx context.Context, id string, zipFile *string) error
 	GeneratePresignedURL(ctx context.Context, id string) (string, error)
 }
 
@@ -112,15 +110,16 @@ type CreateFileRequest struct {
 }
 
 type service struct {
-	repo     Repository
-	logger   log.Logger
-	objSto   UploadDownloader
-	producer Producer
-	topic    string
-	bucket   string
-	userSvc  user.Service
-	actSvc   activity.Service
-	archiver Archiver
+	repo          Repository
+	logger        log.Logger
+	objSto        UploadDownloader
+	producer      Producer
+	topic         string
+	bucket        string
+	samplesZipPwd string
+	userSvc       user.Service
+	actSvc        activity.Service
+	archiver      Archiver
 }
 
 // UpdateUserRequest represents a File update request.
@@ -148,10 +147,10 @@ type UpdateFileRequest struct {
 
 // NewService creates a new File service.
 func NewService(repo Repository, logger log.Logger,
-	updown UploadDownloader, producer Producer, topic, bucket string,
+	updown UploadDownloader, producer Producer, topic, bucket, samplesZipPwd string,
 	userSvc user.Service, actSvc activity.Service, arch Archiver) Service {
-	return service{repo, logger, updown,
-		producer, topic, bucket, userSvc, actSvc, arch}
+	return service{repo, logger, updown, producer, topic, bucket, samplesZipPwd,
+		userSvc, actSvc, arch}
 }
 
 // Get returns the File with the specified File ID.
@@ -424,7 +423,7 @@ func (s service) Rescan(ctx context.Context, sha256 string) error {
 	return nil
 }
 
-func (s service) Download(ctx context.Context, sha256 string, zipfile *string) error {
+func (s service) Download(ctx context.Context, sha256 string, zipFile *string) error {
 
 	// Create a context with a timeout that will abort the download if it takes
 	// more than the passed in timeout.
@@ -449,8 +448,8 @@ func (s service) Download(ctx context.Context, sha256 string, zipfile *string) e
 		return err
 	}
 
-	*zipfile = filepath.Join("/tmp", sha256+".zip")
-	err = s.archiver.Archive(*zipfile, SamplesPwd, buf)
+	*zipFile = filepath.Join("/tmp", sha256+".zip")
+	err = s.archiver.Archive(*zipFile, s.samplesZipPwd, buf)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err
