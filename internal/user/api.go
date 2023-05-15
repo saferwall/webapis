@@ -19,14 +19,13 @@ import (
 
 const (
 	KB = 1000
-	MB = 1000 * KB
 )
 
 func RegisterHandlers(g *echo.Group, service Service, maxAvatarSize int,
 	requireLogin, optionalLogin, verifyUser echo.MiddlewareFunc,
 	logger log.Logger, mailer Mailer, templater tpl.Service) {
 
-	res := resource{service, logger, mailer, templater, int64(maxAvatarSize*MB)}
+	res := resource{service, logger, mailer, templater, int64(maxAvatarSize*KB)}
 
 	g.POST("/users/", res.create)
 	g.GET("/users/", res.list, requireLogin)
