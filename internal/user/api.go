@@ -17,11 +17,15 @@ import (
 	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
 
-func RegisterHandlers(g *echo.Group, service Service,
+const (
+	KB = 1000
+)
+
+func RegisterHandlers(g *echo.Group, service Service, maxAvatarSize int,
 	requireLogin, optionalLogin, verifyUser echo.MiddlewareFunc,
 	logger log.Logger, mailer Mailer, templater tpl.Service) {
 
-	res := resource{service, logger, mailer, templater}
+	res := resource{service, logger, mailer, templater, int64(maxAvatarSize*KB)}
 
 	g.POST("/users/", res.create)
 	g.GET("/users/", res.list, requireLogin)
@@ -38,7 +42,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.GET("/users/:username/submissions/", res.submissions, verifyUser, optionalLogin)
 	g.GET("/users/:username/comments/", res.comments, verifyUser, optionalLogin)
 	g.POST("/users/:username/follow/", res.follow, verifyUser, requireLogin)
-	g.POST("/users/:username/unfollow/", res.unfollow, verifyUser, requireLogin)
+	g.POST("/users/:username/unfollow/", res.unFollow, verifyUser, requireLogin)
 	g.POST("/users/:username/avatar/", res.avatar, verifyUser, requireLogin)
 }
 
@@ -48,10 +52,11 @@ type Mailer interface {
 }
 
 type resource struct {
-	service   Service
-	logger    log.Logger
-	mailer    Mailer
-	templater tpl.Service
+	service       Service
+	logger        log.Logger
+	mailer        Mailer
+	templater     tpl.Service
+	maxAvatarSize int64 // expressed in bytes.
 }
 
 // @Summary Get user information by user ID
@@ -486,13 +491,13 @@ func (r resource) follow(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/unfollow/ [post]
-func (r resource) unfollow(c echo.Context) error {
+func (r resource) unFollow(c echo.Context) error {
 	ctx := c.Request().Context()
-	err := r.service.Unfollow(ctx, c.Param("username"))
+	err := r.service.UnFollow(ctx, c.Param("username"))
 	if err != nil {
 		switch err {
 		case errUserSelfFollow:
-			return errors.Forbidden("You can't unfollow yourself.")
+			return errors.Forbidden("You can't un-follow yourself.")
 		}
 	}
 	return c.JSON(http.StatusOK, struct {
@@ -531,11 +536,11 @@ func (r resource) avatar(c echo.Context) error {
 
 	f, err := c.FormFile("file")
 	if err != nil {
-		r.logger.With(ctx).Info(err)
+		r.logger.With(ctx).Error(err)
 		return errors.BadRequest("missing file in form request")
 	}
 
-	if f.Size > 1000000 {
+	if f.Size > r.maxAvatarSize {
 		r.logger.With(ctx).Infof("image size too large: %v", f.Size)
 		return errors.TooLargeEntity("The file size is too large, maximum allowed: 1MB")
 	}

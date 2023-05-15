@@ -98,9 +98,9 @@ type Config struct {
 	// for reset password and email confirmation requests in minutes.
 	ResetPasswordTokenExp int `mapstructure:"reset_pwd_token_expiration"`
 	// Maximum file size to allow for samples.
-	MaxFileSize int64 `mapstructure:"max_file_size"`
+	MaxFileSize int `mapstructure:"max_file_size"`
 	// Maximum avatar size to allow for user profile picture.
-	MaxAvatarSize int64 `mapstructure:"max_avatar_file_size"`
+	MaxAvatarSize int `mapstructure:"max_avatar_file_size"`
 	// Database configuration.
 	DB DatabaseCfg `mapstructure:"db"`
 	// Broker server configuration.

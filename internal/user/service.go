@@ -22,7 +22,7 @@ import (
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
-// Service encapsulates usecase logic for users.
+// Service encapsulates use case logic for users.
 type Service interface {
 	Get(ctx context.Context, id string) (User, error)
 	Query(ctx context.Context, offset, limit int) ([]User, error)
@@ -51,7 +51,7 @@ type Service interface {
 	CountComments(ctx context.Context, id string) (int, error)
 	CountSubmissions(ctx context.Context, id string) (int, error)
 	Follow(ctx context.Context, id string) error
-	Unfollow(ctx context.Context, id string) error
+	UnFollow(ctx context.Context, id string) error
 	GetByEmail(ctx context.Context, id string) (User, error)
 	UpdateAvatar(ctx context.Context, id string, src io.Reader) error
 	UpdatePassword(ctx context.Context, input UpdatePasswordRequest) error
@@ -62,14 +62,13 @@ type Service interface {
 
 var (
 	// avatar upload timeout in seconds.
-	avatarUploadTimeout     = time.Duration(time.Second * 10)
-	errEmailAlreadyExists   = errors.New("email already exists")
-	errUserAlreadyExists    = errors.New("username already exists")
-	errUserNotFound         = errors.New("user not found")
-	errUserAlreadyConfirmed = errors.New("email already confirmed")
-	errWrongPassword        = errors.New("wrong password")
-	errUserSelfFollow       = errors.New(
-		"source and target user in follow request is the same")
+	avatarUploadTimeout        = time.Duration(time.Second * 10)
+	errEmailAlreadyExists      = errors.New("email already exists")
+	errUserAlreadyExists       = errors.New("username already exists")
+	errUserNotFound            = errors.New("user not found")
+	errUserAlreadyConfirmed    = errors.New("email already confirmed")
+	errWrongPassword           = errors.New("wrong password")
+	errUserSelfFollow          = errors.New("user can't self follow")
 	errImageFormatNotSupported = errors.New("unsupported file type")
 )
 
@@ -422,7 +421,7 @@ func (s service) Follow(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s service) Unfollow(ctx context.Context, id string) error {
+func (s service) UnFollow(ctx context.Context, id string) error {
 	var err error
 	targetUser, err := s.Get(ctx, id)
 	if err != nil {
