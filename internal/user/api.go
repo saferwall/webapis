@@ -25,7 +25,7 @@ func RegisterHandlers(g *echo.Group, service Service, maxAvatarSize int,
 	requireLogin, optionalLogin, verifyUser echo.MiddlewareFunc,
 	logger log.Logger, mailer Mailer, templater tpl.Service) {
 
-	res := resource{service, logger, mailer, templater, int64(maxAvatarSize*KB)}
+	res := resource{service, logger, mailer, templater, int64(maxAvatarSize * KB)}
 
 	g.POST("/users/", res.create)
 	g.GET("/users/", res.list, requireLogin)
@@ -61,7 +61,7 @@ type resource struct {
 
 // @Summary Get user information by user ID
 // @Description Retrieves information about a user.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "User ID"
@@ -91,7 +91,7 @@ func (r resource) get(c echo.Context) error {
 
 // @Summary Create a new user
 // @Description Create a new user.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param data body CreateUserRequest true "User data"
@@ -173,7 +173,7 @@ func (r resource) create(c echo.Context) error {
 
 // @Summary Update a user object (full update)
 // @Description Replace a user document with a new user's document.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -213,7 +213,7 @@ func (r resource) update(c echo.Context) error {
 
 // @Summary Deletes a user
 // @Description Deletes a user by ID.
-// @Tags user
+// @Tags User
 // @Produce json
 // @Param username path string true "Username"
 // @Success 204 {object} entity.User
@@ -243,7 +243,7 @@ func (r resource) delete(c echo.Context) error {
 
 // @Summary Retrieves a paginated list of users
 // @Description List users.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param per_page query uint false "Number of items per page"
@@ -278,7 +278,7 @@ func (r resource) list(c echo.Context) error {
 
 // @Summary Returns a paginated list of a user's activities
 // @Description List of activities of a user.
-// @Tags activity
+// @Tags Activity
 // @Accept json
 // @Produce json
 // @Param per_page query uint false "Number of items per page"
@@ -310,7 +310,7 @@ func (r resource) activities(c echo.Context) error {
 
 // @Summary Returns a paginated list of a user's likes
 // @Description List of likes of a user.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -339,7 +339,7 @@ func (r resource) likes(c echo.Context) error {
 
 // @Summary Returns a paginated list of a user's following
 // @Description List of users a user follows.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -368,7 +368,7 @@ func (r resource) following(c echo.Context) error {
 
 // @Summary Returns a paginated list of a user's followers
 // @Description List of users who follow a user.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -397,7 +397,7 @@ func (r resource) followers(c echo.Context) error {
 
 // @Summary Returns a paginated list of a user's submissions
 // @Description List of submissions by a user.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -426,7 +426,7 @@ func (r resource) submissions(c echo.Context) error {
 
 // @Summary Returns a paginated list of a user's comments
 // @Description List of comments by a user.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -455,7 +455,7 @@ func (r resource) comments(c echo.Context) error {
 
 // @Summary Follow a user
 // @Description Start following a user.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Target user to follow"
@@ -482,7 +482,7 @@ func (r resource) follow(c echo.Context) error {
 
 // @Summary Unfollow a user
 // @Description Stop following a user.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Target user to unfollow"
@@ -508,7 +508,7 @@ func (r resource) unFollow(c echo.Context) error {
 
 // @Summary Update user avatar
 // @Description Change user avatar
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -571,7 +571,7 @@ func (r resource) avatar(c echo.Context) error {
 
 // @Summary Update password for authenticated users
 // @Description Change password for logged-in users.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"
@@ -616,7 +616,7 @@ func (r resource) password(c echo.Context) error {
 
 // @Summary Update email for authenticated users
 // @Description Change email for logged-in users.
-// @Tags user
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param username path string true "Username"

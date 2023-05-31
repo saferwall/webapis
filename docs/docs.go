@@ -35,7 +35,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Log in",
                 "parameters": [
@@ -81,7 +81,7 @@ const docTemplate = `{
             "delete": {
                 "description": "Delete the cookie used for authentication.",
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Log out from current session",
                 "responses": {
@@ -101,7 +101,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Create a new password from a token received in email",
                 "parameters": [
@@ -153,7 +153,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Resend a confirmation email",
                 "parameters": [
@@ -205,7 +205,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Reset password for non-logged users by email",
                 "parameters": [
@@ -251,7 +251,7 @@ const docTemplate = `{
             "get": {
                 "description": "Verify the JWT token received during account creation.",
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Confirm a new account creation",
                 "parameters": [
@@ -308,7 +308,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "Comment"
                 ],
                 "summary": "Create a new comment",
                 "parameters": [
@@ -366,7 +366,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "Comment"
                 ],
                 "summary": "Get comment by ID",
                 "parameters": [
@@ -413,7 +413,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "Comment"
                 ],
                 "summary": "Deletes a comment",
                 "parameters": [
@@ -461,7 +461,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "Comment"
                 ],
                 "summary": "Update a comment object (full update)",
                 "parameters": [
@@ -520,7 +520,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Retrieves a paginated list of files",
                 "parameters": [
@@ -594,7 +594,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Submit a new file for scanning",
                 "parameters": [
@@ -650,7 +650,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Get a file report",
                 "parameters": [
@@ -698,7 +698,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Update a file report (full update)",
                 "parameters": [
@@ -746,7 +746,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Deletes a file",
                 "parameters": [
@@ -788,7 +788,7 @@ const docTemplate = `{
             "head": {
                 "description": "Check weather a file exists in the database.",
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Check if a file exists.",
                 "parameters": [
@@ -830,7 +830,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Update a file report (partial update)",
                 "parameters": [
@@ -877,7 +877,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Returns a paginated list of file comments",
                 "parameters": [
@@ -924,7 +924,7 @@ const docTemplate = `{
                     "multipart/form-data"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Download a file",
                 "parameters": [
@@ -965,7 +965,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Generate a pre-signed URL for downloading samples.",
                 "parameters": [
@@ -1006,7 +1006,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Like a file",
                 "parameters": [
@@ -1053,7 +1053,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Rescan an existing file",
                 "parameters": [
@@ -1097,7 +1097,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Returns a paginated list of strings",
                 "parameters": [
@@ -1156,7 +1156,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "File summary and metadata",
                 "parameters": [
@@ -1203,7 +1203,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Unlike a file",
                 "parameters": [
@@ -1247,7 +1247,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Retrieves a paginated list of users",
                 "parameters": [
@@ -1315,7 +1315,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Create a new user",
                 "parameters": [
@@ -1373,7 +1373,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "activity"
+                    "Activity"
                 ],
                 "summary": "Returns a paginated list of a user's activities",
                 "parameters": [
@@ -1428,7 +1428,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Get user information by user ID",
                 "parameters": [
@@ -1475,7 +1475,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Deletes a user",
                 "parameters": [
@@ -1523,7 +1523,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Update a user object (full update)",
                 "parameters": [
@@ -1582,7 +1582,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Update user avatar",
                 "parameters": [
@@ -1653,7 +1653,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's comments",
                 "parameters": [
@@ -1715,7 +1715,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Update email for authenticated users",
                 "parameters": [
@@ -1774,7 +1774,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Follow a user",
                 "parameters": [
@@ -1824,7 +1824,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's followers",
                 "parameters": [
@@ -1886,7 +1886,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's following",
                 "parameters": [
@@ -1948,7 +1948,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's likes",
                 "parameters": [
@@ -2010,7 +2010,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Update password for authenticated users",
                 "parameters": [
@@ -2069,7 +2069,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's submissions",
                 "parameters": [
@@ -2131,7 +2131,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Unfollow a user",
                 "parameters": [

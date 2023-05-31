@@ -31,7 +31,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Log in",
                 "parameters": [
@@ -77,7 +77,7 @@
             "delete": {
                 "description": "Delete the cookie used for authentication.",
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Log out from current session",
                 "responses": {
@@ -97,7 +97,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Create a new password from a token received in email",
                 "parameters": [
@@ -149,7 +149,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Resend a confirmation email",
                 "parameters": [
@@ -201,7 +201,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Reset password for non-logged users by email",
                 "parameters": [
@@ -247,7 +247,7 @@
             "get": {
                 "description": "Verify the JWT token received during account creation.",
                 "tags": [
-                    "auth"
+                    "Authentication"
                 ],
                 "summary": "Confirm a new account creation",
                 "parameters": [
@@ -304,7 +304,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "Comment"
                 ],
                 "summary": "Create a new comment",
                 "parameters": [
@@ -362,7 +362,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "Comment"
                 ],
                 "summary": "Get comment by ID",
                 "parameters": [
@@ -409,7 +409,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "Comment"
                 ],
                 "summary": "Deletes a comment",
                 "parameters": [
@@ -457,7 +457,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "comment"
+                    "Comment"
                 ],
                 "summary": "Update a comment object (full update)",
                 "parameters": [
@@ -516,7 +516,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Retrieves a paginated list of files",
                 "parameters": [
@@ -590,7 +590,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Submit a new file for scanning",
                 "parameters": [
@@ -646,7 +646,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Get a file report",
                 "parameters": [
@@ -694,7 +694,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Update a file report (full update)",
                 "parameters": [
@@ -742,7 +742,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Deletes a file",
                 "parameters": [
@@ -784,7 +784,7 @@
             "head": {
                 "description": "Check weather a file exists in the database.",
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Check if a file exists.",
                 "parameters": [
@@ -826,7 +826,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Update a file report (partial update)",
                 "parameters": [
@@ -873,7 +873,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Returns a paginated list of file comments",
                 "parameters": [
@@ -920,7 +920,7 @@
                     "multipart/form-data"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Download a file",
                 "parameters": [
@@ -961,7 +961,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Generate a pre-signed URL for downloading samples.",
                 "parameters": [
@@ -1002,7 +1002,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Like a file",
                 "parameters": [
@@ -1049,7 +1049,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Rescan an existing file",
                 "parameters": [
@@ -1093,7 +1093,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Returns a paginated list of strings",
                 "parameters": [
@@ -1152,7 +1152,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "File summary and metadata",
                 "parameters": [
@@ -1199,7 +1199,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "file"
+                    "File"
                 ],
                 "summary": "Unlike a file",
                 "parameters": [
@@ -1243,7 +1243,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Retrieves a paginated list of users",
                 "parameters": [
@@ -1311,7 +1311,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Create a new user",
                 "parameters": [
@@ -1369,7 +1369,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "activity"
+                    "Activity"
                 ],
                 "summary": "Returns a paginated list of a user's activities",
                 "parameters": [
@@ -1424,7 +1424,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Get user information by user ID",
                 "parameters": [
@@ -1471,7 +1471,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Deletes a user",
                 "parameters": [
@@ -1519,7 +1519,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Update a user object (full update)",
                 "parameters": [
@@ -1578,7 +1578,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Update user avatar",
                 "parameters": [
@@ -1649,7 +1649,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's comments",
                 "parameters": [
@@ -1711,7 +1711,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Update email for authenticated users",
                 "parameters": [
@@ -1770,7 +1770,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Follow a user",
                 "parameters": [
@@ -1820,7 +1820,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's followers",
                 "parameters": [
@@ -1882,7 +1882,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's following",
                 "parameters": [
@@ -1944,7 +1944,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's likes",
                 "parameters": [
@@ -2006,7 +2006,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Update password for authenticated users",
                 "parameters": [
@@ -2065,7 +2065,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Returns a paginated list of a user's submissions",
                 "parameters": [
@@ -2127,7 +2127,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "User"
                 ],
                 "summary": "Unfollow a user",
                 "parameters": [

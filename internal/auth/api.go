@@ -75,7 +75,7 @@ type confirmAccountRequest struct {
 
 // @Summary Log in
 // @Description Users logins by username and password.
-// @Tags auth
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param auth-request body loginRequest true "Username and password"
@@ -117,7 +117,7 @@ func (r resource) login(c echo.Context) error {
 
 // @Summary Log out from current session
 // @Description Delete the cookie used for authentication.
-// @Tags auth
+// @Tags Authentication
 // @Success 204 "logout success"
 // @Router /auth/logout/ [delete]
 func (r resource) logout(c echo.Context) error {
@@ -139,7 +139,7 @@ func (r resource) logout(c echo.Context) error {
 
 // @Summary Confirm a new account creation
 // @Description Verify the JWT token received during account creation.
-// @Tags auth
+// @Tags Authentication
 // @Param guid query string true "GUID to identify the token"
 // @Param token query string true "JWT token generated for account creation"
 // @Success 200 {string} json "{"token": "value"}"
@@ -167,7 +167,7 @@ func (r resource) verifyAccount(c echo.Context) error {
 
 // @Summary Reset password for non-logged users by email
 // @Description Request a reset password for anonymous users.
-// @Tags auth
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param reset-pwd body resetPwdRequest true "Email used during account sign-up"
@@ -229,7 +229,7 @@ func (r resource) resetPassword(c echo.Context) error {
 
 // @Summary Create a new password from a token received in email
 // @Description Update the password from the auth token received in email.
-// @Tags auth
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param reset-pwd body createNewPwdRequest true "New password request"
@@ -267,7 +267,7 @@ func (r resource) createNewPassword(c echo.Context) error {
 
 // @Summary Resend a confirmation email
 // @Description Send a new confirmation email link to confirm user's account.
-// @Tags auth
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param reset-pwd body confirmAccountRequest true "Account confirmation request"

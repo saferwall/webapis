@@ -32,7 +32,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 // @Summary Create a new comment
 // @Description Create a new comment.
-// @Tags comment
+// @Tags Comment
 // @Accept json
 // @Produce json
 // @Param data body CreateCommentRequest true "Comment body"
@@ -63,7 +63,7 @@ func (r resource) create(c echo.Context) error {
 
 // @Summary Get comment by ID
 // @Description Retrieves information about a comment.
-// @Tags comment
+// @Tags Comment
 // @Accept json
 // @Produce json
 // @Param id path string true "Comment ID"
@@ -84,7 +84,7 @@ func (r resource) get(c echo.Context) error {
 
 // @Summary Update a comment object (full update)
 // @Description Replace a cocument with a new comment's document.
-// @Tags comment
+// @Tags Comment
 // @Accept json
 // @Produce json
 // @Param id path string true "Comment ID"
@@ -113,7 +113,7 @@ func (r resource) update(c echo.Context) error {
 
 // @Summary Deletes a comment
 // @Description Deletes a comment by ID.
-// @Tags comment
+// @Tags Comment
 // @Produce json
 // @Param id path string true "Comment ID"
 // @Success 204 {object} entity.Comment

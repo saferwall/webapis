@@ -345,7 +345,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Log in
       tags:
-      - auth
+      - Authentication
   /auth/logout/:
     delete:
       description: Delete the cookie used for authentication.
@@ -354,7 +354,7 @@ paths:
           description: logout success
       summary: Log out from current session
       tags:
-      - auth
+      - Authentication
   /auth/password/:
     post:
       consumes:
@@ -388,7 +388,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Create a new password from a token received in email
       tags:
-      - auth
+      - Authentication
   /auth/resend-confirmation/:
     post:
       consumes:
@@ -422,7 +422,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Resend a confirmation email
       tags:
-      - auth
+      - Authentication
   /auth/reset-password/:
     post:
       consumes:
@@ -456,7 +456,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Reset password for non-logged users by email
       tags:
-      - auth
+      - Authentication
   /auth/verify-account/:
     get:
       description: Verify the JWT token received during account creation.
@@ -490,7 +490,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Confirm a new account creation
       tags:
-      - auth
+      - Authentication
   /comments/:
     post:
       consumes:
@@ -528,7 +528,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Create a new comment
       tags:
-      - comment
+      - Comment
   /comments/{id}:
     get:
       consumes:
@@ -561,7 +561,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Get comment by ID
       tags:
-      - comment
+      - Comment
   /comments/{id}/:
     delete:
       description: Deletes a comment by ID.
@@ -592,7 +592,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Deletes a comment
       tags:
-      - comment
+      - Comment
     patch:
       consumes:
       - application/json
@@ -630,7 +630,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update a comment object (full update)
       tags:
-      - comment
+      - Comment
   /files/:
     get:
       consumes:
@@ -673,7 +673,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Retrieves a paginated list of files
       tags:
-      - file
+      - File
     post:
       consumes:
       - multipart/form-data
@@ -712,7 +712,7 @@ paths:
         ApiKeyAuth: []
       summary: Submit a new file for scanning
       tags:
-      - file
+      - File
   /files/{sha256}:
     delete:
       consumes:
@@ -745,7 +745,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Deletes a file
       tags:
-      - file
+      - File
     get:
       consumes:
       - application/json
@@ -777,7 +777,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Get a file report
       tags:
-      - file
+      - File
     head:
       description: Check weather a file exists in the database.
       parameters:
@@ -801,7 +801,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Check if a file exists.
       tags:
-      - file
+      - File
     patch:
       consumes:
       - application/json
@@ -833,7 +833,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update a file report (partial update)
       tags:
-      - file
+      - File
     put:
       consumes:
       - application/json
@@ -865,7 +865,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update a file report (full update)
       tags:
-      - file
+      - File
   /files/{sha256}/comments/:
     get:
       description: List of comments for a given file.
@@ -896,7 +896,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of file comments
       tags:
-      - file
+      - File
   /files/{sha256}/download/:
     get:
       description: Download a binary file. Files are in zip format and password protected.
@@ -923,7 +923,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Download a file
       tags:
-      - file
+      - File
   /files/{sha256}/generate-presigned-url/:
     post:
       description: Generate a pre-signed URL to download samples directly from the
@@ -951,7 +951,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Generate a pre-signed URL for downloading samples.
       tags:
-      - file
+      - File
   /files/{sha256}/like/:
     post:
       description: Adds a file to the like list.
@@ -982,7 +982,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Like a file
       tags:
-      - file
+      - File
   /files/{sha256}/rescan/:
     post:
       description: Rescan an existing file.
@@ -1009,7 +1009,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Rescan an existing file
       tags:
-      - file
+      - File
   /files/{sha256}/strings/:
     get:
       consumes:
@@ -1050,7 +1050,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of strings
       tags:
-      - file
+      - File
   /files/{sha256}/summary/:
     get:
       description: File metadata returned in the summary view of a file.
@@ -1081,7 +1081,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: File summary and metadata
       tags:
-      - file
+      - File
   /files/{sha256}/unlike/:
     post:
       description: Removes a file from the like list.
@@ -1108,7 +1108,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Unlike a file
       tags:
-      - file
+      - File
   /users/:
     get:
       consumes:
@@ -1151,7 +1151,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Retrieves a paginated list of users
       tags:
-      - user
+      - User
     post:
       consumes:
       - application/json
@@ -1188,7 +1188,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Create a new user
       tags:
-      - user
+      - User
   /users/{username}:
     get:
       consumes:
@@ -1221,7 +1221,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Get user information by user ID
       tags:
-      - user
+      - User
   /users/{username}/:
     delete:
       description: Deletes a user by ID.
@@ -1252,7 +1252,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Deletes a user
       tags:
-      - user
+      - User
     patch:
       consumes:
       - application/json
@@ -1290,7 +1290,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update a user object (full update)
       tags:
-      - user
+      - User
   /users/{username}/avatar/:
     post:
       consumes:
@@ -1337,7 +1337,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update user avatar
       tags:
-      - user
+      - User
   /users/{username}/comments/:
     get:
       consumes:
@@ -1378,7 +1378,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of a user's comments
       tags:
-      - user
+      - User
   /users/{username}/email/:
     post:
       consumes:
@@ -1417,7 +1417,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update email for authenticated users
       tags:
-      - user
+      - User
   /users/{username}/follow/:
     post:
       consumes:
@@ -1450,7 +1450,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Follow a user
       tags:
-      - user
+      - User
   /users/{username}/followers/:
     get:
       consumes:
@@ -1491,7 +1491,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of a user's followers
       tags:
-      - user
+      - User
   /users/{username}/following/:
     get:
       consumes:
@@ -1532,7 +1532,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of a user's following
       tags:
-      - user
+      - User
   /users/{username}/likes/:
     get:
       consumes:
@@ -1573,7 +1573,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of a user's likes
       tags:
-      - user
+      - User
   /users/{username}/password/:
     post:
       consumes:
@@ -1612,7 +1612,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Update password for authenticated users
       tags:
-      - user
+      - User
   /users/{username}/submissions/:
     get:
       consumes:
@@ -1653,7 +1653,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of a user's submissions
       tags:
-      - user
+      - User
   /users/{username}/unfollow/:
     post:
       consumes:
@@ -1686,7 +1686,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Unfollow a user
       tags:
-      - user
+      - User
   /users/activities/:
     get:
       consumes:
@@ -1722,7 +1722,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of a user's activities
       tags:
-      - activity
+      - Activity
 schemes:
 - https
 securityDefinitions:

@@ -50,7 +50,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 // @Summary Check if a file exists.
 // @Description Check weather a file exists in the database.
-// @Tags file
+// @Tags File
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
@@ -73,7 +73,7 @@ func (r resource) exists(c echo.Context) error {
 
 // @Summary Get a file report
 // @Description Retrieves the content of a file report.
-// @Tags file
+// @Tags File
 // @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
@@ -108,7 +108,7 @@ func (r resource) get(c echo.Context) error {
 
 // @Summary Submit a new file for scanning
 // @Description Upload file for analysis.
-// @Tags file
+// @Tags File
 // @Accept mpfd
 // @Produce json
 // @Param file formData file true  "binary file"
@@ -156,7 +156,7 @@ func (r resource) create(c echo.Context) error {
 
 // @Summary Update a file report (full update)
 // @Description Replace a file report with a new report
-// @Tags file
+// @Tags File
 // @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
@@ -191,7 +191,7 @@ func (r resource) update(c echo.Context) error {
 
 // @Summary Update a file report (partial update)
 // @Description Patch a portion of a file report.
-// @Tags file
+// @Tags File
 // @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
@@ -214,7 +214,7 @@ func (r resource) patch(c echo.Context) error {
 
 // @Summary Deletes a file
 // @Description Deletes a file by ID.
-// @Tags file
+// @Tags File
 // @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
@@ -243,7 +243,7 @@ func (r resource) delete(c echo.Context) error {
 
 // @Summary Retrieves a paginated list of files
 // @Description List files
-// @Tags file
+// @Tags File
 // @Accept json
 // @Produce json
 // @Param per_page query uint false "Number of files per page"
@@ -278,7 +278,7 @@ func (r resource) list(c echo.Context) error {
 
 // @Summary Returns a paginated list of strings
 // @Description List strings of a file.
-// @Tags file
+// @Tags File
 // @Accept json
 // @Produce json
 // @Param sha256 path string true "File SHA256"
@@ -307,7 +307,7 @@ func (r resource) strings(c echo.Context) error {
 
 // @Summary File summary and metadata
 // @Description File metadata returned in the summary view of a file.
-// @Tags file
+// @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} pagination.Pages
@@ -326,7 +326,7 @@ func (r resource) summary(c echo.Context) error {
 
 // @Summary Returns a paginated list of file comments
 // @Description List of comments for a given file.
-// @Tags file
+// @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} pagination.Pages
@@ -353,7 +353,7 @@ func (r resource) comments(c echo.Context) error {
 
 // @Summary Like a file
 // @Description Adds a file to the like list.
-// @Tags file
+// @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Success 200 {object} object{}
@@ -375,7 +375,7 @@ func (r resource) like(c echo.Context) error {
 
 // @Summary Unlike a file
 // @Description Removes a file from the like list.
-// @Tags file
+// @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Failure 403 {object} errors.ErrorResponse
@@ -396,7 +396,7 @@ func (r resource) unlike(c echo.Context) error {
 
 // @Summary Rescan an existing file
 // @Description Rescan an existing file.
-// @Tags file
+// @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Failure 403 {object} errors.ErrorResponse
@@ -417,7 +417,7 @@ func (r resource) rescan(c echo.Context) error {
 
 // @Summary Download a file
 // @Description Download a binary file. Files are in zip format and password protected.
-// @Tags file
+// @Tags File
 // @Produce mpfd
 // @Param sha256 path string true "File SHA256"
 // @Failure 403 {object} errors.ErrorResponse
@@ -441,7 +441,7 @@ func (r resource) download(c echo.Context) error {
 
 // @Summary Generate a pre-signed URL for downloading samples.
 // @Description Generate a pre-signed URL to download samples directly from the object storage.
-// @Tags file
+// @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
 // @Failure 403 {object} errors.ErrorResponse
