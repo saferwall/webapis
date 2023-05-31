@@ -30,9 +30,9 @@ var (
 
 // Progress of a file scan.
 const (
-	queued     = iota
-	processing = iota
-	finished   = iota
+	queued = iota + 1
+	processing
+	finished
 )
 
 // Service encapsulates use case logic for files.
@@ -208,13 +208,12 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		// Create a new file.
-		statusQueued := queued
 		err = s.repo.Create(ctx, sha256, entity.File{
 			SHA256:      sha256,
 			Type:        "file",
 			FirstSeen:   now,
 			Submissions: append(file.Submissions, submission),
-			Status:      &statusQueued,
+			Status:      queued,
 		})
 		if err != nil {
 			s.logger.With(ctx).Error(err)
