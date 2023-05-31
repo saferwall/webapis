@@ -110,7 +110,7 @@ type UpdateUserRequest struct {
 // UpdatePasswordRequest represents a password update request.
 type UpdatePasswordRequest struct {
 	OldPassword string `json:"old" validate:"required,min=8,max=30" example:"control123"`
-	NewPassword string `json:"new" validate:"required,necsfield=OldPassword,min=8,max=30" example:"secretControl"`
+	NewPassword string `json:"new_password" validate:"required,necsfield=OldPassword,min=8,max=30" example:"secretControl"`
 }
 
 // UpdateEmailRequest represents an email update request.

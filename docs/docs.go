@@ -958,6 +958,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/files/{sha256}/generate-presigned-url/": {
+            "post": {
+                "description": "Generate a pre-signed URL to download samples directly from the object storage.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "file"
+                ],
+                "summary": "Generate a pre-signed URL for downloading samples.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File SHA256",
+                        "name": "sha256",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/files/{sha256}/like/": {
             "post": {
                 "description": "Adds a file to the like list.",
@@ -2183,9 +2224,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "maxLength": 20,
-                    "minLength": 1,
-                    "example": "mike"
+                    "example": "mrrobot or mr-robot@protonmail.com"
                 }
             }
         },

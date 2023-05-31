@@ -34,9 +34,7 @@ definitions:
         minLength: 8
         type: string
       username:
-        example: mike
-        maxLength: 20
-        minLength: 1
+        example: mrrobot or mr-robot@protonmail.com
         type: string
     required:
     - password
@@ -924,6 +922,34 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Download a file
+      tags:
+      - file
+  /files/{sha256}/generate-presigned-url/:
+    post:
+      description: Generate a pre-signed URL to download samples directly from the
+        object storage.
+      parameters:
+      - description: File SHA256
+        in: path
+        name: sha256
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Generate a pre-signed URL for downloading samples.
       tags:
       - file
   /files/{sha256}/like/:
