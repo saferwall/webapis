@@ -4,7 +4,9 @@
 
 package entity
 
-import "strings"
+import (
+	"strings"
+)
 
 // File represent a sample
 type File struct {
@@ -30,7 +32,7 @@ type File struct {
 	Histogram        []int                  `json:"histogram,omitempty"`
 	ByteEntropy      []int                  `json:"byte_entropy,omitempty"`
 	Ml               map[string]interface{} `json:"ml,omitempty"`
-	CommentsCount    int                    `json:"comments_count"`
+	CommentsCount    *int                   `json:"comments_count,omitempty"`
 	Format           string                 `json:"file_format,omitempty"`
 	Extension        string                 `json:"file_extension,omitempty"`
 	BehaviorReportID string                 `json:"behavior_report_id,omitempty"`
