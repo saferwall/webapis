@@ -180,7 +180,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 	now := time.Now().Unix()
 
-	// When a new file has been uploader, we create a new doc in the db.
+	// When a new file has been uploaded, we create a new doc in the db.
 	if err != nil && err.Error() == ErrDocumentNotFound {
 
 		// Create a context with a timeout that will abort the upload if it takes
