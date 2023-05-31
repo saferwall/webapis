@@ -208,12 +208,13 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		// Create a new file.
+		statusQueued := queued
 		err = s.repo.Create(ctx, sha256, entity.File{
 			SHA256:      sha256,
 			Type:        "file",
 			FirstSeen:   now,
 			Submissions: append(file.Submissions, submission),
-			Status:      queued,
+			Status:      &statusQueued,
 		})
 		if err != nil {
 			s.logger.With(ctx).Error(err)
