@@ -6,14 +6,15 @@ package s3
 
 import (
 	"context"
+	"io"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	awss3 "github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"io"
-	"time"
 )
 
 // Service provides abstraction to cloud object storage.
@@ -64,6 +65,7 @@ func New(region, accessKey, secretKey string) (Service, error) {
 	// Create a downloader with S3 client and custom options
 	downloader := s3manager.NewDownloaderWithClient(s3Svc,
 		func(u *s3manager.Downloader) {
+			u.Concurrency = 1            // Guarantee sequential writes
 			u.PartSize = 5 * 1024 * 1024 // 5MB per part
 		})
 
@@ -168,4 +170,21 @@ func (s Service) GeneratePresignedURL(ctx context.Context, bucketName, key strin
 	}
 
 	return urlStr, nil
+}
+
+// Delete removes an object from the store.
+func (s Service) Delete(ctx context.Context, bucket, key string) (bool, error) {
+
+	// Prepare the delete object input.
+	input := &awss3.DeleteObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	}
+
+	_, err := s.s3svc.DeleteObjectWithContext(ctx, input)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

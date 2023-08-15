@@ -99,3 +99,16 @@ func (s Service) Exists(ctx context.Context, bucketName, key string) (bool, erro
 func (s Service) GeneratePresignedURL(ctx context.Context, bucketName, key string) (string, error) {
 	return "", errors.New("not implemented")
 }
+
+// Delete deletes an object from the local file system.
+func (s Service) Delete(ctx context.Context, bucket, key string) error {
+
+	// Get the file path.
+	name := filepath.Join(s.root, bucket, key)
+	err := os.Remove(name)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

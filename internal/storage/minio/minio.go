@@ -43,7 +43,7 @@ func New(endpoint, accessKey, secretKey string) (Service, error) {
 	return Service{s3Client}, nil
 }
 
-// Upload uploads an object to s3.
+// Upload uploads an object to the remote storage,.
 func (s Service) Upload(ctx context.Context, bucket, key string,
 	file io.Reader) error {
 
@@ -133,4 +133,17 @@ func (s Service) GeneratePresignedURL(ctx context.Context, bucketName,
 		return "", err
 	}
 	return presignedURL.String(), nil
+}
+
+// Delete deletes an object from the remote storage.
+func (s Service) Delete(ctx context.Context, bucket, key string) error {
+
+	opts := mio.RemoveObjectOptions{}
+
+	err := s.client.RemoveObject(ctx, bucket, key, opts)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
