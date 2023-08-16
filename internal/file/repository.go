@@ -112,7 +112,7 @@ func (r repository) Count(ctx context.Context) (int, error) {
 	params["docType"] = "file"
 
 	statement :=
-		"SELECT COUNT(*) AS count FROM `" + r.db.Bucket.Name() + "` " +
+		"SELECT RAW COUNT(*) AS count FROM `" + r.db.Bucket.Name() + "` " +
 			"WHERE `type`=$docType"
 
 	err := r.db.Count(ctx, statement, params, &count)
