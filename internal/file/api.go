@@ -319,6 +319,7 @@ func (r resource) strings(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/summary/ [get]
+// @Security Bearer || {}
 func (r resource) summary(c echo.Context) error {
 	ctx := c.Request().Context()
 	fileSummary, err := r.service.Summary(ctx, c.Param("sha256"))
@@ -338,6 +339,7 @@ func (r resource) summary(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/comments/ [get]
+// @Security Bearer || {}
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
 	file, err := r.service.Get(ctx, c.Param("sha256"), nil)

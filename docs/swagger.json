@@ -887,6 +887,12 @@
         },
         "/files/{sha256}/comments/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "List of comments for a given file.",
                 "produces": [
                     "application/json"
@@ -1186,6 +1192,12 @@
         },
         "/files/{sha256}/summary/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "File metadata returned in the summary view of a file.",
                 "produces": [
                     "application/json"
@@ -1410,6 +1422,12 @@
         },
         "/users/activities/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "List of activities of a user.",
                 "consumes": [
                     "application/json"
@@ -1465,6 +1483,12 @@
         },
         "/users/{username}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "Retrieves information about a user.",
                 "consumes": [
                     "application/json"
@@ -1705,6 +1729,12 @@
         },
         "/users/{username}/comments/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "List of comments by a user.",
                 "consumes": [
                     "application/json"
@@ -1886,6 +1916,12 @@
         },
         "/users/{username}/followers/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "List of users who follow a user.",
                 "consumes": [
                     "application/json"
@@ -1948,6 +1984,12 @@
         },
         "/users/{username}/following/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "List of users a user follows.",
                 "consumes": [
                     "application/json"
@@ -2010,6 +2052,12 @@
         },
         "/users/{username}/likes/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "List of likes of a user.",
                 "consumes": [
                     "application/json"
@@ -2136,6 +2184,12 @@
         },
         "/users/{username}/submissions/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        "{}": []
+                    }
+                ],
                 "description": "List of submissions by a user.",
                 "consumes": [
                     "application/json"

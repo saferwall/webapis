@@ -901,6 +901,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: Returns a paginated list of file comments
       tags:
       - File
@@ -1094,6 +1097,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: File summary and metadata
       tags:
       - File
@@ -1238,6 +1244,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: Get user information by user ID
       tags:
       - User
@@ -1401,6 +1410,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: Returns a paginated list of a user's comments
       tags:
       - User
@@ -1518,6 +1530,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: Returns a paginated list of a user's followers
       tags:
       - User
@@ -1559,6 +1574,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: Returns a paginated list of a user's following
       tags:
       - User
@@ -1600,6 +1618,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: Returns a paginated list of a user's likes
       tags:
       - User
@@ -1682,6 +1703,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: Returns a paginated list of a user's submissions
       tags:
       - User
@@ -1753,6 +1777,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - '{}': []
+        Bearer: []
       summary: Returns a paginated list of a user's activities
       tags:
       - Activity
