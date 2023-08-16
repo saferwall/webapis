@@ -902,8 +902,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: Returns a paginated list of file comments
       tags:
       - File
@@ -1098,8 +1098,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: File summary and metadata
       tags:
       - File
@@ -1245,8 +1245,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: Get user information by user ID
       tags:
       - User
@@ -1411,8 +1411,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: Returns a paginated list of a user's comments
       tags:
       - User
@@ -1531,8 +1531,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: Returns a paginated list of a user's followers
       tags:
       - User
@@ -1575,8 +1575,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: Returns a paginated list of a user's following
       tags:
       - User
@@ -1619,8 +1619,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: Returns a paginated list of a user's likes
       tags:
       - User
@@ -1704,8 +1704,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: Returns a paginated list of a user's submissions
       tags:
       - User
@@ -1778,8 +1778,8 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        Bearer: []
+      - {}
+      - Bearer: []
       summary: Returns a paginated list of a user's activities
       tags:
       - Activity

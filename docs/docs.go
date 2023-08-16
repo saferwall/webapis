@@ -894,7 +894,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "List of comments for a given file.",
@@ -1199,7 +1199,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "File metadata returned in the summary view of a file.",
@@ -1429,7 +1429,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "List of activities of a user.",
@@ -1490,7 +1490,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "Retrieves information about a user.",
@@ -1736,7 +1736,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "List of comments by a user.",
@@ -1923,7 +1923,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "List of users who follow a user.",
@@ -1991,7 +1991,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "List of users a user follows.",
@@ -2059,7 +2059,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "List of likes of a user.",
@@ -2191,7 +2191,7 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": [],
-                        "{}": []
+                        - {}: []
                     }
                 ],
                 "description": "List of submissions by a user.",
@@ -2757,8 +2757,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "Interact with Saferwall Malware Analysis Platform",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {

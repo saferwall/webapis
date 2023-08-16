@@ -889,9 +889,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "List of comments for a given file.",
                 "produces": [
@@ -1194,9 +1194,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "File metadata returned in the summary view of a file.",
                 "produces": [
@@ -1424,9 +1424,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "List of activities of a user.",
                 "consumes": [
@@ -1485,9 +1485,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "Retrieves information about a user.",
                 "consumes": [
@@ -1731,9 +1731,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "List of comments by a user.",
                 "consumes": [
@@ -1918,9 +1918,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "List of users who follow a user.",
                 "consumes": [
@@ -1986,9 +1986,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "List of users a user follows.",
                 "consumes": [
@@ -2054,9 +2054,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "List of likes of a user.",
                 "consumes": [
@@ -2186,9 +2186,9 @@
             "get": {
                 "security": [
                     {
-                        "Bearer": [],
-                        "{}": []
-                    }
+                        "Bearer": []
+                    },
+                    {}
                 ],
                 "description": "List of submissions by a user.",
                 "consumes": [
