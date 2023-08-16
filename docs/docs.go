@@ -512,6 +512,11 @@ const docTemplate = `{
         },
         "/files/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "List files",
                 "consumes": [
                     "application/json"
@@ -582,8 +587,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": [],
-                        "{}": []
+                        "Bearer": []
                     }
                 ],
                 "description": "Upload file for analysis.",
@@ -690,6 +694,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Replace a file report with a new report",
                 "consumes": [
                     "application/json"
@@ -738,6 +747,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Deletes a file by ID.",
                 "consumes": [
                     "application/json"
@@ -822,6 +836,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Patch a portion of a file report.",
                 "consumes": [
                     "application/json"
@@ -919,6 +938,11 @@ const docTemplate = `{
         },
         "/files/{sha256}/download/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Download a binary file. Files are in zip format and password protected.",
                 "produces": [
                     "multipart/form-data"
@@ -960,6 +984,11 @@ const docTemplate = `{
         },
         "/files/{sha256}/generate-presigned-url/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Generate a pre-signed URL to download samples directly from the object storage.",
                 "produces": [
                     "application/json"
@@ -1001,6 +1030,11 @@ const docTemplate = `{
         },
         "/files/{sha256}/like/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Adds a file to the like list.",
                 "produces": [
                     "application/json"
@@ -1048,6 +1082,11 @@ const docTemplate = `{
         },
         "/files/{sha256}/rescan/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Rescan an existing file.",
                 "produces": [
                     "application/json"
@@ -1198,6 +1237,11 @@ const docTemplate = `{
         },
         "/files/{sha256}/unlike/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Removes a file from the like list.",
                 "produces": [
                     "application/json"
@@ -1239,6 +1283,11 @@ const docTemplate = `{
         },
         "/users/": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "List users.",
                 "consumes": [
                     "application/json"
@@ -1470,6 +1519,11 @@ const docTemplate = `{
         },
         "/users/{username}/": {
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Deletes a user by ID.",
                 "produces": [
                     "application/json"
@@ -1515,6 +1569,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Replace a user document with a new user's document.",
                 "consumes": [
                     "application/json"
@@ -1574,6 +1633,11 @@ const docTemplate = `{
         },
         "/users/{username}/avatar/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Change user avatar",
                 "consumes": [
                     "application/json"
@@ -1707,6 +1771,11 @@ const docTemplate = `{
         },
         "/users/{username}/email/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Change email for logged-in users.",
                 "consumes": [
                     "application/json"
@@ -1766,6 +1835,11 @@ const docTemplate = `{
         },
         "/users/{username}/follow/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Start following a user.",
                 "consumes": [
                     "application/json"
@@ -2002,6 +2076,11 @@ const docTemplate = `{
         },
         "/users/{username}/password/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Change password for logged-in users.",
                 "consumes": [
                     "application/json"
@@ -2123,6 +2202,11 @@ const docTemplate = `{
         },
         "/users/{username}/unfollow/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Stop following a user.",
                 "consumes": [
                     "application/json"

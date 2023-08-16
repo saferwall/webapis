@@ -671,6 +671,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Retrieves a paginated list of files
       tags:
       - File
@@ -708,8 +710,7 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - '{}': []
-        ApiKeyAuth: []
+      - Bearer: []
       summary: Submit a new file for scanning
       tags:
       - File
@@ -743,6 +744,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Deletes a file
       tags:
       - File
@@ -831,6 +834,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Update a file report (partial update)
       tags:
       - File
@@ -863,6 +868,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Update a file report (full update)
       tags:
       - File
@@ -921,6 +928,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Download a file
       tags:
       - File
@@ -949,6 +958,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Generate a pre-signed URL for downloading samples.
       tags:
       - File
@@ -980,6 +991,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Like a file
       tags:
       - File
@@ -1007,6 +1020,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Rescan an existing file
       tags:
       - File
@@ -1106,6 +1121,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Unlike a file
       tags:
       - File
@@ -1149,6 +1166,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Retrieves a paginated list of users
       tags:
       - User
@@ -1250,6 +1269,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Deletes a user
       tags:
       - User
@@ -1288,6 +1309,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Update a user object (full update)
       tags:
       - User
@@ -1335,6 +1358,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Update user avatar
       tags:
       - User
@@ -1415,6 +1440,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Update email for authenticated users
       tags:
       - User
@@ -1448,6 +1475,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Follow a user
       tags:
       - User
@@ -1610,6 +1639,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Update password for authenticated users
       tags:
       - User
@@ -1684,6 +1715,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
+      security:
+      - Bearer: []
       summary: Unfollow a user
       tags:
       - User
