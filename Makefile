@@ -98,6 +98,8 @@ couchbase-init:		## Init couchbase database by creating the cluster and required
 			--enable-flush 0 ; \
 	done
 
-
 gen-openapi:	## Generate OpenAPI spec.
 	swag init --parseDepth 2 -g cmd/main.go
+
+install-swag:	## Install Swag
+	go install github.com/swaggo/swag/cmd/swag@latest

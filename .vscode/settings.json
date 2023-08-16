@@ -13,6 +13,7 @@
         "healthcheck",
         "mpfd",
         "necsfield",
+        "Presign",
         "Robohash",
         "Taymiyyah",
         "templater",
