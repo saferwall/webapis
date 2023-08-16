@@ -31,7 +31,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 
 	res := resource{service, logger, int64(maxFileSize * MB)}
 
-	g.GET("/files/", res.list)
+	g.GET("/files/", res.list, requireLogin)
 	g.POST("/files/", res.create, requireLogin)
 	g.HEAD("/files/:sha256/", res.exists, verifyHash)
 	g.GET("/files/:sha256/", res.get, verifyHash)
@@ -112,13 +112,13 @@ func (r resource) get(c echo.Context) error {
 // @Accept mpfd
 // @Produce json
 // @Param file formData file true  "binary file"
-// @Security ApiKeyAuth || {}
 // @Success 201 {object} entity.File
 // @Failure 400 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 413 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/ [post]
+// @Security Bearer
 func (r resource) create(c echo.Context) error {
 
 	ctx := c.Request().Context()
@@ -165,6 +165,7 @@ func (r resource) create(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [put]
+// @Security Bearer
 func (r resource) update(c echo.Context) error {
 
 	var isAdmin bool
@@ -200,6 +201,7 @@ func (r resource) update(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [patch]
+// @Security Bearer
 func (r resource) patch(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()
@@ -223,6 +225,7 @@ func (r resource) patch(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256} [delete]
+// @Security Bearer
 func (r resource) delete(c echo.Context) error {
 
 	var isAdmin bool
@@ -253,6 +256,7 @@ func (r resource) delete(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/ [get]
+// @Security Bearer
 func (r resource) list(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()
@@ -315,6 +319,7 @@ func (r resource) strings(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/summary/ [get]
+// @Security Bearer || {}
 func (r resource) summary(c echo.Context) error {
 	ctx := c.Request().Context()
 	fileSummary, err := r.service.Summary(ctx, c.Param("sha256"))
@@ -334,6 +339,7 @@ func (r resource) summary(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/comments/ [get]
+// @Security Bearer || {}
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
 	file, err := r.service.Get(ctx, c.Param("sha256"), nil)
@@ -361,6 +367,7 @@ func (r resource) comments(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/like/ [post]
+// @Security Bearer
 func (r resource) like(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Like(ctx, c.Param("sha256"))
@@ -382,6 +389,7 @@ func (r resource) like(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/unlike/ [post]
+// @Security Bearer
 func (r resource) unlike(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Unlike(ctx, c.Param("sha256"))
@@ -403,6 +411,7 @@ func (r resource) unlike(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/rescan/ [post]
+// @Security Bearer
 func (r resource) rescan(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Rescan(ctx, c.Param("sha256"))
@@ -424,6 +433,7 @@ func (r resource) rescan(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/download/ [get]
+// @Security Bearer
 func (r resource) download(c echo.Context) error {
 	ctx := c.Request().Context()
 	var zippedFile string
@@ -448,6 +458,7 @@ func (r resource) download(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/{sha256}/generate-presigned-url/ [post]
+// @Security Bearer
 func (r resource) generatePresignedURL(c echo.Context) error {
 	ctx := c.Request().Context()
 	preSignedURL, err := r.service.GeneratePresignedURL(ctx, c.Param("sha256"))

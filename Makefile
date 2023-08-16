@@ -98,6 +98,24 @@ couchbase-init:		## Init couchbase database by creating the cluster and required
 			--enable-flush 0 ; \
 	done
 
-
 gen-openapi:	## Generate OpenAPI spec.
 	swag init --parseDepth 2 -g cmd/main.go
+
+	old="- '{}': \[\]" && new="- {}" \
+		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/swagger.yaml
+	old='  Bearer: \[\]' && new='- Bearer: []' \
+		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/swagger.yaml
+
+	tr -d '\n' < ${ROOT_DIR}/docs/swagger.json > ${ROOT_DIR}/docs/swagger-tmp.json
+	mv ${ROOT_DIR}/docs/swagger-tmp.json ${ROOT_DIR}/docs/swagger.json
+
+	old='"Bearer": \[\],' && new='"Bearer": \[\]},' \
+		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/swagger.json
+	old='"{}": \[\]                    }' && new="{}" \
+		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/swagger.json
+
+	old='"{}":' && new="- {}:" \
+		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/docs.go
+
+install-swag:	## Install Swag
+	go install github.com/swaggo/swag/cmd/swag@latest

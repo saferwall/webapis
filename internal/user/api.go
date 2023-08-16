@@ -70,6 +70,7 @@ type resource struct {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username} [get]
+// @Security Bearer || {}
 func (r resource) get(c echo.Context) error {
 	ctx := c.Request().Context()
 	user, err := r.service.Get(ctx, c.Param("username"))
@@ -77,8 +78,7 @@ func (r resource) get(c echo.Context) error {
 		return err
 	}
 
-	// Hide the email unless the logged-in user is asking its own
-	// information.
+	// Hide the email unless the logged-in user is asking its own information.
 	curUser, ok := ctx.Value(entity.UserKey).(entity.User)
 	if !ok || curUser.ID() != strings.ToLower(c.Param("username")) {
 		user.Email = ""
@@ -123,8 +123,7 @@ func (r resource) create(c echo.Context) error {
 	// Hide sensible data,
 	user.Password = ""
 
-	// No need to generate a confirmation email when smtp
-	// is not configured.
+	// No need to generate a confirmation email when smtp is not configured.
 	if len(r.templater.EmailRequestTemplate) == 0 {
 		user.Confirmed = true
 		err = r.service.Patch(ctx, user.ID(), "confirmed", true)
@@ -183,6 +182,7 @@ func (r resource) create(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/ [patch]
+// @Security Bearer
 func (r resource) update(c echo.Context) error {
 	var input UpdateUserRequest
 	var curUser string
@@ -221,6 +221,7 @@ func (r resource) update(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/ [delete]
+// @Security Bearer
 func (r resource) delete(c echo.Context) error {
 
 	var isAdmin bool
@@ -253,6 +254,7 @@ func (r resource) delete(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/ [get]
+// @Security Bearer
 func (r resource) list(c echo.Context) error {
 	var isAdmin bool
 	ctx := c.Request().Context()
@@ -288,6 +290,7 @@ func (r resource) list(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/activities/ [get]
+// @Security Bearer || {}
 func (r resource) activities(c echo.Context) error {
 	ctx := c.Request().Context()
 	var id string
@@ -321,6 +324,7 @@ func (r resource) activities(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/likes/ [get]
+// @Security Bearer || {}
 func (r resource) likes(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountLikes(ctx, c.Param("username"))
@@ -350,6 +354,7 @@ func (r resource) likes(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/following/ [get]
+// @Security Bearer || {}
 func (r resource) following(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountFollowing(ctx, c.Param("username"))
@@ -379,6 +384,7 @@ func (r resource) following(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/followers/ [get]
+// @Security Bearer || {}
 func (r resource) followers(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountFollowers(ctx, c.Param("username"))
@@ -408,6 +414,7 @@ func (r resource) followers(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/submissions/ [get]
+// @Security Bearer || {}
 func (r resource) submissions(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountSubmissions(ctx, c.Param("username"))
@@ -437,6 +444,7 @@ func (r resource) submissions(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/comments/ [get]
+// @Security Bearer || {}
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
 	count, err := r.service.CountComments(ctx, c.Param("username"))
@@ -464,6 +472,7 @@ func (r resource) comments(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/follow/ [post]
+// @Security Bearer
 func (r resource) follow(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.Follow(ctx, c.Param("username"))
@@ -491,6 +500,7 @@ func (r resource) follow(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/unfollow/ [post]
+// @Security Bearer
 func (r resource) unFollow(c echo.Context) error {
 	ctx := c.Request().Context()
 	err := r.service.UnFollow(ctx, c.Param("username"))
@@ -520,6 +530,7 @@ func (r resource) unFollow(c echo.Context) error {
 // @Failure 413 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/avatar/ [post]
+// @Security Bearer
 func (r resource) avatar(c echo.Context) error {
 	var curUsername string
 	ctx := c.Request().Context()
@@ -581,6 +592,7 @@ func (r resource) avatar(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/password/ [post]
+// @Security Bearer
 func (r resource) password(c echo.Context) error {
 	var req UpdatePasswordRequest
 	ctx := c.Request().Context()
@@ -626,6 +638,7 @@ func (r resource) password(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /users/{username}/email/ [post]
+// @Security Bearer
 func (r resource) email(c echo.Context) error {
 	var req UpdateEmailRequest
 	ctx := c.Request().Context()
