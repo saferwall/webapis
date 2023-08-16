@@ -35,7 +35,7 @@ export
 include build/docker.mk
 
 
-dk-build: ## Build in a docker container
+dk-build:	## Build in a docker container
 	@echo "${GREEN} [*] =============== Docker Build  =============== ${RESET}"
 	make docker-build IMG=$(DOCKER_HUB_IMG) DOCKER_FILE=Dockerfile DOCKER_DIR=. ;
 	@EXIT_CODE=$$?
@@ -43,7 +43,7 @@ dk-build: ## Build in a docker container
 		make docker-build IMG=$(DOCKER_HUB_IMG) DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
 
-dk-release: ## Build and release in a docker container.
+dk-release:	## Build and release in a docker container.
 	@echo "${GREEN} [*] =============== Docker Build and Release  =============== ${RESET}"
 	make docker-release IMG=$(DOCKER_HUB_IMG) VERSION=$(SAFERWALL_VER) \
 		DOCKER_FILE=Dockerfile DOCKER_DIR=. ;
@@ -53,7 +53,7 @@ dk-release: ## Build and release in a docker container.
 			DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
 
-dc-up: ##  Start docker-compose (args: SVC: name of the service to exclude)
+dc-up:	## Start docker-compose (args: SVC: name of the service to exclude)
 	@echo "${GREEN} [*] =============== Docker Compose UP =============== ${RESET}"
 	docker compose config --services | grep -v '${SVC}' | xargs docker compose up
 
@@ -69,7 +69,7 @@ else
 	docker run -d --name $(COUCHBASE_CONTAINER_NAME) -p 8091-8094:8091-8094 -p 11210:11210 $(COUCHBASE_CONTAINER_VER)
 endif
 
-couchbase-init:		## Init couchbase database by creating the cluster and required buckets.
+couchbase-init:	## Init couchbase database by creating the cluster and required buckets.
 	# Init the cluster.
 	echo "${GREEN} [*] =============== Creating Cluster =============== ${RESET}"
 	docker exec couchbase \
