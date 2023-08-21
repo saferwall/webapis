@@ -16,6 +16,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/archive"
 	"github.com/saferwall/saferwall-api/internal/auth"
+	"github.com/saferwall/saferwall-api/internal/behavior"
 	"github.com/saferwall/saferwall-api/internal/comment"
 	"github.com/saferwall/saferwall-api/internal/config"
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
@@ -123,11 +124,13 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 		userSvc, actSvc, arch)
 	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
 		actSvc, userSvc, fileSvc)
+	behaviorSvc := behavior.NewService(behavior.NewRepository(db, logger), logger)
 
-	// Create the file, user and comment middleware.
+	// Create the middlewares.
 	fileMiddleware := file.NewMiddleware(fileSvc, logger)
 	userMiddleware := user.NewMiddleware(userSvc, logger)
 	commentMiddleware := comment.NewMiddleware(commentSvc, logger)
+	behaviorMiddleware := behavior.NewMiddleware(behaviorSvc, logger)
 
 	// Register the handlers.
 	healthcheck.RegisterHandlers(e, version)
@@ -137,6 +140,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	file.RegisterHandlers(g, fileSvc, logger, cfg.MaxFileSize, authHandler, optAuthHandler, fileMiddleware.VerifyHash)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 	comment.RegisterHandlers(g, commentSvc, logger, authHandler, commentMiddleware.VerifyID)
+	behavior.RegisterHandlers(g, behaviorSvc, authHandler, behaviorMiddleware.VerifyID, logger)
 
 	return e
 }

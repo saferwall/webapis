@@ -14,22 +14,8 @@ type Behavior struct {
 	SystemEvents     interface{} `json:"sys_events,omitempty"`
 	ProcessTree      interface{} `json:"proc_tree,omitempty"`
 	ScreenshotsCount int         `json:"screenshots_count,omitempty"`
-	ScanConfig       ScanConfig  `json:"scan_cfg,omitempty"`
+	ScanConfig       interface{} `json:"scan_cfg,omitempty"`
 	SandboxLog       interface{} `json:"sandbox_log,omitempty"`
 	AgentLog         interface{} `json:"agent_log,omitempty"`
 	Status           int         `json:"status,omitempty"`
-}
-
-// ScanConfig represents the config used to detonate a file.
-type ScanConfig struct {
-	// Destination path where the sample will be located in the VM.
-	DestPath string `json:"dest_path"`
-	// Arguments used to run the sample.
-	Arguments string `json:"args"`
-	// Timeout in seconds for how long to keep the VM running.
-	Timeout int `json:"timeout"`
-	// Country to route traffic through.
-	Country string `json:"country"`
-	// Operating System used to run the sample.
-	OS string `json:"os"`
 }
