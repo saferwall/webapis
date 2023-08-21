@@ -13,49 +13,51 @@ import (
 type n1qlQuery int
 
 const (
-	UserActivities n1qlQuery = iota
-	AnoUserActivities
-	CountUserActivities
-	CountAnoUserActivities
-	UserLikes
-	UserComments
-	UserFollowing
-	UserFollowers
-	UserSubmissions
-	AnoUserLikes
+	AnoUserActivities n1qlQuery = iota
 	AnoUserComments
-	AnoUserFollowing
 	AnoUserFollowers
+	AnoUserFollowing
+	AnoUserLikes
 	AnoUserSubmissions
-	GetAllDocType
-	DeleteActivity
-	FileSummary
-	FileComments
+	BehaviorReport
+	CountAnoUserActivities
 	CountStrings
+	CountUserActivities
+	DeleteActivity
+	FileComments
 	FileStrings
+	FileSummary
+	GetAllDocType
+	UserActivities
+	UserComments
+	UserFollowers
+	UserFollowing
+	UserLikes
+	UserSubmissions
 )
 
 var fileQueryMap = map[string]n1qlQuery{
-	"user-likes.n1ql":                UserLikes,
-	"user-comments.n1ql":             UserComments,
-	"user-following.n1ql":            UserFollowing,
-	"user-followers.n1ql":            UserFollowers,
-	"user-activities.n1ql":           UserActivities,
-	"user-submissions.n1ql":          UserSubmissions,
-	"ano-user-likes.n1ql":            AnoUserLikes,
-	"ano-user-comments.n1ql":         AnoUserComments,
-	"ano-user-following.n1ql":        AnoUserFollowing,
-	"ano-user-followers.n1ql":        AnoUserFollowers,
 	"ano-user-activities.n1ql":       AnoUserActivities,
+	"ano-user-comments.n1ql":         AnoUserComments,
+	"ano-user-followers.n1ql":        AnoUserFollowers,
+	"ano-user-following.n1ql":        AnoUserFollowing,
+	"ano-user-likes.n1ql":            AnoUserLikes,
 	"ano-user-submissions.n1ql":      AnoUserSubmissions,
-	"get-all-doc-type.n1ql":          GetAllDocType,
-	"delete-activity.n1ql":           DeleteActivity,
-	"count-user-activities.n1ql":     CountUserActivities,
+	"behavior-report.n1ql":           BehaviorReport,
 	"count-ano-user-activities.n1ql": CountAnoUserActivities,
-	"file-summary.n1ql":              FileSummary,
+	"count-strings.n1ql":             CountStrings,
+	"count-user-activities.n1ql":     CountUserActivities,
+	"delete-activity.n1ql":           DeleteActivity,
 	"file-comments.n1ql":             FileComments,
 	"file-strings.n1ql":              FileStrings,
-	"count-strings.n1ql":             CountStrings,
+	"file-summary.n1ql":              FileSummary,
+	"get-all-doc-type.n1ql":          GetAllDocType,
+	"user-activities.n1ql":           UserActivities,
+	"user-comments.n1ql":             UserComments,
+	"user-followers.n1ql":            UserFollowers,
+	"user-following.n1ql":            UserFollowing,
+	"user-likes.n1ql":                UserLikes,
+	"user-submissions.n1ql":          UserSubmissions,
 }
 
 // walk returns list of files in directory.

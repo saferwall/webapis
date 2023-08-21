@@ -42,12 +42,25 @@ func (r repository) Get(ctx context.Context, id string, fields []string) (
 
 	var err error
 	var behavior entity.Behavior
+	var res interface{}
 
 	// if only some fields are wanted from the whole document.
 	if len(fields) > 0 {
 		err = r.db.Lookup(ctx, id, fields, &behavior)
 	} else {
-		err = r.db.Get(ctx, id, &behavior)
+		params := make(map[string]interface{}, 1)
+		params["behavior_id"] = id
+		params["behavior_id_apis"] = id + "::apis"
+		params["behavior_id_events"] = id + "::events"
+		statement := r.db.N1QLQuery[dbcontext.BehaviorReport]
+		err := r.db.Query(ctx, statement, params, &res)
+		if err != nil {
+			return entity.Behavior{}, err
+		}
+
+		behaviors := res.([]interface{})
+		b, _ := json.Marshal(behaviors[0])
+		json.Unmarshal(b, &behavior)
 	}
 
 	return behavior, err
