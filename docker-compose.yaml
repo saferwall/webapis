@@ -60,12 +60,74 @@ services:
   ui:
     image: saferwall/ui:latest
     ports:
-      - "8000:80"
+      - "3000:3000"
     environment:
-      VUE_APP_BASE_URI: http://localhost:8000/
-      VUE_APP_API_BASE_URL: http://localhost:8080/v1/
-      VUE_APP_AVATAR_BASE_URL: https://avatar.saferwall.com/
-      NGINX_HTTP_PORT: 80
+      PUBLIC_API_URL: http://localhost:8080/v1/
+      PUBLIC_AVATAR_API_URL: https://avatar.saferwall.com/{username}
+
+  orchestrator:
+    image: saferwall/orchestrator:latest
+    environment:
+      - SAFERWALL_DEPLOYMENT_KIND=dev
+    entrypoint: [ /saferwall/orchestrator-svc, -config, /saferwall/conf/ ]
+    volumes:
+      - /samples:/samples
+      - /saferwall:/saferwall/storage
+
+  aggregator:
+    image: saferwall/aggregator:latest
+    depends_on:
+      - couchbase
+    environment:
+      - SAFERWALL_DEPLOYMENT_KIND=dev
+    entrypoint: [ /saferwall/aggregator-svc, -config, /saferwall/conf/ ]
+    restart: always
+
+  postprocessor:
+    image: saferwall/postprocessor:latest
+    environment:
+      - SAFERWALL_DEPLOYMENT_KIND=dev
+    entrypoint:
+      [
+        /saferwall/postprocessor-svc,
+        -config,
+        /saferwall/conf/
+      ]
+    volumes:
+      - /samples:/samples
+    restart: always
+
+  pe:
+    image: saferwall/pe:latest
+    environment:
+      - SAFERWALL_DEPLOYMENT_KIND=dev
+    entrypoint: [ /saferwall/pe-svc, -config, /saferwall/conf/ ]
+    volumes:
+      - /samples:/samples
+
+  meta:
+    image: saferwall/gometa:latest
+    environment:
+      - SAFERWALL_DEPLOYMENT_KIND=dev
+    entrypoint: [ /saferwall/meta-svc, -config, /saferwall/conf/ ]
+    volumes:
+      - /samples:/samples
+
+  clamav:
+    image: saferwall/goclamav:latest
+    environment:
+      - SAFERWALL_DEPLOYMENT_KIND=dev
+    entrypoint: [ /saferwall/clamav-svc, -config, /saferwall/conf/ ]
+    volumes:
+      - /samples:/samples
+
+  sandbox:
+    image: saferwall/sandbox:latest
+    environment:
+      - SAFERWALL_DEPLOYMENT_KIND=dev
+    entrypoint: [ /saferwall/sandbox-svc, -config, /saferwall/conf/ ]
+    volumes:
+      - /samples:/samples
 
 volumes:
   minio_data: null
