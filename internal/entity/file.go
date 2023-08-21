@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// File represent a sample
+// File represent a binary file.
 type File struct {
 	Type             string                 `json:"type,omitempty"`
 	MD5              string                 `json:"md5,omitempty"`
