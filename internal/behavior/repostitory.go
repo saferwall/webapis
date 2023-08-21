@@ -23,6 +23,10 @@ type Repository interface {
 	Exists(ctx context.Context, id string) (bool, error)
 	// Query returns the list of file behavior scans with the given offset and limit.
 	Query(ctx context.Context, offset, limit int) ([]entity.Behavior, error)
+
+	CountAPIs(ctx context.Context, id string) (int, error)
+	APIs(ctx context.Context, id string, offset, limit int) (
+		interface{}, error)
 }
 
 // repository persists file scan behaviors in database.
@@ -42,12 +46,25 @@ func (r repository) Get(ctx context.Context, id string, fields []string) (
 
 	var err error
 	var behavior entity.Behavior
+	var res interface{}
 
 	// if only some fields are wanted from the whole document.
 	if len(fields) > 0 {
 		err = r.db.Lookup(ctx, id, fields, &behavior)
 	} else {
-		err = r.db.Get(ctx, id, &behavior)
+		params := make(map[string]interface{}, 1)
+		params["behavior_id"] = id
+		params["behavior_id_apis"] = id + "::apis"
+		params["behavior_id_events"] = id + "::events"
+		statement := r.db.N1QLQuery[dbcontext.BehaviorReport]
+		err := r.db.Query(ctx, statement, params, &res)
+		if err != nil {
+			return entity.Behavior{}, err
+		}
+
+		behaviors := res.([]interface{})
+		b, _ := json.Marshal(behaviors[0])
+		json.Unmarshal(b, &behavior)
 	}
 
 	return behavior, err
@@ -99,4 +116,42 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 		behaviors = append(behaviors, behavior)
 	}
 	return behaviors, nil
+}
+
+// CountStrings returns the number of strings in a file doc in the database.
+func (r repository) CountAPIs(ctx context.Context, id string) (int, error) {
+	var count int
+
+	params := make(map[string]interface{}, 1)
+	params["id"] = id + "::apis"
+	statement :=
+		"SELECT RAW ARRAY_LENGTH(api_trace) AS count FROM `" + r.db.Bucket.Name() + "` " +
+			"USE KEYS $id"
+
+	err := r.db.Count(ctx, statement, params, &count)
+	return count, err
+}
+
+func (r repository) APIs(ctx context.Context, id string, offset,
+	limit int) (interface{}, error) {
+
+	var results interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
+	params["id"] = id + "::apis"
+
+	statement :=
+		"SELECT RAW api_trace[$offset:$limit]  FROM `" + r.db.Bucket.Name() +
+			"` USE KEYS $id OFFSET $offset LIMIT $limit"
+
+	err := r.db.Query(ctx, statement, params, &results)
+	if err != nil {
+		return nil, err
+	}
+	if len(results.([]interface{})) == 0 {
+		return results, nil
+	}
+	return results.([]interface{})[0], nil
 }
