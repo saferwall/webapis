@@ -11,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
+	"github.com/saferwall/saferwall-api/pkg/pagination"
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
@@ -19,6 +20,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	res := resource{service, logger}
 
 	g.GET("/behaviors/:id/", res.get, verifyID)
+	g.GET("/behaviors/:id/api-trace/", res.apis, verifyID)
 
 }
 
@@ -45,4 +47,20 @@ func (r resource) get(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, behavior)
+}
+
+func (r resource) apis(c echo.Context) error {
+	ctx := c.Request().Context()
+	count, err := r.service.CountAPIs(ctx, c.Param("id"))
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
+	apis, err := r.service.APIs(
+		ctx, c.Param("id"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = apis
+	return c.JSON(http.StatusOK, pages)
 }
