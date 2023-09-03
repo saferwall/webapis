@@ -63,11 +63,7 @@ func (r resource) apis(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	if len(c.QueryParams()) > 0 {
-		filters := make(map[string][]string)
-		for k, v := range c.QueryParams() {
-			filters[k] = v
-		}
-		ctx = WithFilters(ctx, filters)
+		ctx = WithFilters(ctx, c.QueryParams())
 	}
 
 	count, err := r.service.CountAPIs(ctx, c.Param("id"))
