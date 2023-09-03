@@ -5,6 +5,7 @@
 package behavior
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -12,6 +13,14 @@ import (
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/saferwall/saferwall-api/pkg/pagination"
+)
+
+// contextKey defines a custom time to get/set values from a context.
+type contextKey int
+
+const (
+	// filtersKey identifies the current filters during the request life.
+	filtersKey contextKey = iota
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
@@ -42,6 +51,7 @@ func (r resource) get(c echo.Context) error {
 			return errors.BadRequest("field not allowed")
 		}
 	}
+
 	behavior, err := r.service.Get(c.Request().Context(), c.Param("id"), fields)
 	if err != nil {
 		return err
@@ -51,10 +61,20 @@ func (r resource) get(c echo.Context) error {
 
 func (r resource) apis(c echo.Context) error {
 	ctx := c.Request().Context()
+
+	if len(c.QueryParams()) > 0 {
+		filters := make(map[string][]string)
+		for k, v := range c.QueryParams() {
+			filters[k] = v
+		}
+		ctx = WithFilters(ctx, filters)
+	}
+
 	count, err := r.service.CountAPIs(ctx, c.Param("id"))
 	if err != nil {
 		return err
 	}
+
 	pages := pagination.NewFromRequest(c.Request(), count)
 	apis, err := r.service.APIs(
 		ctx, c.Param("id"), pages.Offset(), pages.Limit())
@@ -63,4 +83,9 @@ func (r resource) apis(c echo.Context) error {
 	}
 	pages.Items = apis
 	return c.JSON(http.StatusOK, pages)
+}
+
+// WithFilters returns a context that contains the API filters.
+func WithFilters(ctx context.Context, value map[string][]string) context.Context {
+	return context.WithValue(ctx, filtersKey, value)
 }

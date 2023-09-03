@@ -7,6 +7,7 @@ package behavior
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -121,12 +122,31 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 // CountStrings returns the number of strings in a file doc in the database.
 func (r repository) CountAPIs(ctx context.Context, id string) (int, error) {
 	var count int
-
+	var statement string
 	params := make(map[string]interface{}, 1)
 	params["id"] = id + "::apis"
-	statement :=
-		"SELECT RAW ARRAY_LENGTH(api_trace) AS count FROM `" + r.db.Bucket.Name() + "` " +
-			"USE KEYS $id"
+
+	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	if ok {
+		statement =
+			"SELECT RAW COUNT(api) AS count FROM `" + r.db.Bucket.Name() + "` d" +
+				" USE KEYS $id UNNEST d.api_trace as api"
+		i := 0
+		for k, v := range filters {
+			if i == 0 {
+				statement += " WHERE"
+			} else {
+				statement += " AND"
+			}
+			i++
+			statement += fmt.Sprintf(" api.%s IN $%s", k, k)
+			params[k] = v
+		}
+	} else {
+		statement =
+			"SELECT RAW ARRAY_LENGTH(d.api_trace) AS count FROM `" + r.db.Bucket.Name() + "` d" +
+				" USE KEYS $id"
+	}
 
 	err := r.db.Count(ctx, statement, params, &count)
 	return count, err
@@ -136,15 +156,36 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 	limit int) (interface{}, error) {
 
 	var results interface{}
+	var statement string
 
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
 	params["limit"] = limit
 	params["id"] = id + "::apis"
 
-	statement :=
-		"SELECT RAW api_trace[$offset:$limit]  FROM `" + r.db.Bucket.Name() +
-			"` USE KEYS $id"
+	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	if ok {
+		statement =
+			"SELECT RAW api FROM `" + r.db.Bucket.Name() + "` d" +
+				" USE KEYS $id UNNEST d.api_trace as api"
+		i := 0
+		for k, v := range filters {
+			if i == 0 {
+				statement += " WHERE"
+			} else {
+				statement += " AND"
+			}
+			i++
+			statement += fmt.Sprintf(" api.%s IN $%s", k, k)
+			params[k] = v
+		}
+		statement += " OFFSET $offset LIMIT $limit"
+	} else {
+		statement =
+			"SELECT RAW api_trace[$offset:$limit] FROM `" + r.db.Bucket.Name() +
+				"` USE KEYS $id"
+
+	}
 
 	err := r.db.Query(ctx, statement, params, &results)
 	if err != nil {
@@ -152,6 +193,8 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 	}
 	if len(results.([]interface{})) == 0 {
 		return results, nil
+	} else if len(results.([]interface{})) == 1 {
+		return results.([]interface{})[0], nil
 	}
-	return results.([]interface{})[0], nil
+	return results.([]interface{}), nil
 }
