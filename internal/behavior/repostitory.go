@@ -144,7 +144,7 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 
 	statement :=
 		"SELECT RAW api_trace[$offset:$limit]  FROM `" + r.db.Bucket.Name() +
-			"` USE KEYS $id OFFSET $offset LIMIT $limit"
+			"` USE KEYS $id"
 
 	err := r.db.Query(ctx, statement, params, &results)
 	if err != nil {
