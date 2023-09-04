@@ -17,7 +17,9 @@ type Service interface {
 	Exists(ctx context.Context, id string) (bool, error)
 	Count(ctx context.Context) (int, error)
 	CountAPIs(ctx context.Context, id string) (int, error)
+	CountEvents(ctx context.Context, id string) (int, error)
 	APIs(ctx context.Context, id string, offset, limit int) (interface{}, error)
+	Events(ctx context.Context, id string, offset, limit int) (interface{}, error)
 }
 
 // Behavior represents the data about a behavior scan.
@@ -62,10 +64,28 @@ func (s service) CountAPIs(ctx context.Context, id string) (int, error) {
 	return count, err
 }
 
+func (s service) CountEvents(ctx context.Context, id string) (int, error) {
+	count, err := s.repo.CountEvents(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return count, err
+}
+
 func (s service) APIs(ctx context.Context, id string, offset, limit int) (
 	interface{}, error) {
 
 	result, err := s.repo.APIs(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s service) Events(ctx context.Context, id string, offset, limit int) (
+	interface{}, error) {
+
+	result, err := s.repo.Events(ctx, id, offset, limit)
 	if err != nil {
 		return nil, err
 	}
