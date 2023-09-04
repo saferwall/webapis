@@ -26,7 +26,10 @@ type Repository interface {
 	Query(ctx context.Context, offset, limit int) ([]entity.Behavior, error)
 
 	CountAPIs(ctx context.Context, id string) (int, error)
+	CountEvents(ctx context.Context, id string) (int, error)
 	APIs(ctx context.Context, id string, offset, limit int) (
+		interface{}, error)
+	Events(ctx context.Context, id string, offset, limit int) (
 		interface{}, error)
 }
 
@@ -152,6 +155,39 @@ func (r repository) CountAPIs(ctx context.Context, id string) (int, error) {
 	return count, err
 }
 
+// CountEvents returns the number of strings in a file doc in the database.
+func (r repository) CountEvents(ctx context.Context, id string) (int, error) {
+	var count int
+	var statement string
+	params := make(map[string]interface{}, 1)
+	params["id"] = id + "::events"
+
+	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	if ok {
+		statement =
+			"SELECT RAW COUNT(event) AS count FROM `" + r.db.Bucket.Name() + "` d" +
+				" USE KEYS $id UNNEST d.sys_events as event"
+		i := 0
+		for k, v := range filters {
+			if i == 0 {
+				statement += " WHERE"
+			} else {
+				statement += " AND"
+			}
+			i++
+			statement += fmt.Sprintf(" event.%s IN $%s", k, k)
+			params[k] = v
+		}
+	} else {
+		statement =
+			"SELECT RAW ARRAY_LENGTH(d.sys_events) AS count FROM `" + r.db.Bucket.Name() + "` d" +
+				" USE KEYS $id"
+	}
+
+	err := r.db.Count(ctx, statement, params, &count)
+	return count, err
+}
+
 func (r repository) APIs(ctx context.Context, id string, offset,
 	limit int) (interface{}, error) {
 
@@ -183,6 +219,53 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 	} else {
 		statement =
 			"SELECT RAW api_trace[$offset:$limit] FROM `" + r.db.Bucket.Name() +
+				"` USE KEYS $id"
+
+	}
+
+	err := r.db.Query(ctx, statement, params, &results)
+	if err != nil {
+		return nil, err
+	}
+	if len(results.([]interface{})) == 0 {
+		return results, nil
+	} else if len(results.([]interface{})) == 1 {
+		return results.([]interface{})[0], nil
+	}
+	return results.([]interface{}), nil
+}
+
+func (r repository) Events(ctx context.Context, id string, offset,
+	limit int) (interface{}, error) {
+
+	var results interface{}
+	var statement string
+
+	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
+	params["id"] = id + "::events"
+
+	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	if ok {
+		statement =
+			"SELECT RAW event FROM `" + r.db.Bucket.Name() + "` d" +
+				" USE KEYS $id UNNEST d.sys_events as event"
+		i := 0
+		for k, v := range filters {
+			if i == 0 {
+				statement += " WHERE"
+			} else {
+				statement += " AND"
+			}
+			i++
+			statement += fmt.Sprintf(" event.%s IN $%s", k, k)
+			params[k] = v
+		}
+		statement += " OFFSET $offset LIMIT $limit"
+	} else {
+		statement =
+			"SELECT RAW sys_events[$offset:$limit] FROM `" + r.db.Bucket.Name() +
 				"` USE KEYS $id"
 
 	}

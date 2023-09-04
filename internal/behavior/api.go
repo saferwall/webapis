@@ -30,6 +30,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	g.GET("/behaviors/:id/", res.get, verifyID)
 	g.GET("/behaviors/:id/api-trace/", res.apis, verifyID)
+	g.GET("/behaviors/:id/sys-events/", res.events, verifyID)
 
 }
 
@@ -78,6 +79,28 @@ func (r resource) apis(c echo.Context) error {
 		return err
 	}
 	pages.Items = apis
+	return c.JSON(http.StatusOK, pages)
+}
+
+func (r resource) events(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	if len(c.QueryParams()) > 0 {
+		ctx = WithFilters(ctx, c.QueryParams())
+	}
+
+	count, err := r.service.CountEvents(ctx, c.Param("id"))
+	if err != nil {
+		return err
+	}
+
+	pages := pagination.NewFromRequest(c.Request(), count)
+	events, err := r.service.Events(
+		ctx, c.Param("id"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = events
 	return c.JSON(http.StatusOK, pages)
 }
 
