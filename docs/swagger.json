@@ -294,6 +294,120 @@
                 }
             }
         },
+        "/behaviors/{id}": {
+            "get": {
+                "description": "Retrieves the full behavior report of a file.",
+                "tags": [
+                    "Behavior"
+                ],
+                "summary": "Check a behavior report.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Behavior report GUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Behavior"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/behaviors/{id}/api-trace/": {
+            "get": {
+                "description": "Paginates over the list of APIs",
+                "tags": [
+                    "Behavior"
+                ],
+                "summary": "List of APIs log.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Behavior report GUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pagination.Pages"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/behaviors/{id}/sys-events/": {
+            "get": {
+                "description": "Paginates over the list of system events.",
+                "tags": [
+                    "Behavior"
+                ],
+                "summary": "List of system events.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Behavior report GUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pagination.Pages"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/comments/": {
             "post": {
                 "description": "Create a new comment.",
@@ -2403,6 +2517,33 @@
                 }
             }
         },
+        "entity.Behavior": {
+            "type": "object",
+            "properties": {
+                "agent_log": {},
+                "api_trace": {},
+                "env": {},
+                "proc_tree": {},
+                "sandbox_log": {},
+                "scan_cfg": {},
+                "screenshots_count": {
+                    "type": "integer"
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "sys_events": {},
+                "timestamp": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Comment": {
             "type": "object",
             "properties": {
@@ -2435,9 +2576,7 @@
         "entity.File": {
             "type": "object",
             "properties": {
-                "behavior_report_id": {
-                    "type": "string"
-                },
+                "behaviors": {},
                 "byte_entropy": {
                     "type": "array",
                     "items": {
@@ -2448,6 +2587,9 @@
                     "type": "integer"
                 },
                 "crc32": {
+                    "type": "string"
+                },
+                "default_behavior_id": {
                     "type": "string"
                 },
                 "exif": {
