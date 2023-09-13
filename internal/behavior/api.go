@@ -39,6 +39,14 @@ type resource struct {
 	logger  log.Logger
 }
 
+// @Summary Check a behavior report.
+// @Description Retrieves the full behavior report of a file.
+// @Tags Behavior
+// @Param id path string true "Behavior report GUID"
+// @Success 200 {object} entity.Behavior
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /behaviors/{id} [get]
 func (r resource) get(c echo.Context) error {
 
 	var fields []string
@@ -60,11 +68,24 @@ func (r resource) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, behavior)
 }
 
+// @Summary List of APIs log.
+// @Description Paginates over the list of APIs
+// @Tags Behavior
+// @Param id path string true "Behavior report GUID"
+// @Success 200 {object} pagination.Pages
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /behaviors/{id}/api-trace/ [get]
 func (r resource) apis(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	if len(c.QueryParams()) > 0 {
-		ctx = WithFilters(ctx, c.QueryParams())
+		queryParams := c.QueryParams()
+		delete(queryParams, pagination.PageSizeVar)
+		delete(queryParams, pagination.PageVar)
+		if len(queryParams) > 0 {
+			ctx = WithFilters(ctx, queryParams)
+		}
 	}
 
 	count, err := r.service.CountAPIs(ctx, c.Param("id"))
@@ -82,11 +103,24 @@ func (r resource) apis(c echo.Context) error {
 	return c.JSON(http.StatusOK, pages)
 }
 
+// @Summary List of system events.
+// @Description Paginates over the list of system events.
+// @Tags Behavior
+// @Param id path string true "Behavior report GUID"
+// @Success 200 {object} pagination.Pages
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /behaviors/{id}/sys-events/ [get]
 func (r resource) events(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	if len(c.QueryParams()) > 0 {
-		ctx = WithFilters(ctx, c.QueryParams())
+		queryParams := c.QueryParams()
+		delete(queryParams, pagination.PageSizeVar)
+		delete(queryParams, pagination.PageVar)
+		if len(queryParams) > 0 {
+			ctx = WithFilters(ctx, queryParams)
+		}
 	}
 
 	count, err := r.service.CountEvents(ctx, c.Param("id"))
