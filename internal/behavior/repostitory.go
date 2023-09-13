@@ -199,11 +199,12 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 	params["limit"] = limit
 	params["id"] = id + "::apis"
 
+	statement =
+		"SELECT RAW api FROM `" + r.db.Bucket.Name() + "` d" +
+			" USE KEYS $id UNNEST d.api_trace as api"
 	filters, ok := ctx.Value(filtersKey).(map[string][]string)
 	if ok {
-		statement =
-			"SELECT RAW api FROM `" + r.db.Bucket.Name() + "` d" +
-				" USE KEYS $id UNNEST d.api_trace as api"
+
 		i := 0
 		for k, v := range filters {
 			if i == 0 {
@@ -215,13 +216,9 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 			statement += fmt.Sprintf(" api.%s IN $%s", k, k)
 			params[k] = v
 		}
-		statement += " OFFSET $offset LIMIT $limit"
-	} else {
-		statement =
-			"SELECT RAW api_trace[$offset:$limit] FROM `" + r.db.Bucket.Name() +
-				"` USE KEYS $id"
-
 	}
+
+	statement += " OFFSET $offset LIMIT $limit"
 
 	err := r.db.Query(ctx, statement, params, &results)
 	if err != nil {
@@ -245,12 +242,13 @@ func (r repository) Events(ctx context.Context, id string, offset,
 	params["offset"] = offset
 	params["limit"] = limit
 	params["id"] = id + "::events"
+	statement =
+		"SELECT RAW event FROM `" + r.db.Bucket.Name() + "` d" +
+			" USE KEYS $id UNNEST d.sys_events as event"
 
 	filters, ok := ctx.Value(filtersKey).(map[string][]string)
 	if ok {
-		statement =
-			"SELECT RAW event FROM `" + r.db.Bucket.Name() + "` d" +
-				" USE KEYS $id UNNEST d.sys_events as event"
+
 		i := 0
 		for k, v := range filters {
 			if i == 0 {
@@ -262,14 +260,9 @@ func (r repository) Events(ctx context.Context, id string, offset,
 			statement += fmt.Sprintf(" event.%s IN $%s", k, k)
 			params[k] = v
 		}
-		statement += " OFFSET $offset LIMIT $limit"
-	} else {
-		statement =
-			"SELECT RAW sys_events[$offset:$limit] FROM `" + r.db.Bucket.Name() +
-				"` USE KEYS $id"
-
 	}
 
+	statement += " OFFSET $offset LIMIT $limit"
 	err := r.db.Query(ctx, statement, params, &results)
 	if err != nil {
 		return nil, err

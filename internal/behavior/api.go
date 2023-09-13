@@ -64,7 +64,12 @@ func (r resource) apis(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	if len(c.QueryParams()) > 0 {
-		ctx = WithFilters(ctx, c.QueryParams())
+		queryParams := c.QueryParams()
+		delete(queryParams, pagination.PageSizeVar)
+		delete(queryParams, pagination.PageVar)
+		if len(queryParams) > 0 {
+			ctx = WithFilters(ctx, queryParams)
+		}
 	}
 
 	count, err := r.service.CountAPIs(ctx, c.Param("id"))
@@ -86,7 +91,12 @@ func (r resource) events(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	if len(c.QueryParams()) > 0 {
-		ctx = WithFilters(ctx, c.QueryParams())
+		queryParams := c.QueryParams()
+		delete(queryParams, pagination.PageSizeVar)
+		delete(queryParams, pagination.PageVar)
+		if len(queryParams) > 0 {
+			ctx = WithFilters(ctx, queryParams)
+		}
 	}
 
 	count, err := r.service.CountEvents(ctx, c.Param("id"))
