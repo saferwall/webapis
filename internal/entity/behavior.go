@@ -13,6 +13,7 @@ type Behavior struct {
 	APITrace         interface{} `json:"api_trace,omitempty"`
 	SystemEvents     interface{} `json:"sys_events,omitempty"`
 	ProcessTree      interface{} `json:"proc_tree,omitempty"`
+	Capabilities     interface{} `json:"capabilities,omitempty"`
 	ScreenshotsCount int         `json:"screenshots_count,omitempty"`
 	ScanConfig       interface{} `json:"scan_cfg,omitempty"`
 	SandboxLog       interface{} `json:"sandbox_log,omitempty"`

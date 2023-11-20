@@ -2526,6 +2526,7 @@ const docTemplate = `{
             "properties": {
                 "agent_log": {},
                 "api_trace": {},
+                "capabilities": {},
                 "env": {},
                 "proc_tree": {},
                 "sandbox_log": {},
