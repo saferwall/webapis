@@ -267,12 +267,27 @@ func (r resource) list(c echo.Context) error {
 		return errors.Forbidden("")
 	}
 
+	// the `fields` query parameter is used to limit the fields
+	// to include in the response.
+	var fields []string
+	if fieldsParam := c.QueryParam("fields"); fieldsParam != "" {
+		fields = strings.Split(fieldsParam, ",")
+	}
+
+	if len(fields) > 0 {
+		allowed := areFieldsAllowed(fields)
+		if !allowed {
+			return errors.BadRequest("field not allowed")
+		}
+	}
+
 	count, err := r.service.Count(ctx)
 	if err != nil {
 		return err
 	}
+
 	pages := pagination.NewFromRequest(c.Request(), count)
-	files, err := r.service.Query(ctx, pages.Offset(), pages.Limit())
+	files, err := r.service.Query(ctx, pages.Offset(), pages.Limit(), fields)
 	if err != nil {
 		return err
 	}
