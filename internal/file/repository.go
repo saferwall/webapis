@@ -7,6 +7,7 @@ package file
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
@@ -23,7 +24,7 @@ type Repository interface {
 	// Exists return true when the doc exists in the DB.
 	Exists(ctx context.Context, id string) (bool, error)
 	// Query returns the list of files with the given offset and limit.
-	Query(ctx context.Context, offset, limit int) ([]entity.File, error)
+	Query(ctx context.Context, offset, limit int, fields []string) ([]entity.File, error)
 	// Create saves a new file in the storage.
 	Create(ctx context.Context, id string, file entity.File) error
 	// Update updates the whole file with given ID in the storage.
@@ -121,7 +122,7 @@ func (r repository) Count(ctx context.Context) (int, error) {
 
 // Query retrieves the file records with the specified offset and limit
 // from the database.
-func (r repository) Query(ctx context.Context, offset, limit int) (
+func (r repository) Query(ctx context.Context, offset, limit int, fields []string) (
 	[]entity.File, error) {
 	var res interface{}
 
@@ -129,8 +130,19 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 	params["docType"] = "file"
 	params["offset"] = offset
 	params["limit"] = limit
-
 	statement := r.db.N1QLQuery[dbcontext.GetAllDocType]
+
+	if len(fields) > 0 {
+		statement = "SELECT "
+		for _, field := range fields {
+			statement += fmt.Sprintf("%s,", field)
+		}
+		statement = strings.TrimSuffix(statement, ",")
+		statement += fmt.Sprintf(" FROM `%s` WHERE type = $docType OFFSET $offset LIMIT $limit",
+			r.db.Bucket.Name())
+
+	}
+
 	err := r.db.Query(ctx, statement, params, &res)
 	if err != nil {
 		return []entity.File{}, err

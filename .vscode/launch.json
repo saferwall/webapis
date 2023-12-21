@@ -9,7 +9,11 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${workspaceFolder}/cmd"
+            "program": "${workspaceFolder}/cmd",
+            "env": {
+                "SFW_WEBAPIS_DEPLOYMENT_KIND": "local"
+              },
+            "dlvFlags": ["--check-go-version=false"],
         }
     ]
 }

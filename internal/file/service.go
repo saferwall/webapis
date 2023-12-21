@@ -43,7 +43,7 @@ type Service interface {
 	Create(ctx context.Context, input CreateFileRequest) (File, error)
 	Update(ctx context.Context, id string, input UpdateFileRequest) (File, error)
 	Delete(ctx context.Context, id string) (File, error)
-	Query(ctx context.Context, offset, limit int) ([]File, error)
+	Query(ctx context.Context, offset, limit int, fields []string) ([]File, error)
 	Patch(ctx context.Context, key, path string, val interface{}) error
 	Summary(ctx context.Context, id string) (interface{}, error)
 	Like(ctx context.Context, id string) error
@@ -315,10 +315,10 @@ func (s service) Exists(ctx context.Context, id string) (bool, error) {
 }
 
 // Query returns the files with the specified offset and limit.
-func (s service) Query(ctx context.Context, offset, limit int) (
+func (s service) Query(ctx context.Context, offset, limit int, fields []string) (
 	[]File, error) {
 
-	items, err := s.repo.Query(ctx, offset, limit)
+	items, err := s.repo.Query(ctx, offset, limit, fields)
 	if err != nil {
 		return nil, err
 	}
