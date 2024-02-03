@@ -190,6 +190,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		// Ensure the context is canceled to prevent leaking.
 		defer cancelFn()
 
+		// TODO: check if the file is already in Obj.
 		err = s.objSto.Upload(uploadCtx, s.bucket, sha256,
 			bytes.NewReader(fileContent))
 		if err != nil {
