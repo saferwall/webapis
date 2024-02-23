@@ -101,8 +101,7 @@ func (r repository) Patch(ctx context.Context, key, path string,
 
 // Delete deletes a file with the specified ID from the database.
 func (r repository) Delete(ctx context.Context, id string) error {
-	key := strings.ToLower(id)
-	return r.db.Delete(ctx, key)
+	return r.db.Delete(ctx, id)
 }
 
 // Count returns the number of the file records in the database.
@@ -163,7 +162,7 @@ func (r repository) Summary(ctx context.Context, id string) (
 	var results interface{}
 	var query string
 	params := make(map[string]interface{}, 1)
-	params["sha256"] = strings.ToLower(id)
+	params["sha256"] = id
 
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		params["loggedInUser"] = user.ID()
@@ -191,7 +190,7 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
 	params["limit"] = limit
-	params["sha256"] = strings.ToLower(id)
+	params["sha256"] = id
 
 	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
 		params["loggedInUser"] = user.ID()
@@ -213,7 +212,7 @@ func (r repository) CountStrings(ctx context.Context, id string) (int, error) {
 	var count int
 
 	params := make(map[string]interface{}, 1)
-	params["sha256"] = strings.ToLower(id)
+	params["sha256"] = id
 
 	query := r.db.N1QLQuery[dbcontext.CountStrings]
 	err := r.db.Count(ctx, query, params, &count)
@@ -228,7 +227,7 @@ func (r repository) Strings(ctx context.Context, id string, offset,
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
 	params["limit"] = limit
-	params["sha256"] = strings.ToLower(id)
+	params["sha256"] = id
 
 	query := r.db.N1QLQuery[dbcontext.FileStrings]
 	err := r.db.Query(ctx, query, params, &results)
