@@ -37,6 +37,11 @@ func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
 			m.logger.Error("failed to match sha256 regex for doc %v", sha256)
 			return e.BadRequest("invalid sha256 hash")
 		}
+
+		// Change the <sha256> path paramater to lower case. This will reflect on
+		// any handler that uses `VerifyHash` middleware.
+		c.SetParamValues(sha256)
+
 		docExists, err := m.service.Exists(c.Request().Context(), sha256)
 		if err != nil {
 			return err
