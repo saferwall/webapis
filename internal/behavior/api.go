@@ -31,6 +31,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 	g.GET("/behaviors/:id/", res.get, verifyID)
 	g.GET("/behaviors/:id/api-trace/", res.apis, verifyID)
 	g.GET("/behaviors/:id/sys-events/", res.events, verifyID)
+	g.GET("/behaviors/:id/artifacts/", res.artifacts, verifyID)
 
 }
 
@@ -130,6 +131,41 @@ func (r resource) events(c echo.Context) error {
 
 	pages := pagination.NewFromRequest(c.Request(), count)
 	events, err := r.service.Events(
+		ctx, c.Param("id"), pages.Offset(), pages.Limit())
+	if err != nil {
+		return err
+	}
+	pages.Items = events
+	return c.JSON(http.StatusOK, pages)
+}
+
+// @Summary List of artifacts' metadata.
+// @Description Returns a paginated list of artifacts' metadata such as memdumps, created files, etc ..
+// @Tags Behavior
+// @Param id path string true "Behavior report GUID"
+// @Success 200 {object} object{}
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /behaviors/{id}/artifacts/ [get]
+func (r resource) artifacts(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	if len(c.QueryParams()) > 0 {
+		queryParams := c.QueryParams()
+		delete(queryParams, pagination.PageSizeVar)
+		delete(queryParams, pagination.PageVar)
+		if len(queryParams) > 0 {
+			ctx = WithFilters(ctx, queryParams)
+		}
+	}
+
+	count, err := r.service.CountArtifacts(ctx, c.Param("id"))
+	if err != nil {
+		return err
+	}
+
+	pages := pagination.NewFromRequest(c.Request(), count)
+	events, err := r.service.Artifacts(
 		ctx, c.Param("id"), pages.Offset(), pages.Limit())
 	if err != nil {
 		return err
