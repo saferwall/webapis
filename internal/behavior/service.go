@@ -17,7 +17,9 @@ type Service interface {
 	Exists(ctx context.Context, id string) (bool, error)
 	Count(ctx context.Context) (int, error)
 	CountAPIs(ctx context.Context, id string) (int, error)
+	CountArtifacts(ctx context.Context, id string) (int, error)
 	CountEvents(ctx context.Context, id string) (int, error)
+	Artifacts(ctx context.Context, id string, offset, limit int) (interface{}, error)
 	APIs(ctx context.Context, id string, offset, limit int) (interface{}, error)
 	Events(ctx context.Context, id string, offset, limit int) (interface{}, error)
 }
@@ -86,6 +88,24 @@ func (s service) Events(ctx context.Context, id string, offset, limit int) (
 	interface{}, error) {
 
 	result, err := s.repo.Events(ctx, id, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (s service) CountArtifacts(ctx context.Context, id string) (int, error) {
+	count, err := s.repo.CountArtifacts(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	return count, err
+}
+
+func (s service) Artifacts(ctx context.Context, id string, offset, limit int) (
+	interface{}, error) {
+
+	result, err := s.repo.Artifacts(ctx, id, offset, limit)
 	if err != nil {
 		return nil, err
 	}

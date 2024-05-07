@@ -27,10 +27,12 @@ type Repository interface {
 
 	CountAPIs(ctx context.Context, id string) (int, error)
 	CountEvents(ctx context.Context, id string) (int, error)
+	CountArtifacts(ctx context.Context, id string) (int, error)
 	APIs(ctx context.Context, id string, offset, limit int) (
 		interface{}, error)
 	Events(ctx context.Context, id string, offset, limit int) (
 		interface{}, error)
+	Artifacts(ctx context.Context, id string, offset, limit int) (interface{}, error)
 }
 
 // repository persists file scan behaviors in database.
@@ -122,7 +124,7 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 	return behaviors, nil
 }
 
-// CountStrings returns the number of strings in a file doc in the database.
+// CountAPIs returns the number of API calls for a behavior doc in the database.
 func (r repository) CountAPIs(ctx context.Context, id string) (int, error) {
 	var count int
 	var statement string
@@ -150,6 +152,20 @@ func (r repository) CountAPIs(ctx context.Context, id string) (int, error) {
 			"SELECT RAW ARRAY_LENGTH(d.api_trace) AS count FROM `" + r.db.Bucket.Name() + "` d" +
 				" USE KEYS $id"
 	}
+
+	err := r.db.Count(ctx, statement, params, &count)
+	return count, err
+}
+
+// CountArtifacts returns the number of artifacts.
+func (r repository) CountArtifacts(ctx context.Context, id string) (int, error) {
+	var count int
+	var statement string
+	params := make(map[string]interface{}, 1)
+	params["id"] = id
+	statement =
+			"SELECT RAW ARRAY_LENGTH(d.artifacts) AS count FROM `" + r.db.Bucket.Name() + "` d" +
+				" USE KEYS $id"
 
 	err := r.db.Count(ctx, statement, params, &count)
 	return count, err
@@ -258,6 +274,49 @@ func (r repository) Events(ctx context.Context, id string, offset,
 			}
 			i++
 			statement += fmt.Sprintf(" event.%s IN $%s", k, k)
+			params[k] = v
+		}
+	}
+
+	statement += " OFFSET $offset LIMIT $limit"
+	err := r.db.Query(ctx, statement, params, &results)
+	if err != nil {
+		return nil, err
+	}
+	if len(results.([]interface{})) == 0 {
+		return results, nil
+	} else if len(results.([]interface{})) == 1 {
+		return results.([]interface{})[0], nil
+	}
+	return results.([]interface{}), nil
+}
+
+func (r repository) Artifacts(ctx context.Context, id string, offset,
+	limit int) (interface{}, error) {
+
+	var results interface{}
+	var statement string
+
+	params := make(map[string]interface{}, 1)
+	params["offset"] = offset
+	params["limit"] = limit
+	params["id"] = id
+	statement =
+		"SELECT RAW artifacts FROM `" + r.db.Bucket.Name() + "` d" +
+			" USE KEYS $id UNNEST d.artifacts as artifacts"
+
+	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	if ok {
+
+		i := 0
+		for k, v := range filters {
+			if i == 0 {
+				statement += " WHERE"
+			} else {
+				statement += " AND"
+			}
+			i++
+			statement += fmt.Sprintf(" artifacts.%s IN $%s", k, k)
 			params[k] = v
 		}
 	}

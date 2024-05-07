@@ -11,6 +11,7 @@ type Behavior struct {
 	Timestamp        int64       `json:"timestamp,omitempty"`
 	Environment      interface{} `json:"env,omitempty"`
 	APITrace         interface{} `json:"api_trace,omitempty"`
+	Artifacts        interface{} `json:"artifacts,omitempty"`
 	SystemEvents     interface{} `json:"sys_events,omitempty"`
 	ProcessTree      interface{} `json:"proc_tree,omitempty"`
 	Capabilities     interface{} `json:"capabilities,omitempty"`
