@@ -32,6 +32,7 @@ SELECT
     },
     "pe_meta": f.pe.meta,
     "default_behavior_id": f.default_behavior_id,
+    "screenshots_count": f.screenshots_count,
     "liked": CASE WHEN ARRAY_LENGTH(user_likes) = 0 THEN false
               ELSE ARRAY_BINARY_SEARCH(ARRAY_SORT((user_likes)[0]), f.sha256) >= 0 END
   }.*
