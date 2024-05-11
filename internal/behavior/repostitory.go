@@ -163,9 +163,28 @@ func (r repository) CountArtifacts(ctx context.Context, id string) (int, error) 
 	var statement string
 	params := make(map[string]interface{}, 1)
 	params["id"] = id
-	statement =
+
+	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	if ok {
+		statement =
+			"SELECT RAW COUNT(artifacts) AS count FROM `" + r.db.Bucket.Name() + "` d" +
+				" USE KEYS $id UNNEST d.artifacts as artifacts"
+		i := 0
+		for k, v := range filters {
+			if i == 0 {
+				statement += " WHERE"
+			} else {
+				statement += " AND"
+			}
+			i++
+			statement += fmt.Sprintf(" artifacts.%s IN $%s", k, k)
+			params[k] = v
+		}
+	} else {
+		statement =
 			"SELECT RAW ARRAY_LENGTH(d.artifacts) AS count FROM `" + r.db.Bucket.Name() + "` d" +
 				" USE KEYS $id"
+	}
 
 	err := r.db.Count(ctx, statement, params, &count)
 	return count, err
