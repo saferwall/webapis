@@ -260,7 +260,7 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 		return nil, err
 	}
 	if len(results.([]interface{})) == 0 {
-		return results, nil
+		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }
@@ -301,7 +301,7 @@ func (r repository) Events(ctx context.Context, id string, offset,
 		return nil, err
 	}
 	if len(results.([]interface{})) == 0 {
-		return results, nil
+		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }
@@ -342,7 +342,7 @@ func (r repository) Artifacts(ctx context.Context, id string, offset,
 		return nil, err
 	}
 	if len(results.([]interface{})) == 0 {
-		return results, nil
+		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }
