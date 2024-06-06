@@ -142,10 +142,17 @@ func (r resource) create(c echo.Context) error {
 
 	r.logger.With(ctx).Debug("Header is: %v", c.Request().Header)
 
+	var scanCfg FileScanRequest
+	if err := c.Bind(&scanCfg); err != nil {
+		r.logger.With(c.Request().Context()).Info(err)
+		return errors.BadRequest("")
+	}
+
 	input := CreateFileRequest{
 		src:      src,
 		filename: f.Filename,
 		geoip:    c.Request().Header.Get("X-Geoip-Country"),
+		scanCfg:  scanCfg,
 	}
 	file, err := r.service.Create(ctx, input)
 	if err != nil {
@@ -429,7 +436,16 @@ func (r resource) unlike(c echo.Context) error {
 // @Security Bearer
 func (r resource) rescan(c echo.Context) error {
 	ctx := c.Request().Context()
-	err := r.service.Rescan(ctx, c.Param("sha256"))
+
+	var scanCfg FileScanRequest
+	if c.Request().ContentLength > 0 {
+		if err := c.Bind(&scanCfg); err != nil {
+			r.logger.With(c.Request().Context()).Info(err)
+			return errors.BadRequest("")
+		}
+	}
+
+	err := r.service.Rescan(ctx, c.Param("sha256"), scanCfg)
 	if err != nil {
 		return err
 	}

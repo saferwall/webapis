@@ -48,7 +48,7 @@ type Service interface {
 	Summary(ctx context.Context, id string) (interface{}, error)
 	Like(ctx context.Context, id string) error
 	Unlike(ctx context.Context, id string) error
-	Rescan(ctx context.Context, id string) error
+	Rescan(ctx context.Context, id string, input FileScanRequest) error
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	CountStrings(ctx context.Context, id string) (int, error)
@@ -57,39 +57,16 @@ type Service interface {
 	GeneratePresignedURL(ctx context.Context, id string) (string, error)
 }
 
-// File represents the data about a File.
-type File struct {
-	entity.File
-}
-
-// FileScanCfg represents a file scanning config. This map to a 1:1 mapping between
-// the config stored in the main saferwall repo.
-type FileScanCfg struct {
-	// SHA256 hash of the file.
-	SHA256 string `json:"sha256,omitempty"`
-	// Config used during dynamic file scan.
-	DynFileScanCfg `json:"dynamic,omitempty"`
-}
-
-// DynFileScanCfg represents the config used to detonate a file.
-type DynFileScanCfg struct {
-	// Destination path where the sample will be located in the VM.
-	DestPath string `json:"dest_path,omitempty"`
-	// Arguments used to run the sample.
-	Arguments string `json:"args,omitempty"`
-	// Timeout in seconds for how long to keep the VM running.
-	Timeout int `json:"timeout,omitempty"`
-	// Country to route traffic through.
-	Country string `json:"country,omitempty"`
-	// Operating System used to run the sample.
-	OS string `json:"os,omitempty"`
-}
-
 type UploadDownloader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
 	Download(ctx context.Context, bucket, key string, file io.Writer) error
 	Exists(ctx context.Context, bucket, key string) (bool, error)
 	GeneratePresignedURL(ctx context.Context, bucket, key string) (string, error)
+}
+
+// File represents the data about a File.
+type File struct {
+	entity.File
 }
 
 // Producer represents event stream message producer interface.
@@ -102,24 +79,43 @@ type Archiver interface {
 	Archive(string, string, io.Reader) error
 }
 
+// DynFileScanCfg represents the config used to detonate a file.
+type DynFileScanCfg struct {
+	// Destination path where the sample will be located in the VM.
+	DestPath string `json:"dest_path,omitempty" form:"dest_path"`
+	// Arguments used to run the sample.
+	Arguments string `json:"args,omitempty" form:"args"`
+	// Timeout in seconds for how long to keep the VM running.
+	Timeout int `json:"timeout,omitempty" form:"timeout"`
+	// Country to route traffic through.
+	Country string `json:"country,omitempty" form:"country"`
+	// Operating System used to run the sample.
+	OS string `json:"os,omitempty" form:"os"`
+}
+
+// FileScanRequest represents a File scan request.
+type FileScanRequest struct {
+	// Disable Sandbox
+	SkipDetonation bool `json:"skip_detonation,omitempty" form:"skip_detonation"`
+	// Dynamic scan config
+	DynFileScanCfg `json:"scan_cfg,omitempty"`
+}
+
+// FileScanCfg represents a file scanning config. This map to a 1:1 mapping between
+// the config stored in the main saferwall repo.
+type FileScanCfg struct {
+	// SHA256 hash of the file.
+	SHA256 string `json:"sha256,omitempty"`
+	// Represents the dynamic scan configuration plus some option fields.
+	FileScanRequest
+}
+
 // CreateFileRequest represents a file creation request.
 type CreateFileRequest struct {
 	src      io.Reader
 	filename string
 	geoip    string
-}
-
-type service struct {
-	repo          Repository
-	logger        log.Logger
-	objSto        UploadDownloader
-	producer      Producer
-	topic         string
-	bucket        string
-	samplesZipPwd string
-	userSvc       user.Service
-	actSvc        activity.Service
-	archiver      Archiver
+	scanCfg  FileScanRequest
 }
 
 // UpdateUserRequest represents a File update request.
@@ -143,6 +139,19 @@ type UpdateFileRequest struct {
 	ByteEntropy []int                  `json:"byte_entropy,omitempty"`
 	Ml          map[string]interface{} `json:"ml,omitempty"`
 	FileType    string                 `json:"filetype,omitempty"`
+}
+
+type service struct {
+	repo          Repository
+	logger        log.Logger
+	objSto        UploadDownloader
+	producer      Producer
+	topic         string
+	bucket        string
+	samplesZipPwd string
+	userSvc       user.Service
+	actSvc        activity.Service
+	archiver      Archiver
 }
 
 // NewService creates a new File service.
@@ -244,7 +253,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		}
 
 		// Serialize the msg to send to the orchestrator.
-		msg, err := json.Marshal(FileScanCfg{SHA256: sha256})
+		msg, err := json.Marshal(FileScanCfg{SHA256: sha256, FileScanRequest: req.scanCfg})
 		if err != nil {
 			s.logger.With(ctx).Error(err)
 			return File{}, err
@@ -405,10 +414,10 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 	return nil
 }
 
-func (s service) Rescan(ctx context.Context, sha256 string) error {
+func (s service) Rescan(ctx context.Context, sha256 string, input FileScanRequest) error {
 
 	// Serialize the msg to send to the orchestrator.
-	msg, err := json.Marshal(FileScanCfg{SHA256: sha256})
+	msg, err := json.Marshal(FileScanCfg{SHA256: sha256, FileScanRequest: input})
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err
