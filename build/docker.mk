@@ -1,42 +1,42 @@
 REPO = saferwall
 
-docker-build: ## Build the container
+docker-build:
 	@docker build $(ARGS) -t $(REPO)/$(IMG) \
 		-f $(DOCKER_FILE) $(DOCKER_DIR)
 
-docker-build-nc: ## Build the container without caching
+docker-build-nc:
 	@docker build ${ARGS} --no-cache -t $(REPO)/$(IMG) \
 		-f $(DOCKER_FILE) $(DOCKER_DIR)
 
-docker-run: ## Run container on port configured in `config.env`
+docker-run:
 	docker run -d -p 50051:50051 $(REPO)/$(IMG)
 
-docker-up: build run ## Run container
+docker-up: build run
 
-docker-stop: ## Stop and remove a running container
+docker-stop:
 	docker stop $(IMG); docker rm $(REPO)/$(IMG)
 
-docker-release: docker-repo-login docker-build-nc docker-publish ## Make a release by building and publishing the `{version}` and `latest` tagged containers to ECR
+docker-release: docker-repo-login docker-build-nc docker-publish
 
-docker-publish: docker-repo-login docker-publish-latest docker-publish-version ## Publish the `{version}` and `latest` tagged containers to ECR
+docker-publish: docker-repo-login docker-publish-latest docker-publish-version
 
-docker-publish-latest: docker-tag-latest ## Publish the `latest` taged container to ECR
+docker-publish-latest: docker-tag-latest
 	@echo 'publish latest to $(REPO)/$(IMG)'
 	docker push $(REPO)/$(IMG):latest
 
-docker-publish-version: docker-tag-version ## Publish the `{version}` taged container to ECR
+docker-publish-version: docker-tag-version
 	@echo 'publish $(VERSION) to $(IMG)'
 	docker push $(REPO)/$(IMG):$(VERSION)
 
-docker-tag: docker-tag-latest docker-tag-version ## Generate container tags for the `{version}` and `latest` tags
+docker-tag: docker-tag-latest docker-tag-version
 
-docker-tag-latest: 	## Generate container `{version}` tag
+docker-tag-latest:
 	@echo 'create tag latest'
 	docker tag $(REPO)/$(IMG) $(REPO)/$(IMG):latest
 
-docker-tag-version: 	## Generate container `latest` tag
+docker-tag-version:
 	@echo 'create tag $(VERSION)'
 	docker tag $(REPO)/$(IMG) $(REPO)/$(IMG):$(VERSION)
 
-docker-repo-login: 	## Login to Docker Hub
+docker-repo-login:
 	@echo '$(DOCKER_HUB_PWD)' | docker login -u $(DOCKER_HUB_USR) --password-stdin
