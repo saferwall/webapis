@@ -37,7 +37,7 @@ jobs:
           go vet ./...
 
       - name: Staticcheck
-        uses: dominikh/staticcheck-action@v1.3.0
+        uses: dominikh/staticcheck-action@v1.3.1
         with:
           version: "2022.1"
           install-go: false
