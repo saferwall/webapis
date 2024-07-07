@@ -7,8 +7,7 @@ SHELL := /bin/bash
 .PHONY: help
 
 help: ## This help.
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-
+	@awk 'BEGIN {FS = ":.*?## "} /^[0-9a-zA-Z/_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 .DEFAULT_GOAL := help
 
 # Retrieve the root directory of the project.
@@ -35,7 +34,7 @@ export
 include build/docker.mk
 
 
-dk-build:	## Build in a docker container
+docker/build:	## Build in a docker container
 	@echo "${GREEN} [*] =============== Docker Build  =============== ${RESET}"
 	make docker-build IMG=$(DOCKER_HUB_IMG) DOCKER_FILE=Dockerfile DOCKER_DIR=. ;
 	@EXIT_CODE=$$?
@@ -43,7 +42,7 @@ dk-build:	## Build in a docker container
 		make docker-build IMG=$(DOCKER_HUB_IMG) DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
 
-dk-release:	## Build and release in a docker container.
+docker/release:	## Build and release in a docker container.
 	@echo "${GREEN} [*] =============== Docker Build and Release  =============== ${RESET}"
 	make docker-release IMG=$(DOCKER_HUB_IMG) VERSION=$(SAFERWALL_VER) \
 		DOCKER_FILE=Dockerfile DOCKER_DIR=. ;
@@ -53,11 +52,11 @@ dk-release:	## Build and release in a docker container.
 			DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
 
-dc-up:	## Start docker-compose (args: SVC: name of the service to exclude)
+compose/up:	## Start docker-compose (args: SVC: name of the service to exclude)
 	@echo "${GREEN} [*] =============== Docker Compose UP =============== ${RESET}"
 	docker compose config --services | grep -v '${SVC}' | xargs docker compose up
 
-couchbase-start:	## Start Couchbase Server docker container.
+couchbase/start:	## Start Couchbase Server docker container.
 	$(eval COUCHBASE_CONTAINER_STATUS := $(shell docker container inspect -f '{{.State.Status}}' $(COUCHBASE_CONTAINER_NAME)))
 ifeq ($(COUCHBASE_CONTAINER_STATUS),running)
 	@echo "All good, couchabse server is already running."
@@ -69,7 +68,7 @@ else
 	docker run -d --name $(COUCHBASE_CONTAINER_NAME) -p 8091-8094:8091-8094 -p 11210:11210 $(COUCHBASE_CONTAINER_VER)
 endif
 
-couchbase-init:	## Init couchbase database by creating the cluster and required buckets.
+couchbase/init:	## Init couchbase database by creating the cluster and required buckets.
 	# Init the cluster.
 	echo "${GREEN} [*] =============== Creating Cluster =============== ${RESET}"
 	docker exec couchbase \
@@ -98,7 +97,7 @@ couchbase-init:	## Init couchbase database by creating the cluster and required 
 			--enable-flush 0 ; \
 	done
 
-gen-openapi:	## Generate OpenAPI spec.
+generate/doc:	## Generate OpenAPI spec.
 	swag init --parseDepth 2 -g cmd/main.go
 
 	old="- '{}': \[\]" && new="- {}" \
@@ -117,5 +116,5 @@ gen-openapi:	## Generate OpenAPI spec.
 	old='"{}":' && new="- {}:" \
 		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/docs.go
 
-install-swag:	## Install Swag
+install/swag:	## Install Swag
 	go install github.com/swaggo/swag/cmd/swag@latest
