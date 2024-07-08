@@ -1,0 +1,3 @@
+docs/*.json linguist-generated=true
+docs/*.yaml linguist-generated=true
+go.sum linguist-generated=true
