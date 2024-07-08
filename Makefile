@@ -33,8 +33,12 @@ export
 # Include our internals makefiles.
 include build/docker.mk
 
+init: compose/pull install/swag	## Init project.
 
-docker/build:	## Build in a docker container
+compose/pull:	## Docker compose pull.
+	docker compose pull
+
+docker/build:	## Build in a docker container.
 	@echo "${GREEN} [*] =============== Docker Build  =============== ${RESET}"
 	make docker-build IMG=$(DOCKER_HUB_IMG) DOCKER_FILE=Dockerfile DOCKER_DIR=. ;
 	@EXIT_CODE=$$?
