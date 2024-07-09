@@ -70,7 +70,7 @@ func (r repository) Get(ctx context.Context, id string, fields []string) (
 
 		behaviors := res.([]interface{})
 		b, _ := json.Marshal(behaviors[0])
-		json.Unmarshal(b, &behavior)
+		_ = json.Unmarshal(b, &behavior)
 	}
 
 	return behavior, err
@@ -118,7 +118,7 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 	for _, u := range res.([]interface{}) {
 		behavior := entity.Behavior{}
 		b, _ := json.Marshal(u)
-		json.Unmarshal(b, &behavior)
+		 _ = json.Unmarshal(b, &behavior)
 		behaviors = append(behaviors, behavior)
 	}
 	return behaviors, nil

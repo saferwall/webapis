@@ -101,7 +101,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 
 	// Register a custom fields validator.
 	validate := validator.New()
-	validate.RegisterValidation("username_or_email", validateUsernameOrEmail)
+	 _ = validate.RegisterValidation("username_or_email", validateUsernameOrEmail)
 	e.Validator = &CustomValidator{validator: validate}
 
 	// Register a custom binder.

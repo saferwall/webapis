@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -173,7 +173,7 @@ func (s service) Delete(ctx context.Context, id string) (Comment, error) {
 	}
 
 	// delete corresponsing activity.
-	if s.actSvc.DeleteWith(ctx, "comment", com.Username, id); err != nil {
+	if err = s.actSvc.DeleteWith(ctx, "comment", com.Username, id); err != nil {
 		return Comment{}, err
 	}
 

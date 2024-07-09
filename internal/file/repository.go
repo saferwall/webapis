@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -150,7 +150,7 @@ func (r repository) Query(ctx context.Context, offset, limit int, fields []strin
 	for _, u := range res.([]interface{}) {
 		file := entity.File{}
 		b, _ := json.Marshal(u)
-		json.Unmarshal(b, &file)
+		 _ = json.Unmarshal(b, &file)
 		files = append(files, file)
 	}
 	return files, nil

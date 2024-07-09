@@ -405,7 +405,7 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 		}
 
 		// delete corresponding activity.
-		if s.actSvc.DeleteWith(ctx, "like", user.ID(),
+		if err = s.actSvc.DeleteWith(ctx, "like", user.ID(),
 			sha256); err != nil {
 			return err
 		}

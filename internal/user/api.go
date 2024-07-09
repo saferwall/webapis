@@ -658,13 +658,11 @@ func (r resource) email(c echo.Context) error {
 
 	err := r.service.UpdateEmail(ctx, req)
 	if err != nil {
-		if err != nil {
-			switch err {
-			case errWrongPassword:
-				return errors.Forbidden("")
-			default:
-				return err
-			}
+		switch err {
+		case errWrongPassword:
+			return errors.Forbidden("")
+		default:
+			return err
 		}
 	}
 

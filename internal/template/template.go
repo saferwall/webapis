@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -99,6 +99,6 @@ func (er EmailRequest) Execute(templateData interface{}, wr io.Writer) error {
 	if err := er.tpl.Execute(buf, templateData); err != nil {
 		return err
 	}
-	wr.Write(buf.Bytes())
-	return nil
+	_, err := wr.Write(buf.Bytes())
+	return err
 }
