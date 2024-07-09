@@ -9,6 +9,10 @@
         80,
         120
     ],
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--fast"
+    ],
     "cSpell.words": [
         "healthcheck",
         "mpfd",
