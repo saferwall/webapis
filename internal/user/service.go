@@ -445,7 +445,7 @@ func (s service) UnFollow(ctx context.Context, id string) error {
 		curUser.FollowingCount -= 1
 
 		// delete corresponding activity.
-		if s.actSvc.DeleteWith(ctx, "follow", curUser.Username,
+		if err = s.actSvc.DeleteWith(ctx, "follow", curUser.Username,
 			targetUser.Username); err != nil {
 			return err
 		}
@@ -456,10 +456,10 @@ func (s service) UnFollow(ctx context.Context, id string) error {
 		targetUser.FollowersCount -= 1
 	}
 
-	if s.repo.Update(ctx, curUser.User); err != nil {
+	if err = s.repo.Update(ctx, curUser.User); err != nil {
 		return err
 	}
-	if s.repo.Update(ctx, targetUser.User); err != nil {
+	if err = s.repo.Update(ctx, targetUser.User); err != nil {
 		return err
 	}
 

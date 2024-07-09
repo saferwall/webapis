@@ -158,7 +158,7 @@ func (r repository) GetByEmail(ctx context.Context, email string) (
 
 	user := entity.User{}
 	b, _ := json.Marshal(res.([]interface{})[0])
-	json.Unmarshal(b, &user)
+	_ = json.Unmarshal(b, &user)
 	return user, nil
 }
 
@@ -182,7 +182,7 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 	for _, u := range res.([]interface{}) {
 		user := entity.User{}
 		b, _ := json.Marshal(u)
-		json.Unmarshal(b, &user)
+		_ = json.Unmarshal(b, &user)
 		user.Email = ""
 		user.Password = ""
 		users = append(users, user)

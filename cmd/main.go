@@ -103,7 +103,10 @@ func run(logger log.Logger) error {
 	uni := ut.New(en, en)
 	trans, _ := uni.GetTranslator("en")
 	validate := validator.New()
-	en_translations.RegisterDefaultTranslations(validate, trans)
+	err = en_translations.RegisterDefaultTranslations(validate, trans)
+	if err != nil {
+		return err
+	}
 
 	// Create a password securer for auth.
 	sec := password.New(sha256.New())
@@ -132,9 +135,6 @@ func run(logger log.Logger) error {
 	if cfg.SMTP.Server != "" {
 		smtpMailer = mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
 			cfg.SMTP.Password)
-		if err != nil {
-			logger.Errorf("failed to connect to smtp server: %v", err)
-		}
 		emailTemplates, err = tpl.New(*flagTplFiles)
 		if err != nil {
 			return err
