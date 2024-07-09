@@ -1,0 +1,5 @@
+# Options for analysis running.
+run:
+  # Exit code when at least one issue was found.
+  # Default: 1
+  issues-exit-code: 0

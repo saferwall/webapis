@@ -2,17 +2,28 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.3.0
     hooks:
-    -   id: check-json
-    -   id: check-toml
-    -   id: check-yaml
-    -   id: detect-aws-credentials
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: detect-aws-credentials
         args:
           - "--allow-missing-credentials"
-    -   id: detect-private-key
-    -   id: end-of-file-fixer
-    -   id: pretty-format-json
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: pretty-format-json
         args:
           - "--autofix"
           - "--indent=4"
           - "--no-sort-keys"
-    -   id: trailing-whitespace
+      - id: trailing-whitespace
+  - repo: https://github.com/google/yamlfmt
+    rev: v0.13.0
+    hooks:
+      - id: yamlfmt
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        files: \.(yaml|yml)$
+        types: [file, yaml]
+        entry: yamllint -c .yamllint.yaml

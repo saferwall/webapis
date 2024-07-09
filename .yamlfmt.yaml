@@ -1,0 +1,6 @@
+# https://github.com/google/yamlfmt/blob/main/docs/config-file.md
+formatter:
+  type: basic
+  max_line_length: 100
+  retain_line_breaks: true
+  scan_folded_as_literal: true
