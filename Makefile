@@ -57,8 +57,13 @@ docker/release:	## Build and release in a docker container.
 	fi
 
 compose/up:	## Start docker-compose (args: SVC: name of the service to exclude)
-	@echo "${GREEN} [*] =============== Docker Compose UP =============== ${RESET}"
+	@echo "${GREEN} [*] =============== Docker Compose Up =============== ${RESET}"
 	docker compose config --services | grep -v '${SVC}' | xargs docker compose up
+
+compose/up/min:	## Start docker-compose (args: SVC: name of the service to exclude)
+	@echo "${YELLOW} [*] =============== Docker Compose Up Minimum =============== ${RESET}"
+	docker compose config --services | grep -v 'clamav\|sandbox\|meta\|orchestrator\|postprocessor\|aggregator\|pe\|ui' \
+		| xargs docker compose up
 
 couchbase/start:	## Start Couchbase Server docker container.
 	$(eval COUCHBASE_CONTAINER_STATUS := $(shell docker container inspect -f '{{.State.Status}}' $(COUCHBASE_CONTAINER_NAME)))
