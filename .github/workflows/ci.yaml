@@ -32,16 +32,10 @@ jobs:
         with:
           files: ./coverage
 
-      - name: Go vet
-        run: |
-          go vet ./...
-
-      - name: Staticcheck
-        uses: dominikh/staticcheck-action@v1.3.1
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
         with:
-          version: "2022.1"
-          install-go: false
-          cache-key: ${{ matrix.go-version }}
+          version: v1.59
 
   build-container:
     runs-on: ubuntu-20.04
