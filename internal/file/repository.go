@@ -150,7 +150,7 @@ func (r repository) Query(ctx context.Context, offset, limit int, fields []strin
 	for _, u := range res.([]interface{}) {
 		file := entity.File{}
 		b, _ := json.Marshal(u)
-		 _ = json.Unmarshal(b, &file)
+		_ = json.Unmarshal(b, &file)
 		files = append(files, file)
 	}
 	return files, nil
@@ -203,6 +203,10 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(results.([]interface{})) == 0 {
+		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }
