@@ -244,6 +244,9 @@ func (r repository) Likes(ctx context.Context, id string, offset,
 	if err != nil {
 		return nil, err
 	}
+	if len(results.([]interface{})) == 0 {
+		return []interface{}{}, nil
+	}
 	return results.([]interface{}), nil
 }
 
@@ -273,6 +276,9 @@ func (r repository) Followers(ctx context.Context, id string, offset,
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
+	}
+	if len(results.([]interface{})) == 0 {
+		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }
@@ -304,6 +310,9 @@ func (r repository) Following(ctx context.Context, id string, offset,
 	if err != nil {
 		return nil, err
 	}
+	if len(results.([]interface{})) == 0 {
+		return []interface{}{}, nil
+	}
 	return results.([]interface{}), nil
 }
 
@@ -332,6 +341,9 @@ func (r repository) Submissions(ctx context.Context, id string, offset,
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
+	}
+	if len(results.([]interface{})) == 0 {
+		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }
@@ -362,6 +374,9 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
+	}
+	if len(results.([]interface{})) == 0 {
+		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }

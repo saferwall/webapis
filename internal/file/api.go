@@ -368,8 +368,13 @@ func (r resource) comments(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	count := file.CommentsCount
-	pages := pagination.NewFromRequest(c.Request(), *count)
+
+	count := 0
+	if file.CommentsCount != nil {
+		count = *file.CommentsCount
+	}
+
+	pages := pagination.NewFromRequest(c.Request(), count)
 	comments, err := r.service.Comments(
 		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
 	if err != nil {
