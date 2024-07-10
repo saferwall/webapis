@@ -33,10 +33,22 @@ export
 # Include our internals makefiles.
 include build/docker.mk
 
-init: compose/pull install/swag	## Init project.
+init: compose/pull install/swag couchbase/init	## Init project.
+
+install/swag:	## Install Swag
+	go install github.com/swaggo/swag/cmd/swag@latest
 
 compose/pull:	## Docker compose pull.
 	docker compose pull
+
+compose/up:	## Start docker-compose (args: SVC: name of the service to exclude)
+	@echo "${GREEN} [*] =============== Docker Compose Up =============== ${RESET}"
+	docker compose config --services | grep -v '${SVC}' | xargs docker compose up
+
+compose/up/min:	## Start docker-compose (args: SVC: name of the service to exclude)
+	@echo "${YELLOW} [*] =============== Docker Compose Up Minimum =============== ${RESET}"
+	docker compose config --services | grep -v 'clamav\|sandbox\|meta\|orchestrator\|postprocessor\|aggregator\|pe\|ui' \
+		| xargs docker compose up
 
 docker/build:	## Build in a docker container.
 	@echo "${GREEN} [*] =============== Docker Build  =============== ${RESET}"
@@ -56,15 +68,6 @@ docker/release:	## Build and release in a docker container.
 			DOCKER_FILE=Dockerfile DOCKER_DIR=. ; \
 	fi
 
-compose/up:	## Start docker-compose (args: SVC: name of the service to exclude)
-	@echo "${GREEN} [*] =============== Docker Compose Up =============== ${RESET}"
-	docker compose config --services | grep -v '${SVC}' | xargs docker compose up
-
-compose/up/min:	## Start docker-compose (args: SVC: name of the service to exclude)
-	@echo "${YELLOW} [*] =============== Docker Compose Up Minimum =============== ${RESET}"
-	docker compose config --services | grep -v 'clamav\|sandbox\|meta\|orchestrator\|postprocessor\|aggregator\|pe\|ui' \
-		| xargs docker compose up
-
 couchbase/start:	## Start Couchbase Server docker container.
 	$(eval COUCHBASE_CONTAINER_STATUS := $(shell docker container inspect -f '{{.State.Status}}' $(COUCHBASE_CONTAINER_NAME)))
 ifeq ($(COUCHBASE_CONTAINER_STATUS),running)
@@ -80,7 +83,8 @@ endif
 couchbase/init:	## Init couchbase database by creating the cluster and required buckets.
 	# Init the cluster.
 	echo "${GREEN} [*] =============== Creating Cluster =============== ${RESET}"
-	docker exec couchbase \
+	docker compose start couchbase
+	docker exec $(COUCHBASE_CONTAINER_NAME) \
 		couchbase-cli cluster-init \
 		--cluster localhost \
 		--cluster-username $(COUCHBASE_ADMIN_USER) \
@@ -94,11 +98,11 @@ couchbase/init:	## Init couchbase database by creating the cluster and required 
 	# Create require buckets.
 	for bucket in $(COUCHBASE_BUCKETS_LIST) ; do \
 		echo "${GREEN} [*] =============== Creating $$bucket =============== ${RESET}" ; \
-		docker exec couchbase \
+		docker exec $(COUCHBASE_CONTAINER_NAME) \
 			couchbase-cli bucket-create \
 			--cluster localhost \
-			--username Administrator \
-			--password password \
+			--username $(COUCHBASE_ADMIN_USER) \
+			--password $(COUCHBASE_ADMIN_PWD) \
 			--bucket sfw \
 			--bucket-type couchbase \
 			--bucket-ramsize 128 \
@@ -124,6 +128,3 @@ generate/doc:	## Generate OpenAPI spec.
 
 	old='"{}":' && new="- {}:" \
 		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/docs.go
-
-install/swag:	## Install Swag
-	go install github.com/swaggo/swag/cmd/swag@latest

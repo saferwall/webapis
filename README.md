@@ -30,6 +30,18 @@ This project follows the [Standard Go Project Layout](https://github.com/golang-
 - **internal** - contains private project specific code.
 - **pkg** - contains generic packages without project specific dependencies - these can be safely moved to other projects without internal dependencies.
 
+## Getting started
+
+- Install [docker](https://docs.docker.com/engine/install/).
+- git clone `https://github.com/saferwall/webapis.git`.
+- Create a `private.env` in the root directory:
+    ```sh
+    # Used by docker-compose NSQ service when debugging a service locally and
+    # using all the other services from docker-compose.
+    EXTERNAL_IP=<your-host-ip>
+    ```
+- Make sure `make` is installed and run `make init`.
+
 ## References
 
 - [Standard Package Layout](https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1)

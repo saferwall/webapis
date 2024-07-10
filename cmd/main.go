@@ -32,7 +32,7 @@ import (
 )
 
 // Version indicates the current version of the application.
-var Version = "0.5.0"
+var Version = "0.6.0"
 
 var flagConfig = flag.String("config", "./../configs/", "path to the config file")
 var flagN1QLFiles = flag.String("db", "./../db/", "path to the n1ql files")
