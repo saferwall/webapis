@@ -192,19 +192,39 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 	// When a new file has been uploaded, we create a new doc in the db.
 	if err != nil && err.Error() == ErrDocumentNotFound {
 
-		// Create a context with a timeout that will abort the upload if it takes
-		// more than the passed in timeout.
-		uploadCtx, cancelFn := context.WithTimeout(context.Background(), fileUploadTimeout)
+		go func() {
+			existsCtx, cancelExistsFn := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancelExistsFn()
 
-		// Ensure the context is canceled to prevent leaking.
-		defer cancelFn()
+			if ok, _ := s.objSto.Exists(existsCtx, s.bucket, sha256); ok {
+				return
+			}
 
-		// TODO: check if the file is already in Obj.
-		err = s.objSto.Upload(uploadCtx, s.bucket, sha256,
-			bytes.NewReader(fileContent))
-		if err != nil {
-			return File{}, err
-		}
+			var err error
+
+			for attempt := 0; attempt < 3; attempt++ {
+				// Create a context with a timeout that will abort the upload if it takes
+				// more than the passed in timeout.
+				uploadCtx, cancelUploadFn := context.WithTimeout(context.Background(), fileUploadTimeout)
+
+				// Ensure the context is canceled to prevent leaking.
+				defer cancelUploadFn()
+
+				err = s.objSto.Upload(uploadCtx, s.bucket, sha256, bytes.NewReader(fileContent))
+				if err == nil {
+					break
+				}
+				s.logger.With(uploadCtx).Error(err)
+
+				// Give time to the system to recover
+				time.Sleep(10 * time.Second)
+			}
+
+			if err != nil {
+				s.logger.Error(err)
+				return
+			}
+		}()
 
 		// Get the source of the HTTP request from the ctx.
 		source, _ := ctx.Value(entity.SourceKey).(string)
