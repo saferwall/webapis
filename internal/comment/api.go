@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -42,6 +42,7 @@ func RegisterHandlers(g *echo.Group, service Service,
 // @Failure 413 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /comments/ [post]
+// @Security Bearer
 func (r resource) create(c echo.Context) error {
 
 	var input CreateCommentRequest
@@ -94,6 +95,7 @@ func (r resource) get(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /comments/{id}/ [patch]
+// @Security Bearer
 func (r resource) update(c echo.Context) error {
 	var input UpdateCommentRequest
 
@@ -121,6 +123,7 @@ func (r resource) update(c echo.Context) error {
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /comments/{id}/ [delete]
+// @Security Bearer
 func (r resource) delete(c echo.Context) error {
 
 	var curUsername string
