@@ -370,6 +370,44 @@
                 }
             }
         },
+        "/behaviors/{id}/artifacts/": {
+            "get": {
+                "description": "Returns a paginated list of artifacts' metadata such as memdumps, created files, etc ..",
+                "tags": [
+                    "Behavior"
+                ],
+                "summary": "List of artifacts' metadata.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Behavior report GUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/behaviors/{id}/sys-events/": {
             "get": {
                 "description": "Paginates over the list of system events.",
@@ -410,6 +448,11 @@
         },
         "/comments/": {
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Create a new comment.",
                 "consumes": [
                     "application/json"
@@ -518,6 +561,11 @@
         },
         "/comments/{id}/": {
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Deletes a comment by ID.",
                 "produces": [
                     "application/json"
@@ -563,6 +611,11 @@
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Replace a cocument with a new comment's document.",
                 "consumes": [
                     "application/json"
@@ -2522,6 +2575,7 @@
             "properties": {
                 "agent_log": {},
                 "api_trace": {},
+                "artifacts": {},
                 "capabilities": {},
                 "env": {},
                 "proc_tree": {},
@@ -2577,7 +2631,7 @@
         "entity.File": {
             "type": "object",
             "properties": {
-                "behaviors": {},
+                "behavior_scans": {},
                 "byte_entropy": {
                     "type": "array",
                     "items": {
@@ -2590,9 +2644,7 @@
                 "crc32": {
                     "type": "string"
                 },
-                "default_behavior_id": {
-                    "type": "string"
-                },
+                "default_behavior_report": {},
                 "exif": {
                     "type": "object",
                     "additionalProperties": {
