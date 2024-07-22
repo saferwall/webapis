@@ -1,345 +1,326 @@
-components:
-  schemas:
-    auth.confirmAccountRequest:
-      properties:
-        email:
-          example: mike@protonmail.com
-          type: string
-      required:
-        - email
-      type: object
-    auth.createNewPwdRequest:
-      properties:
-        guid:
-          example: f47ac10b-58cc-8372-8567-0e02b2c3d479
-          type: string
-        password:
-          example: secretControl
-          maxLength: 30
-          minLength: 8
-          type: string
-        token:
-          example: eyJhbGciOiJIUzI1Ni
-          type: string
-      required:
-        - guid
-        - password
-        - token
-      type: object
-    auth.loginRequest:
-      properties:
-        password:
-          example: control123
-          maxLength: 30
-          minLength: 8
-          type: string
-        username:
-          example: mrrobot or mr-robot@protonmail.com
-          type: string
-      required:
-        - password
-        - username
-      type: object
-    auth.resetPwdRequest:
-      properties:
-        email:
-          example: mike@protonmail.com
-          type: string
-      required:
-        - email
-      type: object
-    comment.CreateCommentRequest:
-      properties:
-        body:
-          type: string
-        sha256:
-          type: string
-        username:
-          type: string
-      required:
-        - body
-        - sha256
-      type: object
-    comment.UpdateCommentRequest:
-      properties:
-        body:
-          type: string
-      required:
-        - body
-      type: object
-    entity.Behavior:
-      properties:
-        agent_log: {}
-        api_trace: {}
-        artifacts: {}
-        capabilities: {}
-        env: {}
-        proc_tree: {}
-        sandbox_log: {}
-        scan_cfg: {}
-        screenshots_count:
-          type: integer
-        sha256:
-          type: string
-        status:
-          type: integer
-        sys_events: {}
-        timestamp:
-          type: integer
-        type:
-          type: string
-      type: object
-    entity.Comment:
-      properties:
-        body:
-          description: Body represents the content of the comment.
-          type: string
-        id:
-          description: ID represents the activity identifier.
-          type: string
-        sha256:
-          description: |-
-            SHA256 references the hash of the file
-            where the comment has been made.
-          type: string
-        timestamp:
-          description: Timestamp when this activity happened.
-          type: integer
-        type:
-          description: Type represents the document type.
-          type: string
-        username:
-          description: Username represents the author of the comment.
-          type: string
-      type: object
-    entity.File:
-      properties:
-        behavior_scans: {}
-        byte_entropy:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
-        comments_count:
-          type: integer
-        crc32:
-          type: string
-        default_behavior_report: {}
-        exif:
-          additionalProperties:
-            type: string
-          type: object
-        file_extension:
-          type: string
-        file_format:
-          type: string
-        first_seen:
-          type: integer
-        histogram:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
-        last_scanned:
-          type: integer
-        magic:
-          type: string
-        md5:
-          type: string
-        ml:
-          additionalProperties: {}
-          type: object
-        multiav:
-          additionalProperties: {}
-          type: object
-        packer:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        pe: {}
-        sha1:
-          type: string
-        sha256:
-          type: string
-        sha512:
-          type: string
-        size:
-          type: integer
-        ssdeep:
-          type: string
-        status:
-          type: integer
-        strings: {}
-        submissions:
-          items:
-            $ref: '#/components/schemas/entity.Submission'
-          type: array
-          uniqueItems: false
-        tags:
-          additionalProperties: {}
-          type: object
-        trid:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        type:
-          type: string
-      type: object
-    entity.Submission:
-      properties:
-        country:
-          type: string
-        filename:
-          type: string
-        src:
-          type: string
-        timestamp:
-          type: integer
-      type: object
-    entity.User:
-      properties:
-        admin:
-          type: boolean
-        bio:
-          type: string
-        comments_count:
-          type: integer
-        confirmed:
-          type: boolean
-        email:
-          type: string
-        followers:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        followers_count:
-          type: integer
-        following:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        following_count:
-          type: integer
-        has_avatar:
-          type: boolean
-        last_seen:
-          type: integer
-        likes:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        likes_count:
-          type: integer
-        location:
-          type: string
-        member_since:
-          type: integer
-        name:
-          type: string
-        password:
-          type: string
-        submissions_count:
-          type: integer
-        type:
-          type: string
-        url:
-          type: string
-        username:
-          type: string
-      type: object
-    errors.ErrorResponse:
-      properties:
-        details: {}
-        message:
-          type: string
-        status:
-          type: integer
-      type: object
-    items:
-      properties:
+basePath: /v1
+definitions:
+  auth.confirmAccountRequest:
+    properties:
+      email:
+        example: mike@protonmail.com
+        type: string
+    required:
+      - email
+    type: object
+  auth.createNewPwdRequest:
+    properties:
+      guid:
+        example: f47ac10b-58cc-8372-8567-0e02b2c3d479
+        type: string
+      password:
+        example: secretControl
+        maxLength: 30
+        minLength: 8
+        type: string
+      token:
+        example: eyJhbGciOiJIUzI1Ni
+        type: string
+    required:
+      - guid
+      - password
+      - token
+    type: object
+  auth.loginRequest:
+    properties:
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        example: mrrobot or mr-robot@protonmail.com
+        type: string
+    required:
+      - password
+      - username
+    type: object
+  auth.resetPwdRequest:
+    properties:
+      email:
+        example: mike@protonmail.com
+        type: string
+    required:
+      - email
+    type: object
+  comment.CreateCommentRequest:
+    properties:
+      body:
+        type: string
+      sha256:
+        type: string
+      username:
+        type: string
+    required:
+      - body
+      - sha256
+    type: object
+  comment.UpdateCommentRequest:
+    properties:
+      body:
+        type: string
+    required:
+      - body
+    type: object
+  entity.Behavior:
+    properties:
+      agent_log: {}
+      api_trace: {}
+      artifacts: {}
+      capabilities: {}
+      env: {}
+      proc_tree: {}
+      sandbox_log: {}
+      scan_cfg: {}
+      screenshots_count:
+        type: integer
+      sha256:
+        type: string
+      status:
+        type: integer
+      sys_events: {}
+      timestamp:
+        type: integer
+      type:
+        type: string
+    type: object
+  entity.Comment:
+    properties:
+      body:
+        description: Body represents the content of the comment.
+        type: string
+      id:
+        description: ID represents the activity identifier.
+        type: string
+      sha256:
+        description: |-
+          SHA256 references the hash of the file
+          where the comment has been made.
+        type: string
+      timestamp:
+        description: Timestamp when this activity happened.
+        type: integer
+      type:
+        description: Type represents the document type.
+        type: string
+      username:
+        description: Username represents the author of the comment.
+        type: string
+    type: object
+  entity.File:
+    properties:
+      behavior_scans: {}
+      byte_entropy:
         items:
-          items:
-            $ref: '#/components/schemas/entity.User'
-          type: array
-      type: object
-    pagination.Pages:
-      allOf:
-        - $ref: '#/components/schemas/items'
-      properties:
-        items: {}
-        page:
           type: integer
-        page_count:
+        type: array
+      comments_count:
+        type: integer
+      crc32:
+        type: string
+      default_behavior_report: {}
+      exif:
+        additionalProperties:
+          type: string
+        type: object
+      file_extension:
+        type: string
+      file_format:
+        type: string
+      first_seen:
+        type: integer
+      histogram:
+        items:
           type: integer
-        per_page:
-          type: integer
-        total_count:
-          type: integer
-      type: object
-    user.CreateUserRequest:
-      properties:
-        email:
-          example: mike@protonmail.com
+        type: array
+      last_scanned:
+        type: integer
+      magic:
+        type: string
+      md5:
+        type: string
+      ml:
+        additionalProperties: true
+        type: object
+      multiav:
+        additionalProperties: true
+        type: object
+      packer:
+        items:
           type: string
-        password:
-          example: control123
-          maxLength: 30
-          minLength: 8
+        type: array
+      pe: {}
+      sha1:
+        type: string
+      sha256:
+        type: string
+      sha512:
+        type: string
+      size:
+        type: integer
+      ssdeep:
+        type: string
+      status:
+        type: integer
+      strings: {}
+      submissions:
+        items:
+          $ref: '#/definitions/entity.Submission'
+        type: array
+      tags:
+        additionalProperties: true
+        type: object
+      trid:
+        items:
           type: string
-        username:
-          example: mike
-          maxLength: 20
-          minLength: 1
+        type: array
+      type:
+        type: string
+    type: object
+  entity.Submission:
+    properties:
+      country:
+        type: string
+      filename:
+        type: string
+      src:
+        type: string
+      timestamp:
+        type: integer
+    type: object
+  entity.User:
+    properties:
+      admin:
+        type: boolean
+      bio:
+        type: string
+      comments_count:
+        type: integer
+      confirmed:
+        type: boolean
+      email:
+        type: string
+      followers:
+        items:
           type: string
-      required:
-        - email
-        - password
-        - username
-      type: object
-    user.UpdateEmailRequest:
-      properties:
-        email:
-          example: mike@proton.me
+        type: array
+      followers_count:
+        type: integer
+      following:
+        items:
           type: string
-        password:
-          example: control123
-          maxLength: 30
-          minLength: 8
+        type: array
+      following_count:
+        type: integer
+      has_avatar:
+        type: boolean
+      last_seen:
+        type: integer
+      likes:
+        items:
           type: string
-      required:
-        - email
-        - password
-      type: object
-    user.UpdateUserRequest:
-      properties:
-        bio:
-          example: What really counts are good endings, not flawed beginnings.
-          maxLength: 64
-          minLength: 1
-          type: string
-        location:
-          example: Damascus
-          maxLength: 16
-          minLength: 1
-          type: string
-        name:
-          example: Ibn Taymiyyah
-          maxLength: 32
-          minLength: 1
-          type: string
-        url:
-          example: https://en.wikipedia.org/wiki/Ibn_Taymiyyah
-          maxLength: 64
-          type: string
-      type: object
-externalDocs:
-  description: ""
-  url: ""
+        type: array
+      likes_count:
+        type: integer
+      location:
+        type: string
+      member_since:
+        type: integer
+      name:
+        type: string
+      password:
+        type: string
+      submissions_count:
+        type: integer
+      type:
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    type: object
+  errors.ErrorResponse:
+    properties:
+      details: {}
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  pagination.Pages:
+    properties:
+      items: {}
+      page:
+        type: integer
+      page_count:
+        type: integer
+      per_page:
+        type: integer
+      total_count:
+        type: integer
+    type: object
+  user.CreateUserRequest:
+    properties:
+      email:
+        example: mike@protonmail.com
+        type: string
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+      username:
+        example: mike
+        maxLength: 20
+        minLength: 1
+        type: string
+    required:
+      - email
+      - password
+      - username
+    type: object
+  user.UpdateEmailRequest:
+    properties:
+      email:
+        example: mike@proton.me
+        type: string
+      password:
+        example: control123
+        maxLength: 30
+        minLength: 8
+        type: string
+    required:
+      - email
+      - password
+    type: object
+  user.UpdateUserRequest:
+    properties:
+      bio:
+        example: What really counts are good endings, not flawed beginnings.
+        maxLength: 64
+        minLength: 1
+        type: string
+      location:
+        example: Damascus
+        maxLength: 16
+        minLength: 1
+        type: string
+      name:
+        example: Ibn Taymiyyah
+        maxLength: 32
+        minLength: 1
+        type: string
+      url:
+        example: https://en.wikipedia.org/wiki/Ibn_Taymiyyah
+        maxLength: 64
+        type: string
+    type: object
+host: api.saferwall.com
 info:
   contact:
     email: support@saferwall.com
@@ -352,43 +333,38 @@ info:
   termsOfService: https://about.saferwall.com/tos
   title: Saferwall Web API
   version: "1.0"
-openapi: 3.1.0
 paths:
   /auth/login/:
     post:
+      consumes:
+        - application/json
       description: Users logins by username and password.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/auth.loginRequest'
-        description: Username and password
-        required: true
+      parameters:
+        - description: Username and password
+          in: body
+          name: auth-request
+          required: true
+          schema:
+            $ref: '#/definitions/auth.loginRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: string
           description: '{"token": "value"}'
+          schema:
+            type: string
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Log in
       tags:
         - Authentication
@@ -403,115 +379,103 @@ paths:
         - Authentication
   /auth/password/:
     post:
+      consumes:
+        - application/json
       description: Update the password from the auth token received in email.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/auth.createNewPwdRequest'
-        description: New password request
-        required: true
+      parameters:
+        - description: New password request
+          in: body
+          name: reset-pwd
+          required: true
+          schema:
+            $ref: '#/definitions/auth.createNewPwdRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: string
           description: '{"token": "value"}'
+          schema:
+            type: string
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Create a new password from a token received in email
       tags:
         - Authentication
   /auth/resend-confirmation/:
     post:
+      consumes:
+        - application/json
       description: Send a new confirmation email link to confirm user's account.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/auth.confirmAccountRequest'
-        description: Account confirmation request
-        required: true
+      parameters:
+        - description: Account confirmation request
+          in: body
+          name: reset-pwd
+          required: true
+          schema:
+            $ref: '#/definitions/auth.confirmAccountRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: string
           description: '{"token": "value"}'
+          schema:
+            type: string
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Resend a confirmation email
       tags:
         - Authentication
   /auth/reset-password/:
     post:
+      consumes:
+        - application/json
       description: Request a reset password for anonymous users.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/auth.resetPwdRequest'
-        description: Email used during account sign-up
-        required: true
+      parameters:
+        - description: Email used during account sign-up
+          in: body
+          name: reset-pwd
+          required: true
+          schema:
+            $ref: '#/definitions/auth.resetPwdRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: string
           description: '{"token": "value"}'
+          schema:
+            type: string
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Reset password for non-logged users by email
       tags:
         - Authentication
@@ -523,39 +487,29 @@ paths:
           in: query
           name: guid
           required: true
-          schema:
-            type: string
+          type: string
         - description: JWT token generated for account creation
           in: query
           name: token
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: string
           description: '{"token": "value"}'
+          schema:
+            type: string
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Confirm a new account creation
       tags:
         - Authentication
@@ -567,27 +521,20 @@ paths:
           in: path
           name: id
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.Behavior'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.Behavior'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Check a behavior report.
       tags:
         - Behavior
@@ -599,27 +546,20 @@ paths:
           in: path
           name: id
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: List of APIs log.
       tags:
         - Behavior
@@ -632,27 +572,20 @@ paths:
           in: path
           name: id
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: object
           description: OK
+          schema:
+            type: object
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: List of artifacts' metadata.
       tags:
         - Behavior
@@ -664,71 +597,58 @@ paths:
           in: path
           name: id
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: List of system events.
       tags:
         - Behavior
   /comments/:
     post:
+      consumes:
+        - application/json
       description: Create a new comment.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/comment.CreateCommentRequest'
-        description: Comment body
-        required: true
+      parameters:
+        - description: Comment body
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/comment.CreateCommentRequest'
+      produces:
+        - application/json
       responses:
         "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.Comment'
           description: Created
+          schema:
+            $ref: '#/definitions/entity.Comment'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "413":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Create a new comment
@@ -736,44 +656,34 @@ paths:
         - Comment
   /comments/{id}:
     get:
+      consumes:
+        - application/json
       description: Retrieves information about a comment.
       parameters:
         - description: Comment ID
           in: path
           name: id
           required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.Comment'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Get comment by ID
       tags:
         - Comment
@@ -785,79 +695,66 @@ paths:
           in: path
           name: id
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.Comment'
           description: No Content
+          schema:
+            $ref: '#/definitions/entity.Comment'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Deletes a comment
       tags:
         - Comment
     patch:
+      consumes:
+        - application/json
       description: Replace a cocument with a new comment's document.
       parameters:
         - description: Comment ID
           in: path
           name: id
           required: true
+          type: string
+        - description: New comment data
+          in: body
+          name: data
+          required: true
           schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/comment.UpdateCommentRequest'
-        description: New comment data
-        required: true
+            $ref: '#/definitions/comment.UpdateCommentRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.Comment'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.Comment'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Update a comment object (full update)
@@ -865,105 +762,82 @@ paths:
         - Comment
   /files/:
     get:
+      consumes:
+        - application/json
       description: List files
       parameters:
         - description: Number of files per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/items'
-                properties:
-                  items: {}
-                  page:
-                    type: integer
-                  page_count:
-                    type: integer
-                  per_page:
-                    type: integer
-                  total_count:
-                    type: integer
-                type: object
           description: OK
+          schema:
+            allOf:
+              - $ref: '#/definitions/pagination.Pages'
+              - properties:
+                  items:
+                    items:
+                      $ref: '#/definitions/entity.File'
+                    type: array
+                type: object
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Retrieves a paginated list of files
       tags:
         - File
     post:
+      consumes:
+        - multipart/form-data
       description: Upload file for analysis.
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: file
-        description: binary file
-        required: true
+      parameters:
+        - description: binary file
+          in: formData
+          name: file
+          required: true
+          type: file
+      produces:
+        - application/json
       responses:
         "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.File'
           description: Created
+          schema:
+            $ref: '#/definitions/entity.File'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "413":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Submit a new file for scanning
@@ -971,88 +845,68 @@ paths:
         - File
   /files/{sha256}:
     delete:
+      consumes:
+        - application/json
       description: Deletes a file by ID.
       parameters:
         - description: File SHA256
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: string
+      produces:
+        - application/json
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.File'
           description: No Content
+          schema:
+            $ref: '#/definitions/entity.File'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Deletes a file
       tags:
         - File
     get:
+      consumes:
+        - application/json
       description: Retrieves the content of a file report.
       parameters:
         - description: File SHA256
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.File'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Get a file report
       tags:
         - File
@@ -1063,113 +917,86 @@ paths:
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.File'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Check if a file exists.
       tags:
         - File
     patch:
+      consumes:
+        - application/json
       description: Patch a portion of a file report.
       parameters:
         - description: File SHA256
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.File'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Update a file report (partial update)
       tags:
         - File
     put:
+      consumes:
+        - application/json
       description: Replace a file report with a new report
       parameters:
         - description: File SHA256
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.File'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.File'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Update a file report (full update)
@@ -1183,36 +1010,29 @@ paths:
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of file comments
       tags:
         - File
@@ -1224,27 +1044,22 @@ paths:
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - multipart/form-data
       responses:
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Download a file
@@ -1258,27 +1073,22 @@ paths:
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Generate a pre-signed URL for downloading samples.
@@ -1292,33 +1102,26 @@ paths:
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: object
           description: OK
+          schema:
+            type: object
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Like a file
@@ -1332,27 +1135,22 @@ paths:
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Rescan an existing file
@@ -1360,54 +1158,42 @@ paths:
         - File
   /files/{sha256}/strings/:
     get:
+      consumes:
+        - application/json
       description: List strings of a file.
       parameters:
         - description: File SHA256
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
         - description: Number of strings per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of strings
       tags:
         - File
@@ -1419,36 +1205,29 @@ paths:
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: File summary and metadata
       tags:
         - File
@@ -1460,27 +1239,22 @@ paths:
           in: path
           name: sha256
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Unlike a file
@@ -1488,151 +1262,119 @@ paths:
         - File
   /users/:
     get:
+      consumes:
+        - application/json
       description: List users.
       parameters:
         - description: Number of items per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/items'
-                properties:
-                  items: {}
-                  page:
-                    type: integer
-                  page_count:
-                    type: integer
-                  per_page:
-                    type: integer
-                  total_count:
-                    type: integer
-                type: object
           description: OK
+          schema:
+            allOf:
+              - $ref: '#/definitions/pagination.Pages'
+              - properties:
+                  items:
+                    items:
+                      $ref: '#/definitions/entity.User'
+                    type: array
+                type: object
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Retrieves a paginated list of users
       tags:
         - User
     post:
+      consumes:
+        - application/json
       description: Create a new user.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/user.CreateUserRequest'
-        description: User data
-        required: true
+      parameters:
+        - description: User data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/user.CreateUserRequest'
+      produces:
+        - application/json
       responses:
         "201":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.User'
           description: Created
+          schema:
+            $ref: '#/definitions/entity.User'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "413":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       summary: Create a new user
       tags:
         - User
   /users/{username}:
     get:
+      consumes:
+        - application/json
       description: Retrieves information about a user.
       parameters:
         - description: User ID
           in: path
           name: username
           required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.User'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: Get user information by user ID
       tags:
         - User
@@ -1644,79 +1386,66 @@ paths:
           in: path
           name: username
           required: true
-          schema:
-            type: string
+          type: string
+      produces:
+        - application/json
       responses:
         "204":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.User'
           description: No Content
+          schema:
+            $ref: '#/definitions/entity.User'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Deletes a user
       tags:
         - User
     patch:
+      consumes:
+        - application/json
       description: Replace a user document with a new user's document.
       parameters:
         - description: Username
           in: path
           name: username
           required: true
+          type: string
+        - description: New user data
+          in: body
+          name: data
+          required: true
           schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/user.UpdateUserRequest'
-        description: New user data
-        required: true
+            $ref: '#/definitions/user.UpdateUserRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/entity.User'
           description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Update a user object (full update)
@@ -1724,58 +1453,48 @@ paths:
         - User
   /users/{username}/avatar/:
     post:
+      consumes:
+        - application/json
       description: Change user avatar
       parameters:
         - description: Username
           in: path
           name: username
           required: true
+          type: string
+        - description: User data
+          in: body
+          name: data
+          required: true
           schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/user.UpdateEmailRequest'
-        description: User data
-        required: true
+            $ref: '#/definitions/user.UpdateEmailRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: object
           description: OK
+          schema:
+            type: object
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "413":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Update user avatar
@@ -1783,102 +1502,84 @@ paths:
         - User
   /users/{username}/comments/:
     get:
+      consumes:
+        - application/json
       description: List of comments by a user.
       parameters:
         - description: Username
           in: path
           name: username
           required: true
-          schema:
-            type: string
+          type: string
         - description: Number of items per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's comments
       tags:
         - User
   /users/{username}/email/:
     post:
+      consumes:
+        - application/json
       description: Change email for logged-in users.
       parameters:
         - description: Username
           in: path
           name: username
           required: true
+          type: string
+        - description: User data
+          in: body
+          name: data
+          required: true
           schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/user.UpdateEmailRequest'
-        description: User data
-        required: true
+            $ref: '#/definitions/user.UpdateEmailRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: object
           description: OK
+          schema:
+            type: object
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Update email for authenticated users
@@ -1886,44 +1587,34 @@ paths:
         - User
   /users/{username}/follow/:
     post:
+      consumes:
+        - application/json
       description: Start following a user.
       parameters:
         - description: Target user to follow
           in: path
           name: username
           required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: object
           description: OK
+          schema:
+            type: object
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Follow a user
@@ -1931,214 +1622,172 @@ paths:
         - User
   /users/{username}/followers/:
     get:
+      consumes:
+        - application/json
       description: List of users who follow a user.
       parameters:
         - description: Username
           in: path
           name: username
           required: true
-          schema:
-            type: string
+          type: string
         - description: Number of items per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's followers
       tags:
         - User
   /users/{username}/following/:
     get:
+      consumes:
+        - application/json
       description: List of users a user follows.
       parameters:
         - description: Username
           in: path
           name: username
           required: true
-          schema:
-            type: string
+          type: string
         - description: Number of items per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's following
       tags:
         - User
   /users/{username}/likes/:
     get:
+      consumes:
+        - application/json
       description: List of likes of a user.
       parameters:
         - description: Username
           in: path
           name: username
           required: true
-          schema:
-            type: string
+          type: string
         - description: Number of items per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's likes
       tags:
         - User
   /users/{username}/password/:
     post:
+      consumes:
+        - application/json
       description: Change password for logged-in users.
       parameters:
         - description: Username
           in: path
           name: username
           required: true
+          type: string
+        - description: User data
+          in: body
+          name: data
+          required: true
           schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/user.UpdateUserRequest'
-        description: User data
-        required: true
+            $ref: '#/definitions/user.UpdateUserRequest'
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: object
           description: OK
+          schema:
+            type: object
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Update password for authenticated users
@@ -2146,100 +1795,78 @@ paths:
         - User
   /users/{username}/submissions/:
     get:
+      consumes:
+        - application/json
       description: List of submissions by a user.
       parameters:
         - description: Username
           in: path
           name: username
           required: true
-          schema:
-            type: string
+          type: string
         - description: Number of items per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's submissions
       tags:
         - User
   /users/{username}/unfollow/:
     post:
+      consumes:
+        - application/json
       description: Stop following a user.
       parameters:
         - description: Target user to unfollow
           in: path
           name: username
           required: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: string
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                type: object
           description: OK
+          schema:
+            type: object
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
         - Bearer: []
       summary: Unfollow a user
@@ -2247,53 +1874,43 @@ paths:
         - User
   /users/activities/:
     get:
+      consumes:
+        - application/json
       description: List of activities of a user.
       parameters:
         - description: Number of items per page
           in: query
           name: per_page
-          schema:
-            type: integer
+          type: integer
         - description: Specify the page number
           in: query
           name: page
-          schema:
-            type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
+          type: integer
+      produces:
+        - application/json
       responses:
         "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/pagination.Pages'
           description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
         "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errors.ErrorResponse'
           description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
       security:
-        - '{}': []
-          Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's activities
       tags:
         - Activity
-servers:
-  - url: api.saferwall.com/v1
+schemes:
+  - https
+swagger: "2.0"
