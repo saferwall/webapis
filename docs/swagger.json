@@ -4,7 +4,7 @@
     ],
     "swagger": "2.0",
     "info": {
-        "description": "Interact with Saferwall Malware Analysis Platform",
+        "description": "Enter the token with the `Bearer ` prefix, e.g. \"Bearer abcde12345\".",
         "title": "Saferwall Web API",
         "termsOfService": "https://about.saferwall.com/tos",
         "contact": {
@@ -2926,14 +2926,6 @@
                     "example": "https://en.wikipedia.org/wiki/Ibn_Taymiyyah"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "Bearer": {
-            "description": "Enter the token with the `Bearer: ` prefix, e.g. \"Bearer abcde12345\".",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }
