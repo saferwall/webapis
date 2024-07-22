@@ -111,7 +111,7 @@ couchbase/init:	## Init couchbase database by creating the cluster and required 
 	done
 
 generate/doc:	## Generate OpenAPI spec.
-	swag init --parseDepth 2 -g cmd/main.go
+	swag init --v3.1  --parseDepth 2 -g cmd/main.go
 
 	old="- '{}': \[\]" && new="- {}" \
 		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/swagger.yaml
