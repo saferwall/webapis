@@ -6,7 +6,7 @@ definitions:
         example: mike@protonmail.com
         type: string
     required:
-    - email
+      - email
     type: object
   auth.createNewPwdRequest:
     properties:
@@ -22,9 +22,9 @@ definitions:
         example: eyJhbGciOiJIUzI1Ni
         type: string
     required:
-    - guid
-    - password
-    - token
+      - guid
+      - password
+      - token
     type: object
   auth.loginRequest:
     properties:
@@ -37,8 +37,8 @@ definitions:
         example: mrrobot or mr-robot@protonmail.com
         type: string
     required:
-    - password
-    - username
+      - password
+      - username
     type: object
   auth.resetPwdRequest:
     properties:
@@ -46,7 +46,7 @@ definitions:
         example: mike@protonmail.com
         type: string
     required:
-    - email
+      - email
     type: object
   comment.CreateCommentRequest:
     properties:
@@ -57,15 +57,15 @@ definitions:
       username:
         type: string
     required:
-    - body
-    - sha256
+      - body
+      - sha256
     type: object
   comment.UpdateCommentRequest:
     properties:
       body:
         type: string
     required:
-    - body
+      - body
     type: object
   entity.Behavior:
     properties:
@@ -280,9 +280,9 @@ definitions:
         minLength: 1
         type: string
     required:
-    - email
-    - password
-    - username
+      - email
+      - password
+      - username
     type: object
   user.UpdateEmailRequest:
     properties:
@@ -295,8 +295,8 @@ definitions:
         minLength: 8
         type: string
     required:
-    - email
-    - password
+      - email
+      - password
     type: object
   user.UpdateUserRequest:
     properties:
@@ -337,17 +337,17 @@ paths:
   /auth/login/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Users logins by username and password.
       parameters:
-      - description: Username and password
-        in: body
-        name: auth-request
-        required: true
-        schema:
-          $ref: '#/definitions/auth.loginRequest'
+        - description: Username and password
+          in: body
+          name: auth-request
+          required: true
+          schema:
+            $ref: '#/definitions/auth.loginRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: '{"token": "value"}'
@@ -367,7 +367,7 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Log in
       tags:
-      - Authentication
+        - Authentication
   /auth/logout/:
     delete:
       description: Delete the cookie used for authentication.
@@ -376,21 +376,21 @@ paths:
           description: logout success
       summary: Log out from current session
       tags:
-      - Authentication
+        - Authentication
   /auth/password/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Update the password from the auth token received in email.
       parameters:
-      - description: New password request
-        in: body
-        name: reset-pwd
-        required: true
-        schema:
-          $ref: '#/definitions/auth.createNewPwdRequest'
+        - description: New password request
+          in: body
+          name: reset-pwd
+          required: true
+          schema:
+            $ref: '#/definitions/auth.createNewPwdRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: '{"token": "value"}'
@@ -410,21 +410,21 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Create a new password from a token received in email
       tags:
-      - Authentication
+        - Authentication
   /auth/resend-confirmation/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Send a new confirmation email link to confirm user's account.
       parameters:
-      - description: Account confirmation request
-        in: body
-        name: reset-pwd
-        required: true
-        schema:
-          $ref: '#/definitions/auth.confirmAccountRequest'
+        - description: Account confirmation request
+          in: body
+          name: reset-pwd
+          required: true
+          schema:
+            $ref: '#/definitions/auth.confirmAccountRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: '{"token": "value"}'
@@ -444,21 +444,21 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Resend a confirmation email
       tags:
-      - Authentication
+        - Authentication
   /auth/reset-password/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Request a reset password for anonymous users.
       parameters:
-      - description: Email used during account sign-up
-        in: body
-        name: reset-pwd
-        required: true
-        schema:
-          $ref: '#/definitions/auth.resetPwdRequest'
+        - description: Email used during account sign-up
+          in: body
+          name: reset-pwd
+          required: true
+          schema:
+            $ref: '#/definitions/auth.resetPwdRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: '{"token": "value"}'
@@ -478,21 +478,21 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Reset password for non-logged users by email
       tags:
-      - Authentication
+        - Authentication
   /auth/verify-account/:
     get:
       description: Verify the JWT token received during account creation.
       parameters:
-      - description: GUID to identify the token
-        in: query
-        name: guid
-        required: true
-        type: string
-      - description: JWT token generated for account creation
-        in: query
-        name: token
-        required: true
-        type: string
+        - description: GUID to identify the token
+          in: query
+          name: guid
+          required: true
+          type: string
+        - description: JWT token generated for account creation
+          in: query
+          name: token
+          required: true
+          type: string
       responses:
         "200":
           description: '{"token": "value"}'
@@ -512,16 +512,16 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Confirm a new account creation
       tags:
-      - Authentication
+        - Authentication
   /behaviors/{id}:
     get:
       description: Retrieves the full behavior report of a file.
       parameters:
-      - description: Behavior report GUID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Behavior report GUID
+          in: path
+          name: id
+          required: true
+          type: string
       responses:
         "200":
           description: OK
@@ -537,16 +537,16 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Check a behavior report.
       tags:
-      - Behavior
+        - Behavior
   /behaviors/{id}/api-trace/:
     get:
       description: Paginates over the list of APIs
       parameters:
-      - description: Behavior report GUID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Behavior report GUID
+          in: path
+          name: id
+          required: true
+          type: string
       responses:
         "200":
           description: OK
@@ -562,17 +562,17 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: List of APIs log.
       tags:
-      - Behavior
+        - Behavior
   /behaviors/{id}/artifacts/:
     get:
-      description: Returns a paginated list of artifacts' metadata such as memdumps,
-        created files, etc ..
+      description: Returns a paginated list of artifacts' metadata such as memdumps, created files, etc
+        ..
       parameters:
-      - description: Behavior report GUID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Behavior report GUID
+          in: path
+          name: id
+          required: true
+          type: string
       responses:
         "200":
           description: OK
@@ -588,16 +588,16 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: List of artifacts' metadata.
       tags:
-      - Behavior
+        - Behavior
   /behaviors/{id}/sys-events/:
     get:
       description: Paginates over the list of system events.
       parameters:
-      - description: Behavior report GUID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Behavior report GUID
+          in: path
+          name: id
+          required: true
+          type: string
       responses:
         "200":
           description: OK
@@ -613,21 +613,21 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: List of system events.
       tags:
-      - Behavior
+        - Behavior
   /comments/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create a new comment.
       parameters:
-      - description: Comment body
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/comment.CreateCommentRequest'
+        - description: Comment body
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/comment.CreateCommentRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -650,23 +650,23 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Create a new comment
       tags:
-      - Comment
+        - Comment
   /comments/{id}:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Retrieves information about a comment.
       parameters:
-      - description: Comment ID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Comment ID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -686,18 +686,18 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Get comment by ID
       tags:
-      - Comment
+        - Comment
   /comments/{id}/:
     delete:
       description: Deletes a comment by ID.
       parameters:
-      - description: Comment ID
-        in: path
-        name: id
-        required: true
-        type: string
+        - description: Comment ID
+          in: path
+          name: id
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "204":
           description: No Content
@@ -716,28 +716,28 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Deletes a comment
       tags:
-      - Comment
+        - Comment
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Replace a cocument with a new comment's document.
       parameters:
-      - description: Comment ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: New comment data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/comment.UpdateCommentRequest'
+        - description: Comment ID
+          in: path
+          name: id
+          required: true
+          type: string
+        - description: New comment data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/comment.UpdateCommentRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -756,38 +756,38 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Update a comment object (full update)
       tags:
-      - Comment
+        - Comment
   /files/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List files
       parameters:
-      - description: Number of files per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: Number of files per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/pagination.Pages'
-            - properties:
-                items:
+              - $ref: '#/definitions/pagination.Pages'
+              - properties:
                   items:
-                    $ref: '#/definitions/entity.File'
-                  type: array
-              type: object
+                    items:
+                      $ref: '#/definitions/entity.File'
+                    type: array
+                type: object
         "403":
           description: Forbidden
           schema:
@@ -801,22 +801,22 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Retrieves a paginated list of files
       tags:
-      - File
+        - File
     post:
       consumes:
-      - multipart/form-data
+        - multipart/form-data
       description: Upload file for analysis.
       parameters:
-      - description: binary file
-        in: formData
-        name: file
-        required: true
-        type: file
+        - description: binary file
+          in: formData
+          name: file
+          required: true
+          type: file
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -839,23 +839,23 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Submit a new file for scanning
       tags:
-      - File
+        - File
   /files/{sha256}:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Deletes a file by ID.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "204":
           description: No Content
@@ -874,22 +874,22 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Deletes a file
       tags:
-      - File
+        - File
     get:
       consumes:
-      - application/json
+        - application/json
       description: Retrieves the content of a file report.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -909,15 +909,15 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Get a file report
       tags:
-      - File
+        - File
     head:
       description: Check weather a file exists in the database.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       responses:
         "200":
           description: OK
@@ -933,19 +933,19 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Check if a file exists.
       tags:
-      - File
+        - File
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Patch a portion of a file report.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -964,22 +964,22 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Update a file report (partial update)
       tags:
-      - File
+        - File
     put:
       consumes:
-      - application/json
+        - application/json
       description: Replace a file report with a new report
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -998,21 +998,21 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Update a file report (full update)
       tags:
-      - File
+        - File
   /files/{sha256}/comments/:
     get:
       description: List of comments for a given file.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1031,22 +1031,22 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of file comments
       tags:
-      - File
+        - File
   /files/{sha256}/download/:
     get:
       description: Download a binary file. Files are in zip format and password protected.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - multipart/form-data
+        - multipart/form-data
       responses:
         "403":
           description: Forbidden
@@ -1061,22 +1061,21 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Download a file
       tags:
-      - File
+        - File
   /files/{sha256}/generate-presigned-url/:
     post:
-      description: Generate a pre-signed URL to download samples directly from the
-        object storage.
+      description: Generate a pre-signed URL to download samples directly from the object storage.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "403":
           description: Forbidden
@@ -1091,21 +1090,21 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Generate a pre-signed URL for downloading samples.
       tags:
-      - File
+        - File
   /files/{sha256}/like/:
     post:
       description: Adds a file to the like list.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1124,21 +1123,21 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Like a file
       tags:
-      - File
+        - File
   /files/{sha256}/rescan/:
     post:
       description: Rescan an existing file.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "403":
           description: Forbidden
@@ -1153,31 +1152,31 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Rescan an existing file
       tags:
-      - File
+        - File
   /files/{sha256}/strings/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List strings of a file.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
-      - description: Number of strings per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
+        - description: Number of strings per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1197,18 +1196,18 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Returns a paginated list of strings
       tags:
-      - File
+        - File
   /files/{sha256}/summary/:
     get:
       description: File metadata returned in the summary view of a file.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1227,22 +1226,22 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: File summary and metadata
       tags:
-      - File
+        - File
   /files/{sha256}/unlike/:
     post:
       description: Removes a file from the like list.
       parameters:
-      - description: File SHA256
-        in: path
-        name: sha256
-        required: true
-        type: string
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "403":
           description: Forbidden
@@ -1257,38 +1256,38 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Unlike a file
       tags:
-      - File
+        - File
   /users/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List users.
       parameters:
-      - description: Number of items per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: Number of items per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
           schema:
             allOf:
-            - $ref: '#/definitions/pagination.Pages'
-            - properties:
-                items:
+              - $ref: '#/definitions/pagination.Pages'
+              - properties:
                   items:
-                    $ref: '#/definitions/entity.User'
-                  type: array
-              type: object
+                    items:
+                      $ref: '#/definitions/entity.User'
+                    type: array
+                type: object
         "403":
           description: Forbidden
           schema:
@@ -1302,23 +1301,23 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Retrieves a paginated list of users
       tags:
-      - User
+        - User
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create a new user.
       parameters:
-      - description: User data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/user.CreateUserRequest'
+        - description: User data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/user.CreateUserRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "201":
           description: Created
@@ -1342,20 +1341,20 @@ paths:
             $ref: '#/definitions/errors.ErrorResponse'
       summary: Create a new user
       tags:
-      - User
+        - User
   /users/{username}:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Retrieves information about a user.
       parameters:
-      - description: User ID
-        in: path
-        name: username
-        required: true
-        type: string
+        - description: User ID
+          in: path
+          name: username
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1374,22 +1373,22 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: Get user information by user ID
       tags:
-      - User
+        - User
   /users/{username}/:
     delete:
       description: Deletes a user by ID.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "204":
           description: No Content
@@ -1408,28 +1407,28 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Deletes a user
       tags:
-      - User
+        - User
     patch:
       consumes:
-      - application/json
+        - application/json
       description: Replace a user document with a new user's document.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: New user data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/user.UpdateUserRequest'
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: New user data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/user.UpdateUserRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1448,29 +1447,29 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Update a user object (full update)
       tags:
-      - User
+        - User
   /users/{username}/avatar/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Change user avatar
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: User data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/user.UpdateEmailRequest'
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: User data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/user.UpdateEmailRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1497,31 +1496,31 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Update user avatar
       tags:
-      - User
+        - User
   /users/{username}/comments/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List of comments by a user.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: Number of items per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: Number of items per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1540,30 +1539,30 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's comments
       tags:
-      - User
+        - User
   /users/{username}/email/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Change email for logged-in users.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: User data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/user.UpdateEmailRequest'
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: User data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/user.UpdateEmailRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1582,23 +1581,23 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Update email for authenticated users
       tags:
-      - User
+        - User
   /users/{username}/follow/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Start following a user.
       parameters:
-      - description: Target user to follow
-        in: path
-        name: username
-        required: true
-        type: string
+        - description: Target user to follow
+          in: path
+          name: username
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1617,31 +1616,31 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Follow a user
       tags:
-      - User
+        - User
   /users/{username}/followers/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List of users who follow a user.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: Number of items per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: Number of items per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1660,32 +1659,32 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's followers
       tags:
-      - User
+        - User
   /users/{username}/following/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List of users a user follows.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: Number of items per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: Number of items per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1704,32 +1703,32 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's following
       tags:
-      - User
+        - User
   /users/{username}/likes/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List of likes of a user.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: Number of items per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: Number of items per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1748,30 +1747,30 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's likes
       tags:
-      - User
+        - User
   /users/{username}/password/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Change password for logged-in users.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: User data
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/user.UpdateUserRequest'
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: User data
+          in: body
+          name: data
+          required: true
+          schema:
+            $ref: '#/definitions/user.UpdateUserRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1790,31 +1789,31 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Update password for authenticated users
       tags:
-      - User
+        - User
   /users/{username}/submissions/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List of submissions by a user.
       parameters:
-      - description: Username
-        in: path
-        name: username
-        required: true
-        type: string
-      - description: Number of items per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: Username
+          in: path
+          name: username
+          required: true
+          type: string
+        - description: Number of items per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1833,24 +1832,24 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's submissions
       tags:
-      - User
+        - User
   /users/{username}/unfollow/:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Stop following a user.
       parameters:
-      - description: Target user to unfollow
-        in: path
-        name: username
-        required: true
-        type: string
+        - description: Target user to unfollow
+          in: path
+          name: username
+          required: true
+          type: string
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1869,26 +1868,26 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - Bearer: []
+        - Bearer: []
       summary: Unfollow a user
       tags:
-      - User
+        - User
   /users/activities/:
     get:
       consumes:
-      - application/json
+        - application/json
       description: List of activities of a user.
       parameters:
-      - description: Number of items per page
-        in: query
-        name: per_page
-        type: integer
-      - description: Specify the page number
-        in: query
-        name: page
-        type: integer
+        - description: Number of items per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -1907,13 +1906,13 @@ paths:
           schema:
             $ref: '#/definitions/errors.ErrorResponse'
       security:
-      - {}
-      - Bearer: []
+        - {}
+        - Bearer: []
       summary: Returns a paginated list of a user's activities
       tags:
-      - Activity
+        - Activity
 schemes:
-- https
+  - https
 securityDefinitions:
   Bearer:
     description: Enter the token with the `Bearer ` prefix, e.g. "Bearer abcde12345".
