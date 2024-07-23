@@ -220,10 +220,26 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 				time.Sleep(10 * time.Second)
 			}
 
+			// Check if the upload failed.
 			if err != nil {
 				s.logger.Error(err)
 				return
 			}
+
+			// Serialize the msg to send to the orchestrator.
+			msg, err := json.Marshal(FileScanCfg{SHA256: sha256, FileScanRequest: req.scanCfg})
+			if err != nil {
+				s.logger.Error(err)
+				return
+			}
+
+			// Push a message to the queue to scan this file.
+			err = s.producer.Produce(s.topic, msg)
+			if err != nil {
+				s.logger.Error(err)
+				return
+			}
+
 		}()
 
 		// Get the source of the HTTP request from the ctx.
@@ -269,20 +285,6 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 		// Update submissions count on user object.
 		err = s.Patch(ctx, user.ID(), "submissions_count", user.SubmissionsCount+1)
 		if err != nil {
-			return File{}, err
-		}
-
-		// Serialize the msg to send to the orchestrator.
-		msg, err := json.Marshal(FileScanCfg{SHA256: sha256, FileScanRequest: req.scanCfg})
-		if err != nil {
-			s.logger.With(ctx).Error(err)
-			return File{}, err
-		}
-
-		// Push a message to the queue to scan this file.
-		err = s.producer.Produce(s.topic, msg)
-		if err != nil {
-			s.logger.With(ctx).Error(err)
 			return File{}, err
 		}
 

@@ -53,7 +53,8 @@ var flagTplFiles = flag.String("tpl", "./../templates/", "path to html templates
 // @host api.saferwall.com
 // @BasePath /v1
 
-// @securityDefinitions.oauth2 Bearer
+// @securityDefinitions.oauth2.password Bearer
+// @tokenurl auth/login
 // @in header
 // @name Authorization
 // @description Enter the token with the `Bearer ` prefix, e.g. "Bearer abcde12345".
