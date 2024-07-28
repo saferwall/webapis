@@ -91,11 +91,8 @@ func (r resource) get(c echo.Context) error {
 		fields = strings.Split(fieldsParam, ",")
 	}
 
-	if len(fields) > 0 {
-		allowed := areFieldsAllowed(fields)
-		if !allowed {
-			return errors.BadRequest("field not allowed")
-		}
+	if !checkFieldsExist(entity.File{}, fields) {
+		return errors.BadRequest("field not allowed")
 	}
 
 	ctx := c.Request().Context()
