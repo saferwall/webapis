@@ -23,6 +23,7 @@ const (
 var (
 	// ErrDocumentNotFound is returned when the doc does not exist in the DB.
 	ErrDocumentNotFound = errors.New("document not found")
+	ErrSubDocNotFound   = gocb.ErrPathNotFound
 )
 
 // DB represents the database connection.
@@ -147,7 +148,7 @@ func (db *DB) Update(ctx context.Context, key string, val interface{}) error {
 }
 
 // Patch performs a sub document in the collection. Sub documents operations
-//may be quicker and more network-efficient than full-document operations.
+// may be quicker and more network-efficient than full-document operations.
 func (db *DB) Patch(ctx context.Context, key string, path string,
 	val interface{}) error {
 

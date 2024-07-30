@@ -91,10 +91,6 @@ func (r resource) get(c echo.Context) error {
 		fields = strings.Split(fieldsParam, ",")
 	}
 
-	if !checkFieldsExist(entity.File{}, fields) {
-		return errors.BadRequest("field not allowed")
-	}
-
 	ctx := c.Request().Context()
 	file, err := r.service.Get(ctx, c.Param("sha256"), fields)
 	if err != nil {
