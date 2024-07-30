@@ -139,6 +139,8 @@ func BuildErrorResponse(err error, trans ut.Translator) ErrorResponse {
 	}
 	if errors.Is(err, db.ErrDocumentNotFound) {
 		return NotFound("")
+	} else if errors.Is(err, db.ErrSubDocNotFound) {
+		return BadRequest("field not found")
 	}
 	return InternalServerError("")
 }
