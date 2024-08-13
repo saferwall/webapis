@@ -268,9 +268,6 @@ func (s service) Activities(ctx context.Context, id string, offset, limit int) (
 	if err != nil {
 		return nil, err
 	}
-	// if len(result) == 0 {
-	// 	return make([]interface{}, 0), nil
-	// }
 	return result, nil
 }
 
