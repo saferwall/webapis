@@ -96,7 +96,7 @@ func (db *DB) Query(ctx context.Context, statement string,
 		return err
 	}
 
-	var rows []interface{}
+	rows := []interface{}{}
 	for results.Next() {
 		var row interface{}
 		err := results.Row(&row)
