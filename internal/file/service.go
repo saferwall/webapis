@@ -125,6 +125,7 @@ type UpdateFileRequest struct {
 	SHA256      string                 `json:"sha256,omitempty"`
 	SHA512      string                 `json:"sha512,omitempty"`
 	Ssdeep      string                 `json:"ssdeep,omitempty"`
+	TLSH        string                 `json:"tlsh,omitempty"`
 	CRC32       string                 `json:"crc32,omitempty"`
 	Magic       string                 `json:"magic,omitempty"`
 	Size        uint64                 `json:"size,omitempty"`
