@@ -16,6 +16,7 @@ type File struct {
 	SHA256           string                 `json:"sha256,omitempty"`
 	SHA512           string                 `json:"sha512,omitempty"`
 	SSDeep           string                 `json:"ssdeep,omitempty"`
+	TLSH             string                 `json:"tlsh,omitempty"`
 	Crc32            string                 `json:"crc32,omitempty"`
 	Size             int64                  `json:"size,omitempty"`
 	Tags             map[string]interface{} `json:"tags,omitempty"`

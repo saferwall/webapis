@@ -11,6 +11,7 @@ SELECT
       "SHA256": f.sha256,
       "SHA512": f.sha512,
       "SSDeep": f.ssdeep,
+      "TLSH": f.tlsh,
       "Packer": f.packer,
       "Magic": f.magic,
       "Tags": f.tags,
