@@ -1,12 +1,12 @@
 SELECT RAW
-  ARRAY_MAX(
-    [
-      ARRAY_LENGTH(f.strings.ascii),
-      ARRAY_LENGTH(f.strings.wide),
-      ARRAY_LENGTH(f.strings.asm)
-    ]
-  )
-FROM
-  `bucket_name` f
-USE KEYS
-  $sha256
+    ARRAY_LENGTH (
+      ARRAY_FLATTEN (
+      [
+          ARRAY {"value": s, "encoding": "ascii"} FOR s IN f.strings.ascii WHEN s LIKE $term END,
+          ARRAY {"value": s, "encoding": "wide"} FOR s IN f.strings.wide WHEN s LIKE $term END,
+          ARRAY {"value": s, "encoding": "asm"} FOR s IN f.strings.asm WHEN s LIKE $term END
+      ], 1 )
+    )
+
+FROM `bucket_name` f
+USE KEYS $sha256
