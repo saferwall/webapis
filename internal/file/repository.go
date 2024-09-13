@@ -176,9 +176,6 @@ func (r repository) Summary(ctx context.Context, id string) (
 		return nil, err
 	}
 
-	if len(results.([]interface{})) == 0 {
-		return results, nil
-	}
 	return results.([]interface{})[0], nil
 }
 
@@ -205,9 +202,6 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 		return nil, err
 	}
 
-	if len(results.([]interface{})) == 0 {
-		return []interface{}{}, nil
-	}
 	return results.([]interface{}), nil
 }
 
@@ -220,8 +214,8 @@ func (r repository) CountStrings(ctx context.Context, id string,
 	params["sha256"] = id
 
 	query := r.db.N1QLQuery[dbcontext.CountStrings]
-	if queryString == "" {
-		query = r.db.N1QLQuery[dbcontext.CountStringsWithSubstring]
+	params["term"] = "%"
+	if queryString != "" {
 		params["term"] = "%" + queryString + "%"
 	}
 	err := r.db.Count(ctx, query, params, &count)
@@ -237,18 +231,15 @@ func (r repository) Strings(ctx context.Context, id, queryString string, offset,
 	params["offset"] = offset
 	params["limit"] = limit
 	params["sha256"] = id
+	params["term"] = "%"
 
 	query := r.db.N1QLQuery[dbcontext.FileStrings]
 	if queryString != "" {
-		query = r.db.N1QLQuery[dbcontext.FileStringsWithSubstring]
 		params["term"] = "%" + queryString + "%"
 	}
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
-	}
-	if len(results.([]interface{})) == 0 {
-		return results, nil
 	}
 	return results.([]interface{})[0], nil
 }
