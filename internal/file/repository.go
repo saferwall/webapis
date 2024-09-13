@@ -38,8 +38,8 @@ type Repository interface {
 	// Comments returns the list of comments over a file.
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
-	CountStrings(ctx context.Context, id string) (int, error)
-	Strings(ctx context.Context, id string, offset, limit int) (
+	CountStrings(ctx context.Context, id string, queryString string) (int, error)
+	Strings(ctx context.Context, id, queryString string, offset, limit int) (
 		interface{}, error)
 }
 
@@ -212,18 +212,23 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 }
 
 // CountStrings returns the number of strings in a file doc in the database.
-func (r repository) CountStrings(ctx context.Context, id string) (int, error) {
+func (r repository) CountStrings(ctx context.Context, id string,
+	queryString string) (int, error) {
 	var count int
 
 	params := make(map[string]interface{}, 1)
 	params["sha256"] = id
 
 	query := r.db.N1QLQuery[dbcontext.CountStrings]
+	if queryString == "" {
+		query = r.db.N1QLQuery[dbcontext.CountStringsWithSubstring]
+		params["term"] = "%" + queryString + "%"
+	}
 	err := r.db.Count(ctx, query, params, &count)
 	return count, err
 }
 
-func (r repository) Strings(ctx context.Context, id string, offset,
+func (r repository) Strings(ctx context.Context, id, queryString string, offset,
 	limit int) (interface{}, error) {
 
 	var results interface{}
@@ -234,6 +239,10 @@ func (r repository) Strings(ctx context.Context, id string, offset,
 	params["sha256"] = id
 
 	query := r.db.N1QLQuery[dbcontext.FileStrings]
+	if queryString != "" {
+		query = r.db.N1QLQuery[dbcontext.FileStringsWithSubstring]
+		params["term"] = "%" + queryString + "%"
+	}
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err

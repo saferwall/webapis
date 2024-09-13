@@ -51,8 +51,8 @@ type Service interface {
 	Rescan(ctx context.Context, id string, input FileScanRequest) error
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
-	CountStrings(ctx context.Context, id string) (int, error)
-	Strings(ctx context.Context, id string, offset, limit int) (interface{}, error)
+	CountStrings(ctx context.Context, id string, queryString string) (int, error)
+	Strings(ctx context.Context, id string, queryString string, offset, limit int) (interface{}, error)
 	Download(ctx context.Context, id string, zipFile *string) error
 	GeneratePresignedURL(ctx context.Context, id string) (string, error)
 }
@@ -500,18 +500,18 @@ func (s service) Comments(ctx context.Context, id string, offset, limit int) (
 	return result, nil
 }
 
-func (s service) CountStrings(ctx context.Context, id string) (int, error) {
-	count, err := s.repo.CountStrings(ctx, id)
+func (s service) CountStrings(ctx context.Context, id string, queryString string) (int, error) {
+	count, err := s.repo.CountStrings(ctx, id, queryString)
 	if err != nil {
 		return 0, err
 	}
 	return count, err
 }
 
-func (s service) Strings(ctx context.Context, id string, offset, limit int) (
+func (s service) Strings(ctx context.Context, id string, queryString string, offset, limit int) (
 	interface{}, error) {
 
-	result, err := s.repo.Strings(ctx, id, offset, limit)
+	result, err := s.repo.Strings(ctx, id, queryString, offset, limit)
 	if err != nil {
 		return nil, err
 	}
