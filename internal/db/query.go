@@ -22,10 +22,12 @@ const (
 	BehaviorReport
 	CountAnoUserActivities
 	CountStrings
+	CountStringsWithSubstring
 	CountUserActivities
 	DeleteActivity
 	FileComments
 	FileStrings
+	FileStringsWithSubstring
 	FileSummary
 	GetAllDocType
 	UserActivities
@@ -37,27 +39,29 @@ const (
 )
 
 var fileQueryMap = map[string]n1qlQuery{
-	"ano-user-activities.n1ql":       AnoUserActivities,
-	"ano-user-comments.n1ql":         AnoUserComments,
-	"ano-user-followers.n1ql":        AnoUserFollowers,
-	"ano-user-following.n1ql":        AnoUserFollowing,
-	"ano-user-likes.n1ql":            AnoUserLikes,
-	"ano-user-submissions.n1ql":      AnoUserSubmissions,
-	"behavior-report.n1ql":           BehaviorReport,
-	"count-ano-user-activities.n1ql": CountAnoUserActivities,
-	"count-strings.n1ql":             CountStrings,
-	"count-user-activities.n1ql":     CountUserActivities,
-	"delete-activity.n1ql":           DeleteActivity,
-	"file-comments.n1ql":             FileComments,
-	"file-strings.n1ql":              FileStrings,
-	"file-summary.n1ql":              FileSummary,
-	"get-all-doc-type.n1ql":          GetAllDocType,
-	"user-activities.n1ql":           UserActivities,
-	"user-comments.n1ql":             UserComments,
-	"user-followers.n1ql":            UserFollowers,
-	"user-following.n1ql":            UserFollowing,
-	"user-likes.n1ql":                UserLikes,
-	"user-submissions.n1ql":          UserSubmissions,
+	"ano-user-activities.n1ql":          AnoUserActivities,
+	"ano-user-comments.n1ql":            AnoUserComments,
+	"ano-user-followers.n1ql":           AnoUserFollowers,
+	"ano-user-following.n1ql":           AnoUserFollowing,
+	"ano-user-likes.n1ql":               AnoUserLikes,
+	"ano-user-submissions.n1ql":         AnoUserSubmissions,
+	"behavior-report.n1ql":              BehaviorReport,
+	"count-ano-user-activities.n1ql":    CountAnoUserActivities,
+	"count-strings.n1ql":                CountStrings,
+	"count-strings-with-substring.n1ql": CountStringsWithSubstring,
+	"count-user-activities.n1ql":        CountUserActivities,
+	"delete-activity.n1ql":              DeleteActivity,
+	"file-comments.n1ql":                FileComments,
+	"file-strings.n1ql":                 FileStrings,
+	"file-strings-with-substring.n1ql":  FileStringsWithSubstring,
+	"file-summary.n1ql":                 FileSummary,
+	"get-all-doc-type.n1ql":             GetAllDocType,
+	"user-activities.n1ql":              UserActivities,
+	"user-comments.n1ql":                UserComments,
+	"user-followers.n1ql":               UserFollowers,
+	"user-following.n1ql":               UserFollowing,
+	"user-likes.n1ql":                   UserLikes,
+	"user-submissions.n1ql":             UserSubmissions,
 }
 
 // walk returns list of files in directory.

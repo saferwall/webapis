@@ -1,4 +1,4 @@
-// Copyright 2022 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -38,7 +38,7 @@ func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
 			return e.BadRequest("invalid sha256 hash")
 		}
 
-		// Change the <sha256> path paramater to lower case. This will reflect on
+		// Change the <sha256> path parameter to lower case. This will reflect on
 		// any handler that uses `VerifyHash` middleware.
 		c.SetParamValues(sha256)
 

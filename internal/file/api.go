@@ -303,6 +303,7 @@ func (r resource) list(c echo.Context) error {
 // @Param sha256 path string true "File SHA256"
 // @Param per_page query uint false "Number of strings per page"
 // @Param page query uint false "Specify the page number"
+// @Param q query string false "Specify the string to search for"
 // @Success 200 {object} pagination.Pages
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
@@ -310,13 +311,16 @@ func (r resource) list(c echo.Context) error {
 // @Router /files/{sha256}/strings/ [get]
 func (r resource) strings(c echo.Context) error {
 	ctx := c.Request().Context()
-	count, err := r.service.CountStrings(ctx, c.Param("sha256"))
+
+	searchTerm := c.QueryParam("q")
+
+	count, err := r.service.CountStrings(ctx, c.Param("sha256"), searchTerm)
 	if err != nil {
 		return err
 	}
 	pages := pagination.NewFromRequest(c.Request(), count)
 	strings, err := r.service.Strings(
-		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
+		ctx, c.Param("sha256"), searchTerm, pages.Offset(), pages.Limit())
 	if err != nil {
 		return err
 	}
