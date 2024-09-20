@@ -4,9 +4,7 @@ SELECT RAW
         ARRAY {"value": s, "encoding": "ascii"} FOR s IN f.strings.ascii WHEN s LIKE $term END,
         ARRAY {"value": s, "encoding": "wide"} FOR s IN f.strings.wide WHEN s LIKE $term END,
         ARRAY {"value": s,  "encoding": "asm"} FOR s IN f.strings.asm WHEN s LIKE $term END
-    ], 1 )
+    ], 1 )[$offset:$limit]
 
 FROM `bucket_name` f
 USE KEYS $sha256
-OFFSET $offset
-LIMIT $limit

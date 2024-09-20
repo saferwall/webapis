@@ -318,9 +318,18 @@ func (r resource) strings(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// The offset and limit passed to the repository interface are accessing
+	// an array [limit:off] rather than OFFSET/LIMIT in SQL.
+	// Adjust them so they can access arrays properly.
 	pages := pagination.NewFromRequest(c.Request(), count)
+	limit := pages.Offset() + pages.Limit()
+	if count < limit {
+		limit = count
+	}
+
 	strings, err := r.service.Strings(
-		ctx, c.Param("sha256"), searchTerm, pages.Offset(), pages.Limit())
+		ctx, c.Param("sha256"), searchTerm, pages.Offset(), limit)
 	if err != nil {
 		return err
 	}
