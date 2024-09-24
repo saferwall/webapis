@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -118,7 +119,7 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 	for _, u := range res.([]interface{}) {
 		behavior := entity.Behavior{}
 		b, _ := json.Marshal(u)
-		 _ = json.Unmarshal(b, &behavior)
+		_ = json.Unmarshal(b, &behavior)
 		behaviors = append(behaviors, behavior)
 	}
 	return behaviors, nil
@@ -209,9 +210,21 @@ func (r repository) CountEvents(ctx context.Context, id string) (int, error) {
 			} else {
 				statement += " AND"
 			}
+
+			// Allow client to either use field=x&field=y, or field=x,y
+			for _, val := range v {
+				v = strings.Split(val, ",")
+			}
+
+			if k == "q" {
+				statement += fmt.Sprintf(" LOWER(event.`path`) LIKE LOWER($q)")
+				params[k] = "%" + v[0] + "%"
+			} else {
+				statement += fmt.Sprintf(" event.%s IN $%s", k, k)
+				params[k] = v
+			}
+
 			i++
-			statement += fmt.Sprintf(" event.%s IN $%s", k, k)
-			params[k] = v
 		}
 	} else {
 		statement =
@@ -289,9 +302,22 @@ func (r repository) Events(ctx context.Context, id string, offset,
 			} else {
 				statement += " AND"
 			}
+
+			// Allow client to either use field=x&field=y, or field=x,y
+			for _, val := range v {
+				v = strings.Split(val, ",")
+			}
+
+			if k == "q" {
+				statement += fmt.Sprintf(" LOWER(event.`path`) LIKE LOWER($q)")
+				params[k] = "%" + v[0] + "%"
+			} else {
+				statement += fmt.Sprintf(" event.%s IN $%s", k, k)
+				params[k] = v
+			}
+
 			i++
-			statement += fmt.Sprintf(" event.%s IN $%s", k, k)
-			params[k] = v
+
 		}
 	}
 
