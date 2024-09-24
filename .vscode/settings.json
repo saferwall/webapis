@@ -22,5 +22,6 @@
         "Taymiyyah",
         "templater",
         "unfollow"
-    ]
+    ],
+    "makefile.configureOnOpen": false
 }
