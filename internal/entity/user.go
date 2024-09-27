@@ -20,7 +20,6 @@ type User struct {
 	MemberSince      int64    `json:"member_since"`
 	LastSeen         int64    `json:"last_seen"`
 	Admin            bool     `json:"admin"`
-	HasAvatar        bool     `json:"has_avatar"`
 	Following        []string `json:"following"`
 	FollowingCount   int      `json:"following_count"`
 	Followers        []string `json:"followers"`

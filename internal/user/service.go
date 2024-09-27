@@ -532,8 +532,6 @@ func (s service) UpdateAvatar(ctx context.Context, id string, src io.Reader) err
 		return err
 	}
 
-	user.HasAvatar = true
-
 	return s.repo.Update(ctx, user)
 }
 
