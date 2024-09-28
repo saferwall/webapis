@@ -283,12 +283,6 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			return File{}, err
 		}
 
-		// Update submissions count on user object.
-		err = s.Patch(ctx, user.ID(), "submissions_count", user.SubmissionsCount+1)
-		if err != nil {
-			return File{}, err
-		}
-
 		return s.Get(ctx, sha256, nil)
 
 	} else {

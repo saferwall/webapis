@@ -368,7 +368,7 @@ func (s service) CountSubmissions(ctx context.Context, id string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return user.SubmissionsCount, err
+	return len(user.Submissions), err
 }
 
 func (s service) Follow(ctx context.Context, id string) error {
