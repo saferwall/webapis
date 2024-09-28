@@ -58,6 +58,8 @@ type Service interface {
 	UpdateEmail(ctx context.Context, input UpdateEmailRequest) error
 	GenerateConfirmationEmail(ctx context.Context, user User) (
 		ConfirmAccountResponse, error)
+	Like(ctx context.Context, id string, userLike entity.UserLike) error
+	Unlike(ctx context.Context, id, sha256 string) error
 }
 
 var (
@@ -334,7 +336,7 @@ func (s service) CountLikes(ctx context.Context, id string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return user.LikesCount, err
+	return len(user.Likes), err
 }
 
 func (s service) CountFollowing(ctx context.Context, id string) (int, error) {
@@ -563,4 +565,12 @@ func (s service) GenerateConfirmationEmail(ctx context.Context, user User) (
 	}
 
 	return resp, nil
+}
+
+func (s service) Like(ctx context.Context, id string, userLike entity.UserLike) error {
+	return s.repo.Like(ctx, id, userLike)
+}
+
+func (s service) Unlike(ctx context.Context, id, sha256 string) error {
+	return s.repo.Unlike(ctx, id, sha256)
 }
