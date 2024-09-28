@@ -344,7 +344,7 @@ func (s service) CountFollowing(ctx context.Context, id string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return user.FollowingCount, err
+	return len(user.Following), err
 }
 
 func (s service) CountFollowers(ctx context.Context, id string) (int, error) {
@@ -393,24 +393,24 @@ func (s service) Follow(ctx context.Context, id string) error {
 		return errUserSelfFollow
 	}
 
-	if !isStringInSlice(targetUsername, curUser.Following) {
-		curUser.Following = append(curUser.Following, targetUsername)
-		curUser.FollowingCount += 1
-
-		// add new activity
-		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
-			Kind:     "follow",
-			Username: curUser.Username,
-			Target:   targetUser.Username,
-			Source:   source,
-		}); err != nil {
-			return err
-		}
-		if err = s.repo.Update(ctx, curUser.User); err != nil {
-			return err
-		}
-
+	// Add new activity even if the user is already followed.
+	if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
+		Kind:     "follow",
+		Username: curUser.Username,
+		Target:   targetUser.Username,
+		Source:   source,
+	}); err != nil {
+		return err
 	}
+
+	newFollow := entity.UserFollowing{
+		Username:  targetUser.Username,
+		Timestamp: time.Now().Unix(),
+	}
+	if err = s.repo.Follow(ctx, curUser.ID(), newFollow); err != nil {
+		return err
+	}
+
 	if !isStringInSlice(curUsername, targetUser.Followers) {
 		targetUser.Followers = append(targetUser.Followers, curUsername)
 		targetUser.FollowersCount += 1
@@ -438,17 +438,10 @@ func (s service) UnFollow(ctx context.Context, id string) error {
 		return errUserSelfFollow
 	}
 
-	if isStringInSlice(targetUsername, curUser.Following) {
-		curUser.Following = removeStringFromSlice(
-			curUser.Following, targetUsername)
-		curUser.FollowingCount -= 1
-
-		// delete corresponding activity.
-		if err = s.actSvc.DeleteWith(ctx, "follow", curUser.Username,
-			targetUser.Username); err != nil {
-			return err
-		}
+	if err = s.repo.Unfollow(ctx, curUser.ID(), targetUser.Username); err != nil {
+		return err
 	}
+
 	if isStringInSlice(curUsername, targetUser.Followers) {
 		targetUser.Followers = removeStringFromSlice(
 			targetUser.Followers, curUsername)

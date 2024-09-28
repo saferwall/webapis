@@ -92,10 +92,12 @@ func (r resource) get(c echo.Context) error {
 		User
 		LikesCount       int `json:"likes_count"`
 		SubmissionsCount int `json:"submissions_count"`
+		FollowingCount   int `json:"following_count"`
 	}{
 		User:             user,
 		LikesCount:       len(user.Likes),
 		SubmissionsCount: len(user.Submissions),
+		FollowingCount:   len(user.Following),
 	}
 	return c.JSON(http.StatusOK, response)
 }
