@@ -46,6 +46,8 @@ type Repository interface {
 		[]interface{}, error)
 	Activities(ctx context.Context, id string, offset, limit int) ([]interface{}, error)
 	CountActivities(ctx context.Context) (int, error)
+	Like(ctx context.Context, id string, userLike entity.UserLike) error
+	Unlike(ctx context.Context, id, sha256 string) error
 }
 
 // repository persists users in database.
@@ -407,4 +409,30 @@ func (r repository) CountActivities(ctx context.Context) (int, error) {
 	}
 
 	return count, nil
+}
+
+func (r repository) Like(ctx context.Context, id string, userLike entity.UserLike) error {
+
+	var results interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["sha256"] = userLike.SHA256
+	params["ts"] = userLike.Timestamp
+	params["user"] = id
+
+	query := r.db.N1QLQuery[dbcontext.ActionLike]
+	return r.db.Query(ctx, query, params, &results)
+}
+
+func (r repository) Unlike(ctx context.Context, id, sha256 string) error {
+
+	var results interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["sha256"] = sha256
+	params["user"] = id
+
+	query := r.db.N1QLQuery[dbcontext.ActionUnlike]
+	return r.db.Query(ctx, query, params, &results)
+
 }

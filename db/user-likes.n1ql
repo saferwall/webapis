@@ -2,18 +2,18 @@
 
 SELECT
   {
-    "id": META(act).id,
-    "date": act.timestamp,
+    "id": UUID(),
+    "date": l.ts,
     "liked": ARRAY_BINARY_SEARCH(
       ARRAY_SORT(
         (
-          SELECT
-            RAW likes
+          SELECT RAW
+            ARRAY like_item.sha256 FOR like_item IN u.`likes` END AS sha256_array
           FROM
-            `bucket_name`
+            `bucket_name` u
           USE KEYS
             $loggedInUser
-        ) [0]
+        )[0]
       ),
       f.sha256
     ) >= 0,
@@ -36,19 +36,14 @@ SELECT
 FROM
   (
     SELECT
-      u.*
+      userLikes.*
     FROM
       `bucket_name` s
     USE KEYS
       $user
-      JOIN `bucket_name` u ON KEYS s.`likes`
-  ) AS f
-  LEFT JOIN `bucket_name` act ON act.target = f.sha256
-WHERE
-  act.`type` = "activity"
-  AND act.kind = "like"
-  AND LOWER(act.username) = $user
-ORDER BY
-  act.timestamp DESC OFFSET $offset
+    UNNEST s.likes AS userLikes
+  ) AS l
+  LEFT JOIN `bucket_name` f ON f.sha256 = l.sha256
+  WHERE f.`type` = "file"OFFSET $offset
 LIMIT
   $limit

@@ -389,26 +389,21 @@ func (s service) Like(ctx context.Context, sha256 string) error {
 	// Get the source of the HTTP request from the ctx.
 	source, _ := ctx.Value(entity.SourceKey).(string)
 
-	if !isStringInSlice(sha256, user.Likes) {
-		user.Likes = append(user.Likes, sha256)
-		user.LikesCount += 1
-		user, err = s.userSvc.Update(ctx, user.ID(), user)
-		if err != nil {
-			return err
-		}
-
-		// add new `like` activity.
-		if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
-			Kind:     "like",
-			Username: user.Username,
-			Target:   sha256,
-			Source:   source,
-		}); err != nil {
-			return err
-		}
+	// Add new `like` activity even if the file is already liked.
+	if _, err = s.actSvc.Create(ctx, activity.CreateActivityRequest{
+		Kind:     "like",
+		Username: user.Username,
+		Target:   sha256,
+		Source:   source,
+	}); err != nil {
+		return err
 	}
 
-	return nil
+	newLike := entity.UserLike{
+		SHA256:    sha256,
+		Timestamp: time.Now().Unix(),
+	}
+	return s.userSvc.Like(ctx, user.ID(), newLike)
 }
 
 func (s service) Unlike(ctx context.Context, sha256 string) error {
@@ -419,22 +414,13 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 		return err
 	}
 
-	if isStringInSlice(sha256, user.Likes) {
-		user.Likes = removeStringFromSlice(user.Likes, sha256)
-		user.LikesCount -= 1
-		user, err = s.userSvc.Update(ctx, user.ID(), user)
-		if err != nil {
-			return err
-		}
-
-		// delete corresponding activity.
-		if err = s.actSvc.DeleteWith(ctx, "like", user.ID(),
-			sha256); err != nil {
-			return err
-		}
+	// delete corresponding activity.
+	if err = s.actSvc.DeleteWith(ctx, "like", user.ID(),
+		sha256); err != nil {
+		return err
 	}
 
-	return nil
+	return s.userSvc.Unlike(ctx, user.ID(), sha256)
 }
 
 func (s service) Rescan(ctx context.Context, sha256 string, input FileScanRequest) error {
