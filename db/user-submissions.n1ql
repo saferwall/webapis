@@ -2,48 +2,49 @@
 
 SELECT
   {
-      "id": META(a).id,
-      "liked": ARRAY_BINARY_SEARCH(
-        ARRAY_SORT(
-          (
-            SELECT RAW
-              n.`target`
-            FROM
-              `bucket_name` n
-            WHERE n.`type` = "activity"
-                AND n.`kind` = "submit"
-                AND n.`username` = $loggedInUser
+    "id": UUID(),
+    "date": l.ts,
+    "liked": ARRAY_BINARY_SEARCH(
+      ARRAY_SORT(
+        (
+          SELECT RAW
+            ARRAY like_item.sha256 FOR like_item IN u.`likes` END AS sha256_array
+          FROM
+            `bucket_name` u
+          USE KEYS
+            $loggedInUser
+        )[0]
+      ),
+      f.sha256
+    ) >= 0,
+    "file": {
+      "hash": f.sha256,
+      "tags": f.tags,
+      "filename": f.submissions [0].filename,
+      "class": f.ml.pe.predicted_class,
+      "multiav": {
+        "value": ARRAY_COUNT(
+          ARRAY_FLATTEN(
+            ARRAY i.infected FOR i IN OBJECT_VALUES(f.multiav.last_scan) WHEN i.infected = TRUE END,
+            1
           )
         ),
-        f.sha256
-      ) >= 0,
-      "date": a.timestamp,
-      "file": {
-        "hash": f.sha256,
-        "tags": f.tags,
-        "filename": f.submissions [0].filename,
-        "class": f.ml.pe.predicted_class,
-        "multiav": {
-          "value": ARRAY_COUNT(
-            ARRAY_FLATTEN(
-              ARRAY i.infected
-               FOR i IN OBJECT_VALUES(f.multiav.last_scan)
-                WHEN i.infected = TRUE END, 1
-            )
-          ),
-          "count": OBJECT_LENGTH(f.multiav.last_scan)
-        }
+        "count": OBJECT_LENGTH(f.multiav.last_scan)
       }
-}.*
+    }
+  }.*
 FROM
-  `bucket_name` a
-  LEFT JOIN `bucket_name` f ON KEYS a.target
-WHERE
-  a.`type` = 'activity'
-    AND LOWER(a.`username`) = $user
-    AND a.`kind` = "submit"
-ORDER BY
-  a.timestamp DESC
+  (
+    SELECT
+      userSubmissions.*
+    FROM
+      `bucket_name` s
+    USE KEYS
+      $user
+    UNNEST s.submissions AS userSubmissions
+  ) AS l
+LEFT JOIN `bucket_name` f ON f.sha256 = l.sha256
+WHERE f.`type` = "file"
 OFFSET $offset
 LIMIT
   $limit

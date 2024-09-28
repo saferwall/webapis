@@ -30,7 +30,7 @@ FROM
       $user
     UNNEST s.likes AS userLikes
   ) AS l
-  LEFT JOIN `bucket_name` f ON f.sha256 = l.sha256
+LEFT JOIN `bucket_name` f ON f.sha256 = l.sha256
 WHERE f.`type` = "file"
 OFFSET $offset
 LIMIT

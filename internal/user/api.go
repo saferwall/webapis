@@ -86,7 +86,18 @@ func (r resource) get(c echo.Context) error {
 
 	// Always hide the password.
 	user.Password = ""
-	return c.JSON(http.StatusOK, user)
+
+	// Create a new struct dynamically including LikesCount
+	response := struct {
+		User
+		LikesCount       int `json:"likes_count"`
+		SubmissionsCount int `json:"submissions_count"`
+	}{
+		User:             user,
+		LikesCount:       len(user.Likes),
+		SubmissionsCount: len(user.Submissions),
+	}
+	return c.JSON(http.StatusOK, response)
 }
 
 // @Summary Create a new user

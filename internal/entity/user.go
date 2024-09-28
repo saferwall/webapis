@@ -12,27 +12,33 @@ type UserLike struct {
 	Timestamp int64  `json:"ts"`
 }
 
+// UserSubmissions represents file uploads by a user.
+type UserSubmission struct {
+	SHA256    string `json:"sha256"`
+	Timestamp int64  `json:"ts"`
+}
+
 // User represents a user.
 type User struct {
-	Type             string     `json:"type"`
-	Email            string     `json:"email,omitempty"`
-	Username         string     `json:"username"`
-	Password         string     `json:"password,omitempty"`
-	FullName         string     `json:"name"`
-	Location         string     `json:"location"`
-	URL              string     `json:"url"`
-	Bio              string     `json:"bio"`
-	Confirmed        bool       `json:"confirmed"`
-	MemberSince      int64      `json:"member_since"`
-	LastSeen         int64      `json:"last_seen"`
-	Admin            bool       `json:"admin"`
-	Following        []string   `json:"following"`
-	FollowingCount   int        `json:"following_count"`
-	Followers        []string   `json:"followers"`
-	FollowersCount   int        `json:"followers_count"`
-	Likes            []UserLike `json:"likes"`
-	SubmissionsCount int        `json:"submissions_count"`
-	CommentsCount    int        `json:"comments_count"`
+	Type           string           `json:"type"`
+	Email          string           `json:"email,omitempty"`
+	Username       string           `json:"username"`
+	Password       string           `json:"password,omitempty"`
+	FullName       string           `json:"name"`
+	Location       string           `json:"location"`
+	URL            string           `json:"url"`
+	Bio            string           `json:"bio"`
+	Confirmed      bool             `json:"confirmed"`
+	MemberSince    int64            `json:"member_since"`
+	LastSeen       int64            `json:"last_seen"`
+	Admin          bool             `json:"admin"`
+	Following      []string         `json:"following"`
+	FollowingCount int              `json:"following_count"`
+	Followers      []string         `json:"followers"`
+	FollowersCount int              `json:"followers_count"`
+	Likes          []UserLike       `json:"likes"`
+	Submissions    []UserSubmission `json:"submissions"`
+	CommentsCount  int              `json:"comments_count"`
 }
 
 // UserPrivate represent a user with sensitive fields included.
