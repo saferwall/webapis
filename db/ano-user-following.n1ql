@@ -4,17 +4,10 @@ SELECT RAW {
   "id": META(p).id,
   "username": p.`username`,
   "member_since": p.`member_since`,
-  "follow": false
-}
-FROM
-  `bucket_name` p
-USE KEYS [(
-    SELECT
-      RAW u.`following`
-    FROM
-      `bucket_name` u
-    USE KEYS $user
-    )[0]]
+  "follow": FALSE }
+FROM `bucket_name` p USE KEYS [(
+    SELECT RAW ARRAY LOWER(u.username) FOR u IN s.`following` END
+    FROM `bucket_name` s USE KEYS $user )[0]]
 OFFSET $offset
 LIMIT
   $limit

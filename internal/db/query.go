@@ -37,12 +37,16 @@ const (
 	UserLikes
 	UserSubmissions
 	ActionLike
+	ActionFollow
 	ActionUnlike
+	ActionUnfollow
 )
 
 var fileQueryMap = map[string]n1qlQuery{
 	"action-like.n1ql":               ActionLike,
+	"action-follow.n1ql":             ActionFollow,
 	"action-unlike.n1ql":             ActionUnlike,
+	"action-unfollow.n1ql":           ActionUnfollow,
 	"ano-user-activities.n1ql":       AnoUserActivities,
 	"ano-user-comments.n1ql":         AnoUserComments,
 	"ano-user-followers.n1ql":        AnoUserFollowers,

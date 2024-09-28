@@ -18,6 +18,12 @@ type UserSubmission struct {
 	Timestamp int64  `json:"ts"`
 }
 
+// UserFollowing represents users which current user is following.
+type UserFollowing struct {
+	Username  string `json:"username"`
+	Timestamp int64  `json:"ts"`
+}
+
 // User represents a user.
 type User struct {
 	Type           string           `json:"type"`
@@ -32,8 +38,7 @@ type User struct {
 	MemberSince    int64            `json:"member_since"`
 	LastSeen       int64            `json:"last_seen"`
 	Admin          bool             `json:"admin"`
-	Following      []string         `json:"following"`
-	FollowingCount int              `json:"following_count"`
+	Following      []UserFollowing  `json:"following"`
 	Followers      []string         `json:"followers"`
 	FollowersCount int              `json:"followers_count"`
 	Likes          []UserLike       `json:"likes"`
