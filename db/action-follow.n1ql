@@ -1,0 +1,6 @@
+/* N1QL query to prepend a username to the user's following. */
+
+UPDATE `bucket_name`
+USE KEYS $user
+SET `following` = ARRAY_PREPEND({"username": $username, "ts": $ts}, `following`)
+WHERE NOT ANY item IN `following` SATISFIES item.username = $username END;

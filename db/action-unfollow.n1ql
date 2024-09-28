@@ -1,0 +1,7 @@
+/* N1QL query to remove a user from a user's following. */
+
+UPDATE `bucket_name`
+USE KEYS $user
+SET `following` = ARRAY item FOR item IN `following`
+             WHEN item.username != $username END
+WHERE ANY item IN `following` SATISFIES item.username = $username END;
