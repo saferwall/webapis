@@ -173,6 +173,10 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 		Email:       strings.ToLower(req.Email),
 		MemberSince: now.Unix(),
 		LastSeen:    now.Unix(),
+		Following:   []entity.UserFollows{},
+		Followers:   []entity.UserFollows{},
+		Submissions: []entity.UserSubmission{},
+		Likes:       []entity.UserLike{},
 	})
 	if err != nil {
 		return User{}, err
