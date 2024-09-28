@@ -352,7 +352,7 @@ func (s service) CountFollowers(ctx context.Context, id string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return user.FollowersCount, err
+	return len(user.Followers), err
 }
 
 func (s service) CountComments(ctx context.Context, id string) (int, error) {
@@ -403,20 +403,13 @@ func (s service) Follow(ctx context.Context, id string) error {
 		return err
 	}
 
-	newFollow := entity.UserFollowing{
+	newFollow := entity.UserFollows{
 		Username:  targetUser.Username,
 		Timestamp: time.Now().Unix(),
 	}
-	if err = s.repo.Follow(ctx, curUser.ID(), newFollow); err != nil {
+	if err = s.repo.Follow(ctx, curUser.Username, newFollow); err != nil {
 		return err
 	}
-
-	if !isStringInSlice(curUsername, targetUser.Followers) {
-		targetUser.Followers = append(targetUser.Followers, curUsername)
-		targetUser.FollowersCount += 1
-		return s.repo.Update(ctx, targetUser.User)
-	}
-
 	return nil
 }
 
@@ -438,14 +431,8 @@ func (s service) UnFollow(ctx context.Context, id string) error {
 		return errUserSelfFollow
 	}
 
-	if err = s.repo.Unfollow(ctx, curUser.ID(), targetUser.Username); err != nil {
+	if err = s.repo.Unfollow(ctx, curUser.Username, targetUser.Username); err != nil {
 		return err
-	}
-
-	if isStringInSlice(curUsername, targetUser.Followers) {
-		targetUser.Followers = removeStringFromSlice(
-			targetUser.Followers, curUsername)
-		targetUser.FollowersCount -= 1
 	}
 
 	if err = s.repo.Update(ctx, curUser.User); err != nil {

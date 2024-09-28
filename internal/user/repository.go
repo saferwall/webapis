@@ -47,9 +47,9 @@ type Repository interface {
 	Activities(ctx context.Context, id string, offset, limit int) ([]interface{}, error)
 	CountActivities(ctx context.Context) (int, error)
 	Like(ctx context.Context, id string, userLike entity.UserLike) error
-	Follow(ctx context.Context, id string, userLike entity.UserFollowing) error
+	Follow(ctx context.Context, username string, userLike entity.UserFollows) error
 	Unlike(ctx context.Context, id, sha256 string) error
-	Unfollow(ctx context.Context, id, username string) error
+	Unfollow(ctx context.Context, username, targetUsername string) error
 }
 
 // repository persists users in database.
@@ -438,26 +438,26 @@ func (r repository) Unlike(ctx context.Context, id, sha256 string) error {
 	return r.db.Query(ctx, query, params, &results)
 }
 
-func (r repository) Follow(ctx context.Context, id string, userFollow entity.UserFollowing) error {
+func (r repository) Follow(ctx context.Context, username string, userFollow entity.UserFollows) error {
 
 	var results interface{}
 
 	params := make(map[string]interface{}, 1)
 	params["username"] = userFollow.Username
 	params["ts"] = userFollow.Timestamp
-	params["user"] = id
+	params["user"] = username
 
 	query := r.db.N1QLQuery[dbcontext.ActionFollow]
 	return r.db.Query(ctx, query, params, &results)
 }
 
-func (r repository) Unfollow(ctx context.Context, id, username string) error {
+func (r repository) Unfollow(ctx context.Context, username, targetUsername string) error {
 
 	var results interface{}
 
 	params := make(map[string]interface{}, 1)
-	params["username"] = username
-	params["user"] = id
+	params["username"] = targetUsername
+	params["user"] = username
 
 	query := r.db.N1QLQuery[dbcontext.ActionUnfollow]
 	return r.db.Query(ctx, query, params, &results)
