@@ -5,13 +5,10 @@ WITH user_following AS (
         s.`following`
     FROM
         `bucket_name` AS s
-    USE KEYS
-        $user
+    USE KEYS $user
 )[0]),
 activities AS (
-    SELECT
-        activity.*,
-        d.username,
+    SELECT COUNT(*) AS activity_count
     FROM
         user_following AS d
     INNER JOIN `bucket_name` AS activity ON activity.username = d.username
@@ -21,9 +18,5 @@ activities AS (
         AND activity.kind != 'comment'
 )
 
-SELECT RAW COUNT(*)
-FROM
-    activities AS activity
-    INNER JOIN `bucket_name` AS f ON activity.target = META(f).id
-WHERE
-    f.`type` = 'file'
+SELECT RAW activity_count
+FROM activities;
