@@ -2,12 +2,6 @@
 
 UPDATE `bucket_name`
 USE KEYS LOWER($user)
-SET `following` = ARRAY item FOR item IN `following`
+SET `DYNAMIC_FIELD` = ARRAY item FOR item IN `DYNAMIC_FIELD`
              WHEN item.username != $username END
-WHERE ANY item IN `following` SATISFIES item.username = $username END;
-
-UPDATE `bucket_name`
-USE KEYS LOWER($username)
-SET `followers` = ARRAY item FOR item IN `followers`
-             WHEN item.username != $user END
-WHERE ANY item IN `followers` SATISFIES item.username = $user END;
+WHERE ANY item IN `DYNAMIC_FIELD` SATISFIES item.username = $username END;

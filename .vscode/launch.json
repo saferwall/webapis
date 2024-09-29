@@ -10,10 +10,13 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/cmd",
+            // "program": "${workspaceFolder}/cmd/migrator",
             "env": {
                 "SFW_WEBAPIS_DEPLOYMENT_KIND": "local"
-              },
-            "dlvFlags": ["--check-go-version=false"],
+            },
+            "dlvFlags": [
+                "--check-go-version=false"
+            ],
         }
     ]
 }

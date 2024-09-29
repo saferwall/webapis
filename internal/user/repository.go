@@ -448,7 +448,19 @@ func (r repository) Follow(ctx context.Context, username string, userFollow enti
 	params["user"] = username
 
 	query := r.db.N1QLQuery[dbcontext.ActionFollow]
-	return r.db.Query(ctx, query, params, &results)
+	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "following")
+	err := r.db.Query(ctx, query, params, &results)
+	if err != nil {
+		return err
+	}
+
+	// As we can't chain two N1QL queries, we execute them sequentially.
+	query = r.db.N1QLQuery[dbcontext.ActionFollow]
+	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "followers")
+	params["username"] = username
+	params["user"] = userFollow.Username
+	return  r.db.Query(ctx, query, params, &results)
+
 }
 
 func (r repository) Unfollow(ctx context.Context, username, targetUsername string) error {
@@ -460,5 +472,16 @@ func (r repository) Unfollow(ctx context.Context, username, targetUsername strin
 	params["user"] = username
 
 	query := r.db.N1QLQuery[dbcontext.ActionUnfollow]
-	return r.db.Query(ctx, query, params, &results)
+	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "following")
+	err := r.db.Query(ctx, query, params, &results)
+	if err != nil {
+		return err
+	}
+
+	// As we can't chain two N1QL queries, we execute them sequentially.
+	query = r.db.N1QLQuery[dbcontext.ActionUnfollow]
+	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "followers")
+	params["username"] = username
+	params["user"] = targetUsername
+	return  r.db.Query(ctx, query, params, &results)
 }

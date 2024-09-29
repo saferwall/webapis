@@ -2,10 +2,5 @@
 
 UPDATE `bucket_name`
 USE KEYS LOWER($user)
-SET `following` = ARRAY_PREPEND({"username": $username, "ts": $ts}, `following`)
-WHERE NOT ANY item IN `following` SATISFIES item.username = $username END;
-
-UPDATE `bucket_name`
-USE KEYS LOWER($username)
-SET `followers` = ARRAY_PREPEND({"username": $user, "ts": $ts}, `followers`)
-WHERE NOT ANY item IN `followers` SATISFIES item.username = $user END;
+SET `DYNAMIC_FIELD` = ARRAY_PREPEND({"username": $username, "ts": $ts}, `DYNAMIC_FIELD`)
+WHERE NOT ANY item IN `DYNAMIC_FIELD` SATISFIES item.username = $username END;
