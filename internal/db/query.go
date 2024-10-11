@@ -40,6 +40,7 @@ const (
 	ActionFollow
 	ActionUnlike
 	ActionUnfollow
+	MetaUI
 )
 
 var fileQueryMap = map[string]n1qlQuery{
@@ -68,6 +69,7 @@ var fileQueryMap = map[string]n1qlQuery{
 	"user-following.n1ql":            UserFollowing,
 	"user-likes.n1ql":                UserLikes,
 	"user-submissions.n1ql":          UserSubmissions,
+	"meta-ui.n1ql":                   MetaUI,
 }
 
 // walk returns list of files in directory.
