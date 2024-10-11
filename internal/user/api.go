@@ -179,8 +179,10 @@ func (r resource) create(c echo.Context) error {
 		return err
 	}
 
-	go r.mailer.Send(body.String(),
-		confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
+	go func() {
+		_ = r.mailer.Send(body.String(),
+			confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
+	}()
 
 	return c.JSON(http.StatusCreated, user)
 }

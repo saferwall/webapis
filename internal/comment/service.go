@@ -97,11 +97,7 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	}
 
 	// Update comments count on file object.
-	commentsCount := 0
-	if file.CommentsCount != nil {
-		commentsCount = *file.CommentsCount + 1
-	}
-	err = s.fileSvc.Patch(ctx, req.SHA256, "comments_count", commentsCount)
+	err = s.fileSvc.Patch(ctx, req.SHA256, "comments_count", file.CommentsCount+1)
 	if err != nil {
 		return Comment{}, err
 	}

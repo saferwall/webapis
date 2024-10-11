@@ -41,7 +41,7 @@ type Service interface {
 	Summary(ctx context.Context, id string) (interface{}, error)
 	Like(ctx context.Context, id string) error
 	Unlike(ctx context.Context, id string) error
-	Rescan(ctx context.Context, id string, input FileScanRequest) error
+	ReScan(ctx context.Context, id string, input FileScanRequest) error
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	CountStrings(ctx context.Context, id string, queryString string) (int, error)
@@ -411,7 +411,7 @@ func (s service) Unlike(ctx context.Context, sha256 string) error {
 	return s.userSvc.Unlike(ctx, user.ID(), sha256)
 }
 
-func (s service) Rescan(ctx context.Context, sha256 string, input FileScanRequest) error {
+func (s service) ReScan(ctx context.Context, sha256 string, input FileScanRequest) error {
 
 	// Serialize the msg to send to the orchestrator.
 	msg, err := json.Marshal(FileScanCfg{SHA256: sha256, FileScanRequest: input})

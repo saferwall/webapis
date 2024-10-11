@@ -317,7 +317,6 @@ func (r repository) Events(ctx context.Context, id string, offset,
 			}
 
 			i++
-
 		}
 	}
 
