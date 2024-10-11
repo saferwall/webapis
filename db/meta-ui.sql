@@ -1,6 +1,11 @@
 /* N1QL query to retrieve file summary of a scan. */
 
-WITH user_likes AS (SELECT RAW likes FROM `bucket_name` USE KEYS $loggedInUser)
+WITH user_likes AS (SELECT RAW
+          ARRAY like_item.sha256 FOR like_item IN u.`likes` END AS sha256_array
+          FROM
+            `bucket_name` u
+          USE KEYS
+            $loggedInUser)
 SELECT
   {
     "status": f.status,
