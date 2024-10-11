@@ -217,8 +217,10 @@ func (r resource) resetPassword(c echo.Context) error {
 		return err
 	}
 
-	go r.mailer.Send(body.String(), resetPasswordTpl.Subject,
-		resetPasswordTpl.From, req.Email)
+	go func() {
+		_ = r.mailer.Send(body.String(), resetPasswordTpl.Subject,
+			resetPasswordTpl.From, req.Email)
+	}()
 
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
@@ -316,8 +318,10 @@ func (r resource) resendConfirmation(c echo.Context) error {
 		return err
 	}
 
-	go r.mailer.Send(body.String(), confirmAccountTpl.Subject,
-		confirmAccountTpl.From, req.Email)
+	go func() {
+		_ = r.mailer.Send(body.String(), confirmAccountTpl.Subject,
+			confirmAccountTpl.From, req.Email)
+	}()
 
 	return c.JSON(http.StatusOK, struct {
 		Message string `json:"message"`
