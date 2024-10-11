@@ -37,8 +37,8 @@ LABEL maintainer="https://github.com/saferwall/saferwall-api"
 LABEL version="0.7.0"
 LABEL description="Saferwall web APIs service"
 
-ENV USER saferwall
-ENV GROUP saferwall
+ENV USER=saferwall
+ENV GROUP=saferwall
 
 # Set the Current Working Directory inside the container.
 WORKDIR /saferwall
