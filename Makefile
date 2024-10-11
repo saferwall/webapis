@@ -128,3 +128,8 @@ generate/doc:	## Generate OpenAPI spec.
 
 	old='"{}":' && new="- {}:" \
 		&& sed -i "s|$$old|$$new|g" ${ROOT_DIR}/docs/docs.go
+
+format/sql: ## Format N1QL files.
+	@for file in ./db/*.sql; do \
+		npx sql-formatter $$file -l n1ql --fix; \
+	done
