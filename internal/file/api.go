@@ -46,6 +46,8 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.POST("/files/:sha256/rescan/", res.rescan, verifyHash, requireLogin)
 	g.GET("/files/:sha256/download/", res.download, verifyHash, requireLogin)
 	g.GET("/files/:sha256/generate-presigned-url/", res.generatePresignedURL, verifyHash, requireLogin)
+	g.GET("/files/:sha256/meta-ui/", res.metaUI, verifyHash, optionalLogin)
+
 }
 
 // @Summary Check if a file exists.
@@ -354,6 +356,7 @@ func (r resource) summary(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
 	return c.JSON(http.StatusOK, fileSummary)
 }
 
@@ -418,6 +421,7 @@ func (r resource) like(c echo.Context) error {
 // @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
+// @Success 200 {object} object{}
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
@@ -440,6 +444,7 @@ func (r resource) unlike(c echo.Context) error {
 // @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
+// @Success 200 {object} object{}
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
@@ -496,6 +501,7 @@ func (r resource) download(c echo.Context) error {
 // @Tags File
 // @Produce json
 // @Param sha256 path string true "File SHA256"
+// @Success 200 {object} object{}
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
@@ -517,4 +523,37 @@ func (r resource) generatePresignedURL(c echo.Context) error {
 		Status  int    `json:"status"`
 		URL     string `json:"url"`
 	}{"ok", http.StatusOK, preSignedURL})
+}
+
+// @Summary Frontend Metadata
+// @Description Frontend metadata fields such as navbar menus.
+// @Tags File
+// @Produce json
+// @Param sha256 path string true "File SHA256"
+// @Success 200 {object} object{}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/{sha256}/meta-ui/ [get]
+// @Security Bearer || {}
+func (r resource) metaUI(c echo.Context) error {
+	ctx := c.Request().Context()
+	fileSummary, err := r.service.Summary(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+
+	// Cache when file scanning is finished.
+	summary, ok := fileSummary.(map[string]interface{})
+	if ok {
+		status, statusOK := summary["status"].(entity.FileScanProgressType)
+		if statusOK {
+			if status == entity.FileScanProgressFinished {
+				c.Response().Header().Set("Cache-Control", "public, max-age=300")
+
+			}
+		}
+	}
+
+	return c.JSON(http.StatusOK, fileSummary)
 }

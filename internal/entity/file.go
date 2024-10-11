@@ -38,7 +38,7 @@ type File struct {
 	Extension        string                 `json:"file_extension,omitempty"`
 	DefaultBhvReport interface{}            `json:"default_behavior_report,omitempty"`
 	BhvScans         interface{}            `json:"behavior_scans,omitempty"`
-	Status           int                    `json:"status,omitempty"`
+	Status           FileScanProgressType   `json:"status,omitempty"`
 }
 
 // Submission represents a file submission.
@@ -48,6 +48,16 @@ type Submission struct {
 	Source    string `json:"src,omitempty"`
 	Country   string `json:"country,omitempty"`
 }
+
+// FileScanProgressType represents the file scan progress type.
+type FileScanProgressType uint8
+
+// Progress of a file scan.
+const (
+	FileScanProgressQueued     FileScanProgressType = 1
+	FileScanProgressProcessing FileScanProgressType = 2
+	FileScanProgressFinished   FileScanProgressType = 3
+)
 
 // ID returns a unique ID to identify a File object.
 func (f File) ID(key string) string {

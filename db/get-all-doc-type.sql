@@ -4,6 +4,8 @@ SELECT
 FROM
   `bucket_name`
 WHERE
-  type = $docType OFFSET $offset
+  type = $docType
+OFFSET
+  $offset
 LIMIT
   $limit

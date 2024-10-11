@@ -28,13 +28,6 @@ var (
 	fileUploadTimeout = time.Duration(time.Second * 30)
 )
 
-// Progress of a file scan.
-const (
-	queued = iota + 1
-	processing
-	finished
-)
-
 // Service encapsulates use case logic for files.
 type Service interface {
 	Get(ctx context.Context, id string, fields []string) (File, error)
@@ -55,6 +48,7 @@ type Service interface {
 	Strings(ctx context.Context, id string, queryString string, offset, limit int) (interface{}, error)
 	Download(ctx context.Context, id string, zipFile *string) error
 	GeneratePresignedURL(ctx context.Context, id string) (string, error)
+	MetaUI(ctx context.Context, id string) (interface{}, error)
 }
 
 type UploadDownloader interface {
@@ -260,7 +254,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			Type:        "file",
 			FirstSeen:   now,
 			Submissions: append(file.Submissions, submission),
-			Status:      queued,
+			Status:      entity.FileScanProgressQueued,
 		})
 		if err != nil {
 			s.logger.With(ctx).Error(err)
@@ -511,4 +505,13 @@ func (s service) GeneratePresignedURL(ctx context.Context, id string) (string, e
 	}
 
 	return s.objSto.GeneratePresignedURL(ctx, s.bucket, id)
+}
+
+func (s service) MetaUI(ctx context.Context, id string) (interface{}, error) {
+	res, err := s.repo.MetaUI(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

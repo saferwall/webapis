@@ -217,7 +217,7 @@ func (r repository) CountEvents(ctx context.Context, id string) (int, error) {
 			}
 
 			if k == "q" {
-				statement += fmt.Sprintf(" LOWER(event.`path`) LIKE LOWER($q)")
+				statement += " LOWER(event.`path`) LIKE LOWER($q)"
 				params[k] = "%" + v[0] + "%"
 			} else {
 				statement += fmt.Sprintf(" event.%s IN $%s", k, k)
@@ -309,7 +309,7 @@ func (r repository) Events(ctx context.Context, id string, offset,
 			}
 
 			if k == "q" {
-				statement += fmt.Sprintf(" LOWER(event.`path`) LIKE LOWER($q)")
+				statement += " LOWER(event.`path`) LIKE LOWER($q)"
 				params[k] = "%" + v[0] + "%"
 			} else {
 				statement += fmt.Sprintf(" event.%s IN $%s", k, k)

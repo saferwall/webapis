@@ -27,3 +27,11 @@ repos:
         files: \.(yaml|yml)$
         types: [file, yaml]
         entry: yamllint -c .yamllint.yaml
+# - repo: https://github.com/sql-formatter-org/sql-formatter
+#   rev: v15.4.3
+#   hooks:
+#     - id: sql-formatter
+#       files: \.(sql|n1ql)$
+#       entry: sql-formatter --fix
+#       language: node
+#       types: [sql]

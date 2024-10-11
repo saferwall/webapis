@@ -41,6 +41,8 @@ type Repository interface {
 	CountStrings(ctx context.Context, id string, queryString string) (int, error)
 	Strings(ctx context.Context, id, queryString string, offset, limit int) (
 		interface{}, error)
+	// MetaUI returns metadata required for the UI when loading an analysis report.
+	MetaUI(ctx context.Context, id string) (interface{}, error)
 }
 
 // repository persists files in database.
@@ -241,5 +243,28 @@ func (r repository) Strings(ctx context.Context, id, queryString string, offset,
 	if err != nil {
 		return nil, err
 	}
+	return results.([]interface{})[0], nil
+}
+
+func (r repository) MetaUI(ctx context.Context, id string) (
+	interface{}, error) {
+
+	var results interface{}
+	var query string
+	params := make(map[string]interface{}, 1)
+	params["sha256"] = id
+
+	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
+		params["loggedInUser"] = user.ID()
+	} else {
+		params["loggedInUser"] = "_none_"
+	}
+
+	query = r.db.N1QLQuery[dbcontext.FileSummary]
+	err := r.db.Query(ctx, query, params, &results)
+	if err != nil {
+		return nil, err
+	}
+
 	return results.([]interface{})[0], nil
 }
