@@ -378,12 +378,7 @@ func (r resource) comments(c echo.Context) error {
 		return err
 	}
 
-	commentsCount := 0
-	if file.CommentsCount != nil {
-		commentsCount = *file.CommentsCount
-	}
-
-	pages := pagination.NewFromRequest(c.Request(), commentsCount)
+	pages := pagination.NewFromRequest(c.Request(), file.CommentsCount)
 	comments, err := r.service.Comments(
 		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
 	if err != nil {
@@ -461,7 +456,7 @@ func (r resource) rescan(c echo.Context) error {
 		}
 	}
 
-	err := r.service.Rescan(ctx, c.Param("sha256"), scanCfg)
+	err := r.service.ReScan(ctx, c.Param("sha256"), scanCfg)
 	if err != nil {
 		return err
 	}
@@ -538,7 +533,7 @@ func (r resource) generatePresignedURL(c echo.Context) error {
 // @Security Bearer || {}
 func (r resource) metaUI(c echo.Context) error {
 	ctx := c.Request().Context()
-	fileSummary, err := r.service.Summary(ctx, c.Param("sha256"))
+	fileSummary, err := r.service.MetaUI(ctx, c.Param("sha256"))
 	if err != nil {
 		return err
 	}

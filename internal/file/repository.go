@@ -260,7 +260,7 @@ func (r repository) MetaUI(ctx context.Context, id string) (
 		params["loggedInUser"] = "_none_"
 	}
 
-	query = r.db.N1QLQuery[dbcontext.FileSummary]
+	query = r.db.N1QLQuery[dbcontext.MetaUI]
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
