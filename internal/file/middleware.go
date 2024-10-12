@@ -80,8 +80,8 @@ func (m middleware) ModifyResponse(next echo.HandlerFunc) echo.HandlerFunc {
 		// Determines the source of the API request, if it originates from a
 		// browser, we want to attach some more UI metadata.
 		if isBrowser(c.Request().UserAgent()) {
-			writer.ResponseWriter.Write(writer.body.Bytes())
-			return nil
+			_, err := writer.ResponseWriter.Write(writer.body.Bytes())
+			return err
 		}
 
 		metaUI, err := m.service.MetaUI(c.Request().Context(), c.Param("sha256"))
