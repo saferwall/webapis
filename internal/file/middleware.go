@@ -5,7 +5,11 @@
 package file
 
 import (
+	"bytes"
+	"encoding/json"
+	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -21,6 +25,15 @@ var (
 type middleware struct {
 	service Service
 	logger  log.Logger
+}
+
+type toolBodyWriter struct {
+	http.ResponseWriter
+	body *bytes.Buffer
+}
+
+func (r toolBodyWriter) Write(b []byte) (int, error) {
+	return r.body.Write(b)
 }
 
 // NewMiddleware creates a new file Middleware.
@@ -51,5 +64,52 @@ func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		return next(c)
+	}
+}
+
+// ModifyResponse modifies the JSON response to include some metadata for the UI.
+func (m middleware) ModifyResponse(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		writer := &toolBodyWriter{body: &bytes.Buffer{}, ResponseWriter: c.Response().Writer}
+		c.Response().Writer = writer
+
+		if err := next(c); err != nil {
+			return err
+		}
+
+		// Determines the source of the API request, if it originates from a
+		// browser, we want to attach some more UI metadata.
+		if isBrowser(c.Request().UserAgent()) {
+			writer.ResponseWriter.Write(writer.body.Bytes())
+			return nil
+		}
+
+		metaUI, err := m.service.MetaUI(c.Request().Context(), c.Param("sha256"))
+		if err != nil {
+			return err
+		}
+
+		oldResponseBody := make(map[string]any)
+
+		err = json.Unmarshal(writer.body.Bytes(), &oldResponseBody)
+		if err != nil {
+			return err
+		}
+
+		oldResponseBody["ui"] = metaUI
+
+		newResponseBody, err := json.Marshal(oldResponseBody)
+		if err != nil {
+			return err
+		}
+
+		n, err := writer.ResponseWriter.Write(newResponseBody)
+		if err != nil {
+			return err
+		}
+
+		c.Response().Header().Set("Content-Length", strconv.Itoa(n))
+
+		return nil
 	}
 }

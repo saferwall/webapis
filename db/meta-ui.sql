@@ -1,22 +1,19 @@
-/* N1QL query to retrieve file summary of a scan. */
-WITH
-  user_likes AS (
-    SELECT
-      RAW ARRAY like_item.sha256 FOR like_item IN u.`likes` END AS sha256_array
-    FROM
-      `bucket_name` u
-    USE KEYS $loggedInUser
-  )
+/* N1QL query to retrieve UI metadata. */
 SELECT
-  {
-    "status": f.status,
-    "default_behavior_report": f.default_behavior_report,
-    "comments_count": f.comments_count,
-    "liked": CASE
-      WHEN ARRAY_LENGTH(user_likes) = 0 THEN false
-      ELSE ARRAY_BINARY_SEARCH(ARRAY_SORT((user_likes) [0]), f.sha256) >= 0
-    END
-  }.*
+  pe.meta as pe,
+  ARRAY_CONCAT(
+    ARRAY_INTERSECT(
+      OBJECT_NAMES(d),
+      [
+        "pe",
+        "elf",
+        "strings",
+        "multiav",
+        "behavior_scans"
+      ]
+    ),
+    ["summary", "comments"]
+  ) AS tabs
 FROM
-  `bucket_name` f
+  `bucket_name` AS d
 USE KEYS $sha256

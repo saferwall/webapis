@@ -101,7 +101,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 
 	// Register a custom fields validator.
 	validate := validator.New()
-	 _ = validate.RegisterValidation("username_or_email", validateUsernameOrEmail)
+	_ = validate.RegisterValidation("username_or_email", validateUsernameOrEmail)
 	e.Validator = &CustomValidator{validator: validate}
 
 	// Register a custom binder.
@@ -137,7 +137,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	user.RegisterHandlers(g, userSvc, cfg.MaxAvatarSize, authHandler, optAuthHandler, userMiddleware.VerifyUser,
 		logger, smtpMailer, emailTpl)
 	auth.RegisterHandlers(g, authSvc, logger, smtpMailer, emailTpl, cfg.UI.Address)
-	file.RegisterHandlers(g, fileSvc, logger, cfg.MaxFileSize, authHandler, optAuthHandler, fileMiddleware.VerifyHash)
+	file.RegisterHandlers(g, fileSvc, logger, cfg.MaxFileSize, authHandler, optAuthHandler, fileMiddleware.VerifyHash, fileMiddleware.ModifyResponse)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 	comment.RegisterHandlers(g, commentSvc, logger, authHandler, commentMiddleware.VerifyID)
 	behavior.RegisterHandlers(g, behaviorSvc, authHandler, behaviorMiddleware.VerifyID, logger)
