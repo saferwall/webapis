@@ -165,13 +165,6 @@ func (r repository) Summary(ctx context.Context, id string) (
 	var query string
 	params := make(map[string]interface{}, 1)
 	params["sha256"] = id
-
-	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
-		params["loggedInUser"] = user.ID()
-	} else {
-		params["loggedInUser"] = "_none_"
-	}
-
 	query = r.db.N1QLQuery[dbcontext.FileSummary]
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
@@ -253,13 +246,6 @@ func (r repository) MetaUI(ctx context.Context, id string) (
 	var query string
 	params := make(map[string]interface{}, 1)
 	params["sha256"] = id
-
-	if user, ok := ctx.Value(entity.UserKey).(entity.User); ok {
-		params["loggedInUser"] = user.ID()
-	} else {
-		params["loggedInUser"] = "_none_"
-	}
-
 	query = r.db.N1QLQuery[dbcontext.MetaUI]
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {

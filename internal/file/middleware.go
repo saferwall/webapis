@@ -79,7 +79,7 @@ func (m middleware) ModifyResponse(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// Determines the source of the API request, if it originates from a
 		// browser, we want to attach some more UI metadata.
-		if isBrowser(c.Request().UserAgent()) {
+		if !isBrowser(c.Request().UserAgent()) {
 			_, err := writer.ResponseWriter.Write(writer.body.Bytes())
 			return err
 		}
