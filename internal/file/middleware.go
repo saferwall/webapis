@@ -70,16 +70,28 @@ func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
 // ModifyResponse modifies the JSON response to include some metadata for the UI.
 func (m middleware) ModifyResponse(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+
+		var err error
+		var isUI int
+
 		writer := &toolBodyWriter{body: &bytes.Buffer{}, ResponseWriter: c.Response().Writer}
 		c.Response().Writer = writer
 
-		if err := next(c); err != nil {
+		if err = next(c); err != nil {
 			return err
 		}
 
-		// Determines the source of the API request, if it originates from a
-		// browser, we want to attach some more UI metadata.
-		if !isBrowser(c.Request().UserAgent()) {
+		isUIStr := c.Request().Header.Get("X-Get-Ui")
+		if len(isUIStr) > 0 {
+			isUI, err = strconv.Atoi(isUIStr)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Determines the source of the API request, if it originates from the UI,
+		// we want to attach some more UI metadata.
+		if isUI != 1 {
 			_, err := writer.ResponseWriter.Write(writer.body.Bytes())
 			return err
 		}
