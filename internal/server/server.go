@@ -123,7 +123,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, cfg.SamplesZipPwd,
 		userSvc, actSvc, arch)
 	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
-		actSvc, userSvc, fileSvc)
+		actSvc, userSvc)
 	behaviorSvc := behavior.NewService(behavior.NewRepository(db, logger), logger)
 
 	// Create the middlewares.
