@@ -5,6 +5,7 @@
 package comment
 
 import (
+	"context"
 	"net/http"
 	"strings"
 
@@ -13,6 +14,14 @@ import (
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/saferwall/saferwall-api/pkg/pagination"
+)
+
+// contextKey defines a custom time to get/set values from a context.
+type contextKey int
+
+const (
+	// filtersKey identifies the current filters during the request life.
+	filtersKey contextKey = iota
 )
 
 type resource struct {
@@ -62,7 +71,16 @@ func (r resource) list(c echo.Context) error {
 		}
 	}
 
-	count, err := r.service.Count(ctx, fields)
+	if len(c.QueryParams()) > 0 || (len(c.QueryParams()) == 1 && c.QueryParam("fields") != "") {
+		queryParams := c.QueryParams()
+		delete(queryParams, pagination.PageSizeVar)
+		delete(queryParams, pagination.PageVar)
+		if len(queryParams) > 0 {
+			ctx = WithFilters(ctx, queryParams)
+		}
+	}
+
+	count, err := r.service.Count(ctx)
 	if err != nil {
 		return err
 	}
@@ -202,4 +220,9 @@ func (r resource) delete(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, comment)
+}
+
+// WithFilters returns a context that contains the API filters.
+func WithFilters(ctx context.Context, value map[string][]string) context.Context {
+	return context.WithValue(ctx, filtersKey, value)
 }

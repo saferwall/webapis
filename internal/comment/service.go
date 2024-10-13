@@ -28,7 +28,7 @@ type Service interface {
 	Create(ctx context.Context, input CreateCommentRequest) (Comment, error)
 	Update(ctx context.Context, id string, input UpdateCommentRequest) (Comment, error)
 	Delete(ctx context.Context, id string) (Comment, error)
-	Count(ctx context.Context, fields []string) (int, error)
+	Count(ctx context.Context) (int, error)
 	Query(ctx context.Context, offset, limit int, fields []string) ([]Comment, error)
 }
 
@@ -170,8 +170,8 @@ func (s service) Delete(ctx context.Context, id string) (Comment, error) {
 }
 
 // Count returns the number of comments.
-func (s service) Count(ctx context.Context, fields []string) (int, error) {
-	return s.repo.Count(ctx, fields)
+func (s service) Count(ctx context.Context) (int, error) {
+	return s.repo.Count(ctx)
 }
 
 // Query returns the comments with the specified offset and limit.

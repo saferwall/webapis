@@ -28,7 +28,7 @@ type Repository interface {
 	// Exists checks if a comment exists with a given ID.
 	Exists(ctx context.Context, id string) (bool, error)
 	// Count returns the number of comments.
-	Count(ctx context.Context, fields []string) (int, error)
+	Count(ctx context.Context) (int, error)
 	// Query returns the list of comments with the given offset and limit.
 	Query(ctx context.Context, offset, limit int, fields []string) ([]entity.Comment, error)
 }
@@ -86,23 +86,28 @@ func (r repository) Exists(ctx context.Context, id string) (bool, error) {
 }
 
 // Count returns the number of the comment records in the database.
-func (r repository) Count(ctx context.Context, fields []string) (int, error) {
+func (r repository) Count(ctx context.Context) (int, error) {
 	var count int
 
 	params := make(map[string]interface{}, 1)
 	params["docType"] = "comment"
 
 	statement :=
-		"SELECT RAW COUNT(*) AS count FROM `" + r.db.Bucket.Name() + "` " +
-			"WHERE `type`=$docType"
+		"SELECT RAW COUNT(*) AS count FROM `" + r.db.Bucket.Name() + "` d " +
+			"WHERE `type`= $docType"
 
-	if len(fields) > 0 {
-		for _, field := range fields {
-			statement += fmt.Sprintf(" AND %s=$%s", field, field)
-			params[field] = field
-
+	// Fitter results.
+	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	if ok {
+		for k, v := range filters {
+			if k == "fields" {
+				continue
+			}
+			statement += fmt.Sprintf(" AND d.%s IN $%s", k, k)
+			params[k] = v
 		}
 	}
+
 	err := r.db.Count(ctx, statement, params, &count)
 	return count, err
 }
@@ -112,12 +117,12 @@ func (r repository) Count(ctx context.Context, fields []string) (int, error) {
 func (r repository) Query(ctx context.Context, offset, limit int, fields []string) (
 	[]entity.Comment, error) {
 	var res interface{}
+	var statement string
 
 	params := make(map[string]interface{}, 1)
 	params["docType"] = "comment"
 	params["offset"] = offset
 	params["limit"] = limit
-	statement := r.db.N1QLQuery[dbcontext.GetAllDocType]
 
 	if len(fields) > 0 {
 		statement = "SELECT "
@@ -125,11 +130,27 @@ func (r repository) Query(ctx context.Context, offset, limit int, fields []strin
 			statement += fmt.Sprintf("%s,", field)
 		}
 		statement = strings.TrimSuffix(statement, ",")
-		statement += fmt.Sprintf(" FROM `%s` WHERE type = $docType OFFSET $offset LIMIT $limit",
+		statement += fmt.Sprintf(" FROM `%s` d WHERE d.`type` = $docType",
 			r.db.Bucket.Name())
-
+	} else {
+		statement =
+			"SELECT d.* FROM `" + r.db.Bucket.Name() + "` d " +
+				"WHERE d.`type` = $docType"
 	}
 
+	// Fitter results.
+	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	if ok {
+		for k, v := range filters {
+			if k == "fields" {
+				continue
+			}
+			statement += fmt.Sprintf(" AND d.`%s` IN $%s", k, k)
+			params[k] = v
+		}
+	}
+
+	statement += " OFFSET $offset LIMIT $limit"
 	err := r.db.Query(ctx, statement, params, &res)
 	if err != nil {
 		return []entity.Comment{}, err
