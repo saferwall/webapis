@@ -374,12 +374,8 @@ func (r resource) summary(c echo.Context) error {
 // @Security Bearer || {}
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
-	file, err := r.service.Get(ctx, c.Param("sha256"), nil)
-	if err != nil {
-		return err
-	}
 
-	pages := pagination.NewFromRequest(c.Request(), file.CommentsCount)
+	pages := pagination.NewFromRequest(c.Request(), 5)
 	comments, err := r.service.Comments(
 		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
 	if err != nil {

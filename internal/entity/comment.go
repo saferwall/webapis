@@ -10,12 +10,12 @@ type Comment struct {
 	// ID represents the activity identifier.
 	ID string `json:"id,omitempty"`
 	// Body represents the content of the comment.
-	Body string `json:"body"`
+	Body string `json:"body,omitempty"`
 	// SHA256 references the hash of the file
 	// where the comment has been made.
-	SHA256 string `json:"sha256"`
+	SHA256 string `json:"sha256,omitempty"`
 	// Timestamp when this activity happened.
-	Timestamp int64 `json:"timestamp"`
+	Timestamp int64 `json:"timestamp,omitempty"`
 	// Username represents the author of the comment.
-	Username string `json:"username"`
+	Username string `json:"username,omitempty"`
 }

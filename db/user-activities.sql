@@ -27,7 +27,13 @@ SELECT
     "id": META(activity).id,
     "author": {
       "username": activity.username,
-      "member_since": activities.member_since
+      "member_since": (
+        SELECT
+          RAW u.member_since
+        FROM
+          `bucket_name` AS u
+        USE KEYS LOWER(activity.username)
+      ) [0]
     },
     "follow": TRUE,
     "comment": f.body,

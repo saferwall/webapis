@@ -33,7 +33,6 @@ type File struct {
 	Histogram        []int                  `json:"histogram,omitempty"`
 	ByteEntropy      []int                  `json:"byte_entropy,omitempty"`
 	Ml               map[string]interface{} `json:"ml,omitempty"`
-	CommentsCount    int                    `json:"comments_count"`
 	Format           string                 `json:"file_format,omitempty"`
 	Extension        string                 `json:"file_extension,omitempty"`
 	DefaultBhvReport interface{}            `json:"default_behavior_report,omitempty"`

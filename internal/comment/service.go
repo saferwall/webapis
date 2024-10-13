@@ -12,7 +12,6 @@ import (
 	"github.com/saferwall/saferwall-api/internal/activity"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
-	"github.com/saferwall/saferwall-api/internal/file"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -25,10 +24,12 @@ type Comment struct {
 // Service encapsulates usecase logic for files.
 type Service interface {
 	Exists(ctx context.Context, id string) (bool, error)
-	Get(ctx context.Context, id string) (Comment, error)
+	Get(ctx context.Context, id string, fields []string) (Comment, error)
 	Create(ctx context.Context, input CreateCommentRequest) (Comment, error)
 	Update(ctx context.Context, id string, input UpdateCommentRequest) (Comment, error)
 	Delete(ctx context.Context, id string) (Comment, error)
+	Count(ctx context.Context) (int, error)
+	Query(ctx context.Context, offset, limit int, fields []string) ([]Comment, error)
 }
 
 type service struct {
@@ -36,7 +37,6 @@ type service struct {
 	logger  log.Logger
 	actSvc  activity.Service
 	userSvc user.Service
-	fileSvc file.Service
 }
 
 // CreateCommentRequest represents a comment creation request.
@@ -53,8 +53,8 @@ type UpdateCommentRequest struct {
 
 // NewService creates a new user service.
 func NewService(repo Repository, logger log.Logger, actSvc activity.Service,
-	userSvc user.Service, fileSvc file.Service) Service {
-	return service{repo, logger, actSvc, userSvc, fileSvc}
+	userSvc user.Service) Service {
+	return service{repo, logger, actSvc, userSvc}
 }
 
 // Exists checks if a comment exists for the given id.
@@ -85,19 +85,8 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 		return Comment{}, err
 	}
 
-	file, err := s.fileSvc.Get(ctx, req.SHA256, nil)
-	if err != nil {
-		return Comment{}, err
-	}
-
 	// Update comments count on user object.
 	err = s.userSvc.Patch(ctx, req.Username, "comments_count", user.CommentsCount+1)
-	if err != nil {
-		return Comment{}, err
-	}
-
-	// Update comments count on file object.
-	err = s.fileSvc.Patch(ctx, req.SHA256, "comments_count", file.CommentsCount+1)
 	if err != nil {
 		return Comment{}, err
 	}
@@ -114,12 +103,12 @@ func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	}); err != nil {
 		return Comment{}, err
 	}
-	return s.Get(ctx, id)
+	return s.Get(ctx, id, nil)
 }
 
 // Get returns the comment with the specified comment ID.
-func (s service) Get(ctx context.Context, id string) (Comment, error) {
-	com, err := s.repo.Get(ctx, id)
+func (s service) Get(ctx context.Context, id string, fields []string) (Comment, error) {
+	com, err := s.repo.Get(ctx, id, fields)
 	if err != nil {
 		return Comment{}, err
 	}
@@ -132,7 +121,7 @@ func (s service) Update(ctx context.Context, id string, input UpdateCommentReque
 
 	var curUsername string
 
-	comment, err := s.Get(ctx, id)
+	comment, err := s.Get(ctx, id, nil)
 	if err != nil {
 		return comment, err
 	}
@@ -164,7 +153,7 @@ func (s service) Update(ctx context.Context, id string, input UpdateCommentReque
 
 // Delete deletes the comment with the specified ID.
 func (s service) Delete(ctx context.Context, id string) (Comment, error) {
-	com, err := s.Get(ctx, id)
+	com, err := s.Get(ctx, id, nil)
 	if err != nil {
 		return Comment{}, err
 	}
@@ -172,10 +161,30 @@ func (s service) Delete(ctx context.Context, id string) (Comment, error) {
 		return Comment{}, err
 	}
 
-	// delete corresponsing activity.
+	// Delete corresponding activity.
 	if err = s.actSvc.DeleteWith(ctx, "comment", com.Username, id); err != nil {
 		return Comment{}, err
 	}
 
 	return com, nil
+}
+
+// Count returns the number of comments.
+func (s service) Count(ctx context.Context) (int, error) {
+	return s.repo.Count(ctx)
+}
+
+// Query returns the comments with the specified offset and limit.
+func (s service) Query(ctx context.Context, offset, limit int, fields []string) (
+	[]Comment, error) {
+
+	items, err := s.repo.Query(ctx, offset, limit, fields)
+	if err != nil {
+		return nil, err
+	}
+	result := []Comment{}
+	for _, item := range items {
+		result = append(result, Comment{item})
+	}
+	return result, nil
 }

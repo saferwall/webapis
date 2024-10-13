@@ -5,12 +5,23 @@
 package comment
 
 import (
+	"context"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
+	"github.com/saferwall/saferwall-api/pkg/pagination"
+)
+
+// contextKey defines a custom time to get/set values from a context.
+type contextKey int
+
+const (
+	// filtersKey identifies the current filters during the request life.
+	filtersKey contextKey = iota
 )
 
 type resource struct {
@@ -24,10 +35,63 @@ func RegisterHandlers(g *echo.Group, service Service,
 
 	res := resource{service, logger}
 
+	g.GET("/comments/", res.list)
 	g.GET("/comments/:id/", res.get, verifyID)
 	g.POST("/comments/", res.create, requireLogin)
 	g.PATCH("/comments/:id/", res.update, verifyID, requireLogin)
 	g.DELETE("/comments/:id/", res.delete, verifyID, requireLogin)
+}
+
+// @Summary Retrieves a paginated list of comments
+// @Description List comments
+// @Tags Comment
+// @Accept json
+// @Produce json
+// @Param per_page query uint false "Number of comments  per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages{items=[]entity.Comment}
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /comments/ [get]
+func (r resource) list(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	// the `fields` query parameter is used to limit the fields
+	// to include in the response.
+	var fields []string
+	if fieldsParam := c.QueryParam("fields"); fieldsParam != "" {
+		fields = strings.Split(fieldsParam, ",")
+	}
+
+	if len(fields) > 0 {
+		allowed := areFieldsAllowed(fields)
+		if !allowed {
+			return errors.BadRequest("field not allowed")
+		}
+	}
+
+	if len(c.QueryParams()) > 0 || (len(c.QueryParams()) == 1 && c.QueryParam("fields") != "") {
+		queryParams := c.QueryParams()
+		delete(queryParams, pagination.PageSizeVar)
+		delete(queryParams, pagination.PageVar)
+		if len(queryParams) > 0 {
+			ctx = WithFilters(ctx, queryParams)
+		}
+	}
+
+	count, err := r.service.Count(ctx)
+	if err != nil {
+		return err
+	}
+
+	pages := pagination.NewFromRequest(c.Request(), count)
+	files, err := r.service.Query(ctx, pages.Offset(), pages.Limit(), fields)
+	if err != nil {
+		return err
+	}
+	pages.Items = files
+	return c.JSON(http.StatusOK, pages)
 }
 
 // @Summary Create a new comment
@@ -75,7 +139,15 @@ func (r resource) create(c echo.Context) error {
 // @Router /comments/{id} [get]
 func (r resource) get(c echo.Context) error {
 	ctx := c.Request().Context()
-	comment, err := r.service.Get(ctx, c.Param("id"))
+
+	// the `fields` query parameter is used to limit the fields
+	// to include in the response.
+	var fields []string
+	if fieldsParam := c.QueryParam("fields"); fieldsParam != "" {
+		fields = strings.Split(fieldsParam, ",")
+	}
+
+	comment, err := r.service.Get(ctx, c.Param("id"), fields)
 	if err != nil {
 		return err
 	}
@@ -133,7 +205,7 @@ func (r resource) delete(c echo.Context) error {
 		curUsername = user.ID()
 	}
 
-	comment, err := r.service.Get(ctx, c.Param("id"))
+	comment, err := r.service.Get(ctx, c.Param("id"), nil)
 	if err != nil {
 		return err
 	}
@@ -148,4 +220,9 @@ func (r resource) delete(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, comment)
+}
+
+// WithFilters returns a context that contains the API filters.
+func WithFilters(ctx context.Context, value map[string][]string) context.Context {
+	return context.WithValue(ctx, filtersKey, value)
 }

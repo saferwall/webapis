@@ -25,7 +25,7 @@ SELECT
     "file_format": f.file_format,
     "file_extension": f.file_extension,
     "signature": f.pe.signature,
-    "comments_count": f.comments_count,
+    "comments_count": 0,
     "multiav": {
       "value": ARRAY_COUNT(
         ARRAY_FLATTEN(
