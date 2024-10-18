@@ -250,6 +250,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 		// Create a new file.
 		err = s.repo.Create(ctx, sha256, entity.File{
+			Meta:        entity.DocMetadata{CreatedAt: now, LastUpdated: now, Version: 1},
 			SHA256:      sha256,
 			Type:        "file",
 			FirstSeen:   now,

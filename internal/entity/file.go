@@ -10,6 +10,7 @@ import (
 
 // File represent a binary file.
 type File struct {
+	Meta             DocMetadata            `json:"doc,omitempty"`
 	Type             string                 `json:"type,omitempty"`
 	MD5              string                 `json:"md5,omitempty"`
 	SHA1             string                 `json:"sha1,omitempty"`
