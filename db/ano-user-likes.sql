@@ -9,6 +9,7 @@ SELECT
       "tags": f.tags,
       "filename": f.submissions[0].filename,
       "class": f.ml.pe.predicted_class,
+      "default_behavior_report": f.default_behavior_report,
       "multiav": {
         "value": ARRAY_COUNT(
           ARRAY_FLATTEN(

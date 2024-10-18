@@ -250,6 +250,7 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 
 		// Create a new file.
 		err = s.repo.Create(ctx, sha256, entity.File{
+			Meta:        entity.DocMetadata{CreatedAt: now, LastUpdated: now, Version: 1},
 			SHA256:      sha256,
 			Type:        "file",
 			FirstSeen:   now,
@@ -304,6 +305,9 @@ func (s service) Update(ctx context.Context, id string, req UpdateFileRequest) (
 	if err != nil {
 		return file, err
 	}
+
+	// update the last modified time
+	file.Meta.LastUpdated = time.Now().Unix()
 
 	// check if File.Username == id
 	if err := s.repo.Update(ctx, id, file.File); err != nil {
