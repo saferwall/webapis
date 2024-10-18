@@ -306,6 +306,9 @@ func (s service) Update(ctx context.Context, id string, req UpdateFileRequest) (
 		return file, err
 	}
 
+	// update the last modified time
+	file.Meta.LastUpdated = time.Now().Unix()
+
 	// check if File.Username == id
 	if err := s.repo.Update(ctx, id, file.File); err != nil {
 		return file, err
