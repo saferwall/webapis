@@ -117,13 +117,14 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	actSvc := activity.NewService(activity.NewRepository(db, logger), logger)
 	userSvc := user.NewService(user.NewRepository(db, logger), logger, tokenGen,
 		sec, cfg.ObjStorage.AvatarsContainerName, updown, actSvc)
+	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
+		actSvc, userSvc)
 	authSvc := auth.NewService(cfg.JWTSigningKey, cfg.JWTExpiration, logger,
 		sec, userSvc, tokenGen)
 	fileSvc := file.NewService(file.NewRepository(db, logger), logger, updown,
 		p, cfg.Broker.Topic, cfg.ObjStorage.FileContainerName, cfg.SamplesZipPwd,
-		userSvc, actSvc, arch)
-	commentSvc := comment.NewService(comment.NewRepository(db, logger), logger,
-		actSvc, userSvc)
+		userSvc, actSvc, commentSvc, arch)
+
 	behaviorSvc := behavior.NewService(behavior.NewRepository(db, logger), logger)
 
 	// Create the middlewares.

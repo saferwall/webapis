@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -97,7 +97,7 @@ func (r repository) Count(ctx context.Context) (int, error) {
 			"WHERE `type`= $docType"
 
 	// Fitter results.
-	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	filters, ok := ctx.Value(FiltersKey).(map[string][]string)
 	if ok {
 		for k, v := range filters {
 			if k == "fields" {
@@ -139,7 +139,7 @@ func (r repository) Query(ctx context.Context, offset, limit int, fields []strin
 	}
 
 	// Fitter results.
-	filters, ok := ctx.Value(filtersKey).(map[string][]string)
+	filters, ok := ctx.Value(FiltersKey).(map[string][]string)
 	if ok {
 		for k, v := range filters {
 			if k == "fields" {
