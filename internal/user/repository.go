@@ -198,6 +198,7 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 func (r repository) Activities(ctx context.Context, id string, offset,
 	limit int) ([]interface{}, error) {
 
+	var err error
 	var activities interface{}
 	params := make(map[string]interface{}, 1)
 	params["offset"] = offset
@@ -205,19 +206,16 @@ func (r repository) Activities(ctx context.Context, id string, offset,
 
 	if id == "" {
 		// For an anonymous user.
-		err := r.db.Query(ctx, r.db.N1QLQuery[dbcontext.AnoUserActivities], params, &activities)
-		if err != nil {
-			return nil, err
-		}
+		err = r.db.Query(ctx, r.db.N1QLQuery[dbcontext.AnoUserActivities], params, &activities)
 	} else {
 		// For a logged-in user.
 		params["user"] = id
-		err := r.db.Query(ctx, r.db.N1QLQuery[dbcontext.UserActivities], params, &activities)
-		if err != nil {
-			return nil, err
-		}
+		err = r.db.Query(ctx, r.db.N1QLQuery[dbcontext.UserActivities], params, &activities)
 	}
 
+	if err != nil {
+		return nil, err
+	}
 	return activities.([]interface{}), nil
 
 }
@@ -249,9 +247,6 @@ func (r repository) Likes(ctx context.Context, id string, offset,
 	if err != nil {
 		return nil, err
 	}
-	if len(results.([]interface{})) == 0 {
-		return []interface{}{}, nil
-	}
 	return results.([]interface{}), nil
 }
 
@@ -281,9 +276,6 @@ func (r repository) Followers(ctx context.Context, id string, offset,
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
-	}
-	if len(results.([]interface{})) == 0 {
-		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }
@@ -315,9 +307,6 @@ func (r repository) Following(ctx context.Context, id string, offset,
 	if err != nil {
 		return nil, err
 	}
-	if len(results.([]interface{})) == 0 {
-		return []interface{}{}, nil
-	}
 	return results.([]interface{}), nil
 }
 
@@ -346,9 +335,6 @@ func (r repository) Submissions(ctx context.Context, id string, offset,
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
 		return nil, err
-	}
-	if len(results.([]interface{})) == 0 {
-		return []interface{}{}, nil
 	}
 	return results.([]interface{}), nil
 }
@@ -380,9 +366,7 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 	if err != nil {
 		return nil, err
 	}
-	if len(results.([]interface{})) == 0 {
-		return []interface{}{}, nil
-	}
+
 	return results.([]interface{}), nil
 }
 

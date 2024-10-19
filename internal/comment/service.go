@@ -66,15 +66,16 @@ func (s service) Exists(ctx context.Context, id string) (bool, error) {
 func (s service) Create(ctx context.Context, req CreateCommentRequest) (
 	Comment, error) {
 
-	now := time.Now()
+	now := time.Now().Unix()
 	id := entity.ID()
 	err := s.repo.Create(ctx, entity.Comment{
+		Meta:      &entity.DocMetadata{CreatedAt: now, LastUpdated: now, Version: 1},
 		Type:      "comment",
 		ID:        id,
 		Body:      req.Body,
 		SHA256:    req.SHA256,
 		Username:  req.Username,
-		Timestamp: now.Unix(),
+		Timestamp: now,
 	})
 	if err != nil {
 		return Comment{}, err
@@ -143,6 +144,9 @@ func (s service) Update(ctx context.Context, id string, input UpdateCommentReque
 	if err != nil {
 		return comment, err
 	}
+
+	// update the last modified time.
+	comment.Meta.LastUpdated = time.Now().Unix()
 
 	if err := s.repo.Update(ctx, comment.Comment); err != nil {
 		return comment, err

@@ -166,14 +166,15 @@ func (s service) Create(ctx context.Context, req CreateUserRequest) (
 		return User{}, errEmailAlreadyExists
 	}
 
-	now := time.Now()
+	now := time.Now().Unix()
 	err = s.repo.Create(ctx, entity.User{
+		Meta:        &entity.DocMetadata{CreatedAt: now, LastUpdated: now, Version: 1},
 		Type:        "user",
 		Username:    req.Username,
 		Password:    s.sec.HashPassword(req.Password),
 		Email:       strings.ToLower(req.Email),
-		MemberSince: now.Unix(),
-		LastSeen:    now.Unix(),
+		MemberSince: now,
+		LastSeen:    now,
 		Following:   []entity.UserFollows{},
 		Followers:   []entity.UserFollows{},
 		Submissions: []entity.UserSubmission{},
@@ -217,6 +218,9 @@ func (s service) Update(ctx context.Context, id string, req interface{}) (
 	if err != nil {
 		return user, err
 	}
+
+	// update the last modified time.
+	user.Meta.LastUpdated = time.Now().Unix()
 
 	if err := s.repo.Update(ctx, user.User); err != nil {
 		return user, err

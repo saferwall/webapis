@@ -5,6 +5,8 @@
 package entity
 
 type Comment struct {
+	// Meta represents document metadata.
+	Meta *DocMetadata `json:"doc,omitempty"`
 	// Type represents the document type.
 	Type string `json:"type,omitempty"`
 	// ID represents the activity identifier.

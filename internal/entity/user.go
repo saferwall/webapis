@@ -26,23 +26,24 @@ type UserFollows struct {
 
 // User represents a user.
 type User struct {
-	Type           string           `json:"type"`
-	Email          string           `json:"email,omitempty"`
-	Username       string           `json:"username"`
-	Password       string           `json:"password,omitempty"`
-	FullName       string           `json:"name"`
-	Location       string           `json:"location"`
-	URL            string           `json:"url"`
-	Bio            string           `json:"bio"`
-	Confirmed      bool             `json:"confirmed"`
-	MemberSince    int64            `json:"member_since"`
-	LastSeen       int64            `json:"last_seen"`
-	Admin          bool             `json:"admin"`
-	Following      []UserFollows    `json:"following"`
-	Followers      []UserFollows    `json:"followers"`
-	Likes          []UserLike       `json:"likes"`
-	Submissions    []UserSubmission `json:"submissions"`
-	CommentsCount  int              `json:"comments_count"`
+	Meta          *DocMetadata     `json:"doc,omitempty"`
+	Type          string           `json:"type"`
+	Email         string           `json:"email,omitempty"`
+	Username      string           `json:"username"`
+	Password      string           `json:"password,omitempty"`
+	FullName      string           `json:"name"`
+	Location      string           `json:"location"`
+	URL           string           `json:"url"`
+	Bio           string           `json:"bio"`
+	Confirmed     bool             `json:"confirmed"`
+	MemberSince   int64            `json:"member_since"`
+	LastSeen      int64            `json:"last_seen"`
+	Admin         bool             `json:"admin"`
+	Following     []UserFollows    `json:"following"`
+	Followers     []UserFollows    `json:"followers"`
+	Likes         []UserLike       `json:"likes"`
+	Submissions   []UserSubmission `json:"submissions"`
+	CommentsCount int              `json:"comments_count"`
 }
 
 // UserPrivate represent a user with sensitive fields included.
