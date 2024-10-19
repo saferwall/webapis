@@ -5,12 +5,7 @@ SELECT
   ARRAY_CONCAT(
     ARRAY_INTERSECT(
       OBJECT_NAMES(d),
-      [
-        "pe",
-        "elf",
-        "strings",
-        "behavior_scans"
-      ]
+      ["pe", "elf", "strings", "behavior_scans"]
     ),
     ["summary", "comments", "antivirus"]
   ) AS tabs

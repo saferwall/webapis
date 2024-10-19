@@ -1,5 +1,4 @@
 /* N1QL query to retrieve file summary of a scan. */
-
 SELECT
   {
     "properties": {
