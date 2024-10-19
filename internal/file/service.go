@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/saferwall/saferwall-api/internal/activity"
+	"github.com/saferwall/saferwall-api/internal/comment"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
@@ -45,6 +46,7 @@ type Service interface {
 	Comments(ctx context.Context, id string, offset, limit int) (
 		[]interface{}, error)
 	CountStrings(ctx context.Context, id string, queryString string) (int, error)
+	CountComments(ctx context.Context, id string) (int, error)
 	Strings(ctx context.Context, id string, queryString string, offset, limit int) (interface{}, error)
 	Download(ctx context.Context, id string, zipFile *string) error
 	GeneratePresignedURL(ctx context.Context, id string) (string, error)
@@ -146,15 +148,16 @@ type service struct {
 	samplesZipPwd string
 	userSvc       user.Service
 	actSvc        activity.Service
+	comSvc        comment.Service
 	archiver      Archiver
 }
 
 // NewService creates a new File service.
 func NewService(repo Repository, logger log.Logger,
 	updown UploadDownloader, producer Producer, topic, bucket, samplesZipPwd string,
-	userSvc user.Service, actSvc activity.Service, arch Archiver) Service {
+	userSvc user.Service, actSvc activity.Service, commentSvc comment.Service, arch Archiver) Service {
 	return service{repo, logger, updown, producer, topic, bucket, samplesZipPwd,
-		userSvc, actSvc, arch}
+		userSvc, actSvc, commentSvc, arch}
 }
 
 // Get returns the File with the specified File ID.
@@ -489,6 +492,18 @@ func (s service) Comments(ctx context.Context, id string, offset, limit int) (
 
 func (s service) CountStrings(ctx context.Context, id string, queryString string) (int, error) {
 	count, err := s.repo.CountStrings(ctx, id, queryString)
+	if err != nil {
+		return 0, err
+	}
+	return count, err
+}
+
+func (s service) CountComments(ctx context.Context, id string) (int, error) {
+	filterVal := map[string][]string{
+		"sha256": {id},
+	}
+	ctx = comment.WithFilters(ctx, filterVal)
+	count, err := s.comSvc.Count(ctx)
 	if err != nil {
 		return 0, err
 	}

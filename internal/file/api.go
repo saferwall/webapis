@@ -375,7 +375,11 @@ func (r resource) summary(c echo.Context) error {
 func (r resource) comments(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	pages := pagination.NewFromRequest(c.Request(), 5)
+	count, err := r.service.CountComments(ctx, c.Param("sha256"))
+	if err != nil {
+		return err
+	}
+	pages := pagination.NewFromRequest(c.Request(), count)
 	comments, err := r.service.Comments(
 		ctx, c.Param("sha256"), pages.Offset(), pages.Limit())
 	if err != nil {
