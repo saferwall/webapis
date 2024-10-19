@@ -13,7 +13,12 @@ import (
 type n1qlQuery int
 
 const (
-	AnoUserActivities n1qlQuery = iota
+	ActionFollow n1qlQuery = iota
+	ActionLike
+	ActionSubmit
+	ActionUnfollow
+	ActionUnlike
+	AnoUserActivities
 	AnoUserComments
 	AnoUserFollowers
 	AnoUserFollowing
@@ -30,24 +35,21 @@ const (
 	FileStringsWithSubstring
 	FileSummary
 	GetAllDocType
+	MetaUI
 	UserActivities
 	UserComments
 	UserFollowers
 	UserFollowing
 	UserLikes
 	UserSubmissions
-	ActionLike
-	ActionFollow
-	ActionUnlike
-	ActionUnfollow
-	MetaUI
 )
 
 var fileQueryMap = map[string]n1qlQuery{
-	"action-like.sql":               ActionLike,
 	"action-follow.sql":             ActionFollow,
-	"action-unlike.sql":             ActionUnlike,
+	"action-like.sql":               ActionLike,
+	"action-submit.sql":             ActionSubmit,
 	"action-unfollow.sql":           ActionUnfollow,
+	"action-unlike.sql":             ActionUnlike,
 	"ano-user-activities.sql":       AnoUserActivities,
 	"ano-user-comments.sql":         AnoUserComments,
 	"ano-user-followers.sql":        AnoUserFollowers,
@@ -63,13 +65,13 @@ var fileQueryMap = map[string]n1qlQuery{
 	"file-strings.sql":              FileStrings,
 	"file-summary.sql":              FileSummary,
 	"get-all-doc-type.sql":          GetAllDocType,
+	"meta-ui.sql":                   MetaUI,
 	"user-activities.sql":           UserActivities,
 	"user-comments.sql":             UserComments,
 	"user-followers.sql":            UserFollowers,
 	"user-following.sql":            UserFollowing,
 	"user-likes.sql":                UserLikes,
 	"user-submissions.sql":          UserSubmissions,
-	"meta-ui.sql":                   MetaUI,
 }
 
 // walk returns list of files in directory.

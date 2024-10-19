@@ -18,7 +18,7 @@ type UserSubmission struct {
 	Timestamp int64  `json:"ts"`
 }
 
-// UserFollows represents users' following or followrs.
+// UserFollows represents users' following or followers.
 type UserFollows struct {
 	Username  string `json:"username"`
 	Timestamp int64  `json:"ts"`

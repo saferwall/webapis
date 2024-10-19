@@ -60,6 +60,7 @@ type Service interface {
 		ConfirmAccountResponse, error)
 	Like(ctx context.Context, id string, userLike entity.UserLike) error
 	Unlike(ctx context.Context, id, sha256 string) error
+	Submit(ctx context.Context, id string, userLike entity.UserSubmission) error
 }
 
 var (
@@ -557,4 +558,8 @@ func (s service) Like(ctx context.Context, id string, userLike entity.UserLike) 
 
 func (s service) Unlike(ctx context.Context, id, sha256 string) error {
 	return s.repo.Unlike(ctx, id, sha256)
+}
+
+func (s service) Submit(ctx context.Context, id string, userSubmission entity.UserSubmission) error {
+	return s.repo.Submit(ctx, id, userSubmission)
 }

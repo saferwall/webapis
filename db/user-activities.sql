@@ -48,7 +48,7 @@ SELECT
           "tags": f.tags,
           "filename": f.submissions[0].filename,
           "class": f.ml.pe.predicted_class,
-          "default_behavior_report": f.default_behavior_report,
+          "default_behavior_id": f.default_behavior_report.id,
           "multiav": {
             "value": ARRAY_COUNT(
               ARRAY_FLATTEN(

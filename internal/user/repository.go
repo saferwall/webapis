@@ -1,4 +1,4 @@
-// Copyright 2021 Saferwall. All rights reserved.
+// Copyright 2018 Saferwall. All rights reserved.
 // Use of this source code is governed by Apache v2 license
 // license that can be found in the LICENSE file.
 
@@ -50,6 +50,7 @@ type Repository interface {
 	Follow(ctx context.Context, username string, userLike entity.UserFollows) error
 	Unlike(ctx context.Context, id, sha256 string) error
 	Unfollow(ctx context.Context, username, targetUsername string) error
+	Submit(ctx context.Context, id string, userSubmission entity.UserSubmission) error
 }
 
 // repository persists users in database.
@@ -459,7 +460,7 @@ func (r repository) Follow(ctx context.Context, username string, userFollow enti
 	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "followers")
 	params["username"] = username
 	params["user"] = userFollow.Username
-	return  r.db.Query(ctx, query, params, &results)
+	return r.db.Query(ctx, query, params, &results)
 
 }
 
@@ -483,5 +484,18 @@ func (r repository) Unfollow(ctx context.Context, username, targetUsername strin
 	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "followers")
 	params["username"] = username
 	params["user"] = targetUsername
-	return  r.db.Query(ctx, query, params, &results)
+	return r.db.Query(ctx, query, params, &results)
+}
+
+func (r repository) Submit(ctx context.Context, id string, userSubmission entity.UserSubmission) error {
+
+	var results interface{}
+
+	params := make(map[string]interface{}, 1)
+	params["sha256"] = userSubmission.SHA256
+	params["ts"] = userSubmission.Timestamp
+	params["user"] = id
+
+	query := r.db.N1QLQuery[dbcontext.ActionSubmit]
+	return r.db.Query(ctx, query, params, &results)
 }

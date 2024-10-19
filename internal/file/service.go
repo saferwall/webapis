@@ -278,6 +278,15 @@ func (s service) Create(ctx context.Context, req CreateFileRequest) (
 			return File{}, err
 		}
 
+		// Update user submissions.
+		newSubmission := entity.UserSubmission{
+			SHA256:    sha256,
+			Timestamp: now,
+		}
+		if err = s.userSvc.Submit(ctx, user.ID(), newSubmission); err != nil {
+			return File{}, err
+		}
+
 		return s.Get(ctx, sha256, nil)
 
 	} else {
