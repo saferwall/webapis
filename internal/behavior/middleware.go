@@ -52,10 +52,10 @@ func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// Retrieve an ETag for the resource.
-		bhvReport, err := m.service.Get(c.Request().Context(), c.Param("sha256"),
+		bhvReport, err := m.service.Get(c.Request().Context(), c.Param("id"),
 			[]string{"doc.last_updated", "status"})
 		if err != nil {
-			m.logger.Errorf("failed to get file object %v", err)
+			m.logger.Errorf("failed to get behavior report: %v", err)
 			return next(c)
 		}
 
@@ -66,7 +66,7 @@ func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
 
 		etag := strconv.FormatInt(bhvReport.Meta.LastUpdated, 10)
 		if etag == "" {
-			m.logger.Errorf("file.Meta.LastUpdated is not set: %v", err)
+			m.logger.Errorf("bhvReport.Meta.LastUpdated is not set: %v", err)
 			return next(c)
 		}
 
