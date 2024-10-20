@@ -52,13 +52,19 @@ func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		// Retrieve an ETag for the resource.
-		file, err := m.service.Get(c.Request().Context(), c.Param("sha256"),
-			[]string{"doc.last_updated"})
+		bhvReport, err := m.service.Get(c.Request().Context(), c.Param("sha256"),
+			[]string{"doc.last_updated", "status"})
 		if err != nil {
 			m.logger.Errorf("failed to get file object %v", err)
 			return next(c)
 		}
-		etag := strconv.FormatInt(file.Meta.LastUpdated, 10)
+
+		// Skip caching when dynamic scan status != finished.
+		if bhvReport.Status != entity.FileScanProgressFinished {
+			return next(c)
+		}
+
+		etag := strconv.FormatInt(bhvReport.Meta.LastUpdated, 10)
 		if etag == "" {
 			m.logger.Errorf("file.Meta.LastUpdated is not set: %v", err)
 			return next(c)
