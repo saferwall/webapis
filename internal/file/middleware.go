@@ -14,6 +14,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/db"
+	"github.com/saferwall/saferwall-api/internal/entity"
 	e "github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -73,11 +74,17 @@ func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
 
 		// Retrieve an ETag for the resource.
 		file, err := m.service.Get(c.Request().Context(), c.Param("sha256"),
-			[]string{"doc.last_updated"})
+			[]string{"doc.last_updated", "status"})
 		if err != nil {
 			m.logger.Errorf("failed to get file object %v", err)
 			return next(c)
 		}
+
+		// Skip caching when file scan status != finished.
+		if file.Status != entity.FileScanProgressFinished {
+			return next(c)
+		}
+
 		etag := strconv.FormatInt(file.Meta.LastUpdated, 10)
 		if etag == "" {
 			m.logger.Errorf("file.Meta.LastUpdated is not set: %v", err)
