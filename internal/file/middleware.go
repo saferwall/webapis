@@ -47,7 +47,7 @@ func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
 
 		sha256 := strings.ToLower(c.Param("sha256"))
 		if !sha256reg.MatchString(sha256) {
-			m.logger.Error("failed to match sha256 regex for doc %v", sha256)
+			m.logger.Errorf("failed to match sha256 regex for doc %v", sha256)
 			return e.BadRequest("invalid sha256 hash")
 		}
 
@@ -63,6 +63,37 @@ func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
 			return db.ErrDocumentNotFound
 		}
 
+		return next(c)
+	}
+}
+
+// CacheResponse is the middleware function for handing HTTP caching.
+func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		// Retrieve an ETag for the resource.
+		file, err := m.service.Get(c.Request().Context(), c.Param("sha256"),
+			[]string{"doc.last_updated"})
+		if err != nil {
+			m.logger.Errorf("failed to get file object %v", err)
+			return next(c)
+		}
+		etag := strconv.FormatInt(file.Meta.LastUpdated, 10)
+		if etag == "" {
+			m.logger.Errorf("file.Meta.LastUpdated is not set: %v", err)
+			return next(c)
+		}
+
+		// Check If-None-Match header from request.
+		ifNoneMatch := c.Request().Header.Get("If-None-Match")
+		if ifNoneMatch == etag {
+			// Cache hit !
+			return c.NoContent(http.StatusNotModified)
+		}
+
+		// Cache miss, set headers
+		c.Response().Header().Set("ETag", etag)
+		c.Response().Header().Set("Cache-Control", "max-age=3600, must-revalidate")
 		return next(c)
 	}
 }

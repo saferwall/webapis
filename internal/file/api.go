@@ -28,18 +28,18 @@ type resource struct {
 
 func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	maxFileSize int,
-	requireLogin, optionalLogin, verifyHash, modifyResponse echo.MiddlewareFunc) {
+	requireLogin, optionalLogin, verifyHash, cacheResponse, modifyResponse echo.MiddlewareFunc) {
 
 	res := resource{service, logger, int64(maxFileSize * MB)}
 
 	g.GET("/files/", res.list, requireLogin)
 	g.POST("/files/", res.create, requireLogin)
 	g.HEAD("/files/:sha256/", res.exists, verifyHash)
-	g.GET("/files/:sha256/", res.get, modifyResponse, verifyHash)
+	g.GET("/files/:sha256/", res.get, modifyResponse, cacheResponse, verifyHash)
 	g.PUT("/files/:sha256/", res.update, verifyHash, requireLogin)
 	g.PATCH("/files/:sha256/", res.patch, verifyHash, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, verifyHash, requireLogin)
-	g.GET("/files/:sha256/strings/", res.strings, modifyResponse, verifyHash)
+	g.GET("/files/:sha256/strings/", res.strings, modifyResponse, cacheResponse, verifyHash)
 	g.GET("/files/:sha256/summary/", res.summary, modifyResponse, verifyHash)
 	g.GET("/files/:sha256/comments/", res.comments, modifyResponse, verifyHash, optionalLogin)
 	g.POST("/files/:sha256/like/", res.like, verifyHash, requireLogin)
