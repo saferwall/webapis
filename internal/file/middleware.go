@@ -47,7 +47,7 @@ func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
 
 		sha256 := strings.ToLower(c.Param("sha256"))
 		if !sha256reg.MatchString(sha256) {
-			m.logger.Error("failed to match sha256 regex for doc %v", sha256)
+			m.logger.Errorf("failed to match sha256 regex for doc %v", sha256)
 			return e.BadRequest("invalid sha256 hash")
 		}
 
@@ -75,12 +75,12 @@ func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
 		file, err := m.service.Get(c.Request().Context(), c.Param("sha256"),
 			[]string{"doc.last_updated"})
 		if err != nil {
-			m.logger.Error("failed to get file object %v", err)
+			m.logger.Errorf("failed to get file object %v", err)
 			return next(c)
 		}
 		etag := strconv.FormatInt(file.Meta.LastUpdated, 10)
 		if etag == "" {
-			m.logger.Error("file.Meta.LastUpdated is not set: %v", err)
+			m.logger.Errorf("file.Meta.LastUpdated is not set: %v", err)
 			return next(c)
 		}
 
@@ -91,7 +91,7 @@ func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.NoContent(http.StatusNotModified)
 		}
 
-		// Set headers
+		// Cache miss, set headers
 		c.Response().Header().Set("ETag", etag)
 		c.Response().Header().Set("Cache-Control", "max-age=3600, must-revalidate")
 		return next(c)

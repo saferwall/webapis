@@ -24,14 +24,14 @@ const (
 )
 
 func RegisterHandlers(g *echo.Group, service Service,
-	requireLogin, verifyID echo.MiddlewareFunc, logger log.Logger) {
+	cacheResponse, verifyID echo.MiddlewareFunc, logger log.Logger) {
 
 	res := resource{service, logger}
 
-	g.GET("/behaviors/:id/", res.get, verifyID)
-	g.GET("/behaviors/:id/api-trace/", res.apis, verifyID)
-	g.GET("/behaviors/:id/sys-events/", res.events, verifyID)
-	g.GET("/behaviors/:id/artifacts/", res.artifacts, verifyID)
+	g.GET("/behaviors/:id/", res.get, cacheResponse, verifyID)
+	g.GET("/behaviors/:id/api-trace/", res.apis, cacheResponse, verifyID)
+	g.GET("/behaviors/:id/sys-events/", res.events, cacheResponse, verifyID)
+	g.GET("/behaviors/:id/artifacts/", res.artifacts, cacheResponse, verifyID)
 
 }
 
