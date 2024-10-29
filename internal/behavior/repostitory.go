@@ -144,9 +144,20 @@ func (r repository) CountAPIs(ctx context.Context, id string) (int, error) {
 			} else {
 				statement += " AND"
 			}
+
+			// Allow client to either use field=x&field=y, or field=x,y
+			for _, val := range v {
+				v = strings.Split(val, ",")
+			}
+
+			if k == "q" {
+				statement += " LOWER(api.`name`) LIKE LOWER($q)"
+				params[k] = "%" + v[0] + "%"
+			} else {
+				statement += fmt.Sprintf(" api.%s IN $%s", k, k)
+				params[k] = v
+			}
 			i++
-			statement += fmt.Sprintf(" api.%s IN $%s", k, k)
-			params[k] = v
 		}
 	} else {
 		statement =
@@ -260,9 +271,20 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 			} else {
 				statement += " AND"
 			}
+
+			// Allow client to either use field=x&field=y, or field=x,y
+			for _, val := range v {
+				v = strings.Split(val, ",")
+			}
+
+			if k == "q" {
+				statement += " LOWER(api.`name`) LIKE LOWER($q)"
+				params[k] = "%" + v[0] + "%"
+			} else {
+				statement += fmt.Sprintf(" api.%s IN $%s", k, k)
+				params[k] = v
+			}
 			i++
-			statement += fmt.Sprintf(" api.%s IN $%s", k, k)
-			params[k] = v
 		}
 	}
 

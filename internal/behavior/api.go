@@ -78,16 +78,7 @@ func (r resource) get(c echo.Context) error {
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /behaviors/{id}/api-trace/ [get]
 func (r resource) apis(c echo.Context) error {
-	ctx := c.Request().Context()
-
-	if len(c.QueryParams()) > 0 {
-		queryParams := c.QueryParams()
-		delete(queryParams, pagination.PageSizeVar)
-		delete(queryParams, pagination.PageVar)
-		if len(queryParams) > 0 {
-			ctx = WithFilters(ctx, queryParams)
-		}
-	}
+	ctx := WithFilters(c.Request().Context(), c.QueryParams())
 
 	count, err := r.service.CountAPIs(ctx, c.Param("id"))
 	if err != nil {
@@ -113,16 +104,7 @@ func (r resource) apis(c echo.Context) error {
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /behaviors/{id}/sys-events/ [get]
 func (r resource) events(c echo.Context) error {
-	ctx := c.Request().Context()
-
-	if len(c.QueryParams()) > 0 {
-		queryParams := c.QueryParams()
-		delete(queryParams, pagination.PageSizeVar)
-		delete(queryParams, pagination.PageVar)
-		if len(queryParams) > 0 {
-			ctx = WithFilters(ctx, queryParams)
-		}
-	}
+	ctx := WithFilters(c.Request().Context(), c.QueryParams())
 
 	count, err := r.service.CountEvents(ctx, c.Param("id"))
 	if err != nil {
@@ -148,16 +130,7 @@ func (r resource) events(c echo.Context) error {
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /behaviors/{id}/artifacts/ [get]
 func (r resource) artifacts(c echo.Context) error {
-	ctx := c.Request().Context()
-
-	if len(c.QueryParams()) > 0 {
-		queryParams := c.QueryParams()
-		delete(queryParams, pagination.PageSizeVar)
-		delete(queryParams, pagination.PageVar)
-		if len(queryParams) > 0 {
-			ctx = WithFilters(ctx, queryParams)
-		}
-	}
+	ctx := WithFilters(c.Request().Context(), c.QueryParams())
 
 	count, err := r.service.CountArtifacts(ctx, c.Param("id"))
 	if err != nil {
@@ -175,6 +148,12 @@ func (r resource) artifacts(c echo.Context) error {
 }
 
 // WithFilters returns a context that contains the API filters.
-func WithFilters(ctx context.Context, value map[string][]string) context.Context {
-	return context.WithValue(ctx, filtersKey, value)
+func WithFilters(ctx context.Context, queryParams map[string][]string) context.Context {
+	// Attach our filters only when the query parameters are not `page` or `per_page`
+	delete(queryParams, pagination.PageSizeVar)
+	delete(queryParams, pagination.PageVar)
+	if len(queryParams) > 0 {
+		return context.WithValue(ctx, filtersKey, queryParams)
+	}
+	return ctx
 }
