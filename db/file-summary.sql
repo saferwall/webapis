@@ -24,7 +24,6 @@ SELECT
     "file_format": f.file_format,
     "file_extension": f.file_extension,
     "signature": f.pe.signature,
-    "comments_count": 0,
     "multiav": {
       "value": ARRAY_COUNT(
         ARRAY_FLATTEN(
@@ -33,10 +32,7 @@ SELECT
         )
       ),
       "count": OBJECT_LENGTH(f.multiav.last_scan)
-    },
-    "pe_meta": f.pe.meta,
-    "default_behavior_report": f.default_behavior_report,
-    "liked": FALSE
+    }
   }.*
 FROM
   `bucket_name` f
