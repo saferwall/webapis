@@ -40,7 +40,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.PATCH("/files/:sha256/", res.patch, verifyHash, requireLogin)
 	g.DELETE("/files/:sha256/", res.delete, verifyHash, requireLogin)
 	g.GET("/files/:sha256/strings/", res.strings, modifyResponse, cacheResponse, verifyHash)
-	g.GET("/files/:sha256/summary/", res.summary, modifyResponse, verifyHash)
+	g.GET("/files/:sha256/summary/", res.summary, modifyResponse, cacheResponse, verifyHash)
 	g.GET("/files/:sha256/comments/", res.comments, modifyResponse, verifyHash, optionalLogin)
 	g.POST("/files/:sha256/like/", res.like, verifyHash, requireLogin)
 	g.POST("/files/:sha256/unlike/", res.unlike, verifyHash, requireLogin)

@@ -34,7 +34,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo \
 
 FROM alpine:latest
 LABEL maintainer="https://github.com/saferwall/saferwall-api"
-LABEL version="0.7.0"
+LABEL version="0.8.0"
 LABEL description="Saferwall web APIs service"
 
 ENV USER=saferwall
