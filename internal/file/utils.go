@@ -8,6 +8,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -29,4 +30,18 @@ func hash(b []byte) string {
 	h := sha256.New()
 	h.Write(b)
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+// isBrowser returns true when the HTTP request is coming from a known user agent.
+func isBrowser(userAgent string) bool {
+	browserList := []string{
+		"Chrome", "Chromium", "Mozilla", "Opera", "Safari", "Edge", "MSIE",
+	}
+
+	for _, browserName := range browserList {
+		if strings.Contains(userAgent, browserName) {
+			return true
+		}
+	}
+	return false
 }
