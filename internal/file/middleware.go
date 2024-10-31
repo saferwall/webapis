@@ -101,6 +101,7 @@ func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
 		// Cache miss, set headers
 		c.Response().Header().Set("ETag", etag)
 		c.Response().Header().Set("Cache-Control", "max-age=3600, must-revalidate")
+		c.Response().Header().Set("Access-Control-Max-Age", "3600")
 		return next(c)
 	}
 }
