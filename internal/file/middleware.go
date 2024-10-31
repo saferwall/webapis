@@ -101,7 +101,6 @@ func (m middleware) CacheResponse(next echo.HandlerFunc) echo.HandlerFunc {
 		// Cache miss, set headers
 		c.Response().Header().Set("ETag", etag)
 		c.Response().Header().Set("Cache-Control", "max-age=3600, must-revalidate")
-		c.Response().Header().Set("Access-Control-Max-Age", "3600")
 		return next(c)
 	}
 }
@@ -111,7 +110,7 @@ func (m middleware) ModifyResponse(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
 		var err error
-		var isUI int
+		var isUI bool
 
 		writer := &toolBodyWriter{body: &bytes.Buffer{}, ResponseWriter: c.Response().Writer}
 		c.Response().Writer = writer
@@ -120,17 +119,11 @@ func (m middleware) ModifyResponse(next echo.HandlerFunc) echo.HandlerFunc {
 			return err
 		}
 
-		isUIStr := c.Request().Header.Get("X-Get-Ui")
-		if len(isUIStr) > 0 {
-			isUI, err = strconv.Atoi(isUIStr)
-			if err != nil {
-				return err
-			}
-		}
+		isUI = isBrowser(c.Request().UserAgent())
 
 		// Determines the source of the API request, if it originates from the UI,
 		// we want to attach some more UI metadata.
-		if isUI != 1 {
+		if !isUI {
 			_, err := writer.ResponseWriter.Write(writer.body.Bytes())
 			return err
 		}
