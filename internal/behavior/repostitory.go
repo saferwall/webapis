@@ -188,9 +188,20 @@ func (r repository) CountArtifacts(ctx context.Context, id string) (int, error) 
 			} else {
 				statement += " AND"
 			}
+
+			// Allow client to either use field=x&field=y, or field=x,y
+			for _, val := range v {
+				v = strings.Split(val, ",")
+			}
+
+			if k == "q" {
+				statement += " LOWER(artifacts.`name`) LIKE LOWER($q)"
+				params[k] = "%" + v[0] + "%"
+			} else {
+				statement += fmt.Sprintf(" artifacts.%s IN $%s", k, k)
+				params[k] = v
+			}
 			i++
-			statement += fmt.Sprintf(" artifacts.%s IN $%s", k, k)
-			params[k] = v
 		}
 	} else {
 		statement =
@@ -334,7 +345,6 @@ func (r repository) Events(ctx context.Context, id string, offset,
 				statement += fmt.Sprintf(" event.%s IN $%s", k, k)
 				params[k] = v
 			}
-
 			i++
 		}
 	}
@@ -371,9 +381,21 @@ func (r repository) Artifacts(ctx context.Context, id string, offset,
 			} else {
 				statement += " AND"
 			}
+
+			// Allow client to either use field=x&field=y, or field=x,y
+			for _, val := range v {
+				v = strings.Split(val, ",")
+			}
+
+			if k == "q" {
+				statement += " LOWER(artifacts.`name`) LIKE LOWER($q)"
+				params[k] = "%" + v[0] + "%"
+			} else {
+				statement += fmt.Sprintf(" artifacts.%s IN $%s", k, k)
+				params[k] = v
+			}
 			i++
-			statement += fmt.Sprintf(" artifacts.%s IN $%s", k, k)
-			params[k] = v
+
 		}
 	}
 
