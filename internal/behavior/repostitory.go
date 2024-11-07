@@ -146,8 +146,8 @@ func (r repository) CountAPIs(ctx context.Context, id string) (int, error) {
 			}
 
 			// Allow client to either use field=x&field=y, or field=x,y
-			for _, val := range v {
-				v = strings.Split(val, ",")
+			if len(v) == 1 && strings.Contains(v[0], ",") {
+				v = strings.Split(v[0], ",")
 			}
 
 			if k == "q" {
@@ -190,8 +190,8 @@ func (r repository) CountArtifacts(ctx context.Context, id string) (int, error) 
 			}
 
 			// Allow client to either use field=x&field=y, or field=x,y
-			for _, val := range v {
-				v = strings.Split(val, ",")
+			if len(v) == 1 && strings.Contains(v[0], ",") {
+				v = strings.Split(v[0], ",")
 			}
 
 			if k == "q" {
@@ -234,8 +234,8 @@ func (r repository) CountEvents(ctx context.Context, id string) (int, error) {
 			}
 
 			// Allow client to either use field=x&field=y, or field=x,y
-			for _, val := range v {
-				v = strings.Split(val, ",")
+			if len(v) == 1 && strings.Contains(v[0], ",") {
+				v = strings.Split(v[0], ",")
 			}
 
 			if k == "q" {
@@ -284,8 +284,8 @@ func (r repository) APIs(ctx context.Context, id string, offset,
 			}
 
 			// Allow client to either use field=x&field=y, or field=x,y
-			for _, val := range v {
-				v = strings.Split(val, ",")
+			if len(v) == 1 && strings.Contains(v[0], ",") {
+				v = strings.Split(v[0], ",")
 			}
 
 			if k == "q" {
@@ -334,8 +334,8 @@ func (r repository) Events(ctx context.Context, id string, offset,
 			}
 
 			// Allow client to either use field=x&field=y, or field=x,y
-			for _, val := range v {
-				v = strings.Split(val, ",")
+			if len(v) == 1 && strings.Contains(v[0], ",") {
+				v = strings.Split(v[0], ",")
 			}
 
 			if k == "q" {
@@ -383,8 +383,8 @@ func (r repository) Artifacts(ctx context.Context, id string, offset,
 			}
 
 			// Allow client to either use field=x&field=y, or field=x,y
-			for _, val := range v {
-				v = strings.Split(val, ",")
+			if len(v) == 1 && strings.Contains(v[0], ",") {
+				v = strings.Split(v[0], ",")
 			}
 
 			if k == "q" {
