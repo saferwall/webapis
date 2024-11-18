@@ -24,6 +24,7 @@ SELECT
     "file_format": f.file_format,
     "file_extension": f.file_extension,
     "signature": f.pe.signature,
+    "default_behavior_report": f.default_behavior_report,
     "multiav": {
       "value": ARRAY_COUNT(
         ARRAY_FLATTEN(
