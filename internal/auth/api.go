@@ -13,6 +13,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/errors"
+	"github.com/saferwall/saferwall-api/internal/mailer"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
 
@@ -24,19 +25,14 @@ const (
 type resource struct {
 	service   Service
 	logger    log.Logger
-	mailer    Mailer
+	mailer    mailer.Mailer
 	templater tpl.Service
 	UIAddress string
 }
 
-// Mailer represents the mailer interface/
-type Mailer interface {
-	Send(body, subject, from, to string) error
-}
-
 // RegisterHandlers registers handlers for different HTTP requests.
 func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
-	mailer Mailer, templater tpl.Service, UIAddress string) {
+	mailer mailer.Mailer, templater tpl.Service, UIAddress string) {
 
 	res := resource{service, logger, mailer, templater, UIAddress}
 
@@ -161,7 +157,10 @@ func (r resource) verifyAccount(c echo.Context) error {
 		return err
 	}
 
-	return c.Redirect(http.StatusPermanentRedirect, r.UIAddress)
+	return c.JSON(http.StatusOK, struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}{"ok", http.StatusOK})
 
 }
 
@@ -218,8 +217,12 @@ func (r resource) resetPassword(c echo.Context) error {
 	}
 
 	go func() {
+		var attachments []mailer.Attachment
+		for _, attachment := range resetPasswordTpl.InlineImgs {
+			attachments = append(attachments, attachment)
+		}
 		_ = r.mailer.Send(body.String(), resetPasswordTpl.Subject,
-			resetPasswordTpl.From, req.Email)
+			resetPasswordTpl.From, req.Email, attachments)
 	}()
 
 	return c.JSON(http.StatusOK, struct {
@@ -319,8 +322,12 @@ func (r resource) resendConfirmation(c echo.Context) error {
 	}
 
 	go func() {
+		var attachments []mailer.Attachment
+		for _, attachment := range confirmAccountTpl.InlineImgs {
+			attachments = append(attachments, attachment)
+		}
 		_ = r.mailer.Send(body.String(), confirmAccountTpl.Subject,
-			confirmAccountTpl.From, req.Email)
+			confirmAccountTpl.From, req.Email, attachments)
 	}()
 
 	return c.JSON(http.StatusOK, struct {

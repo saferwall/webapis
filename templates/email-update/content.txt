@@ -1,19 +1,12 @@
-*****************
-Hi {{.Username}},
-*****************
+Hi {{ .Username }} !
 
-You recently requested to update your email for your saferwall account. Use the button below to update it. This email update link is only valid for the next 10 minutes.
+You recently requested to update your email address for your saferwall. Use the link to below to update it.
+This email update link is only valid for the next 10 minutes.
 
-Confirm your email ( {{.ActionURL }} )
-
-If you did not request an email update, please ignore this email or contact support ( {{.SupportEmail }} ) if you have questions.
+https://saferwall.com/auth/confirm/verify?token={{ .Token }}&guid={{ .Guid }}&id={{ .Email }}
 
 Thanks,
 The Saferwall Team
 
-If you’re having trouble with the button above, copy and paste the URL below into your web browser.
-
-{{.ActionURL}}
-
-© 2021 saferwall. All rights reserved.
-
+Need help? Contact us !
+{{ .SupportEmail }}
