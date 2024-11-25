@@ -134,3 +134,13 @@ format/sql: ## Format N1QL files.
 	@for file in ./db/*.sql; do \
 		npx sql-formatter $$file -l n1ql --fix; \
 	done
+
+email/gen: ## Generate email templates.
+	cd ../ui \
+		&& git stash \
+		&& git checkout feat-email \
+		&& git pull \
+		&& cd email \
+		&& npm install \
+		&& npm run build \
+		&& cp -r dist/* ../../webapis/templates/

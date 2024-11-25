@@ -1,26 +1,11 @@
-***********************
-Welcome, {{.Username}}!
-***********************
+Hi {{ .Username }} !
 
-Thanks for trying saferwall. We’re thrilled to have you on board. To get the most out of saferwall, do this primary next step:
+Thank you for signing up with Saferwall ! Please confirm your registration by visiting the link below.
 
-Confirm your account ( {{.ActionURL }} )
-
-For reference, here's your login information:
-
-Login Page: {{.LoginURL}}
-
-Username: {{.Username}}
-
-If you have any questions, feel free to email our customer support team ( {{.SupportEmail }} ). We also offer live chat ( {{.LiveChatURL }} ) in discord.
+https://saferwall.com/auth/confirm/verify?token={{ .Token }}&guid={{ .Guid }}&id={{ .Email }}
 
 Thanks,
 The Saferwall Team
 
-P.S. Need immediate help getting started? Check out our help documentation ( {{.HelpURL }} ). Or, just reply to this email, the saferwall support team is always ready to help!
-
-If you’re having trouble with the button above, copy and paste the URL below into your web browser.
-
-{{.ActionURL}}
-
-© 2021 saferwall. All rights reserved.
+Need help? Contact us !
+{{ .SupportEmail }}

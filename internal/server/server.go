@@ -23,7 +23,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/internal/file"
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
-	"github.com/saferwall/saferwall-api/internal/mailer"
+	smtpmailer "github.com/saferwall/saferwall-api/internal/mailer/smtp"
 	"github.com/saferwall/saferwall-api/internal/queue"
 	"github.com/saferwall/saferwall-api/internal/secure/password"
 	"github.com/saferwall/saferwall-api/internal/secure/token"
@@ -53,7 +53,7 @@ var (
 func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	cfg *config.Config, version string, trans ut.Translator,
 	updown storage.UploadDownloader, p queue.Producer,
-	smtpMailer mailer.SMTPMailer, arch archive.Archiver,
+	smtpMailer smtpmailer.SMTPMailer, arch archive.Archiver,
 	tokenGen token.Service,
 	emailTpl tpl.Service) http.Handler {
 

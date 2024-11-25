@@ -20,7 +20,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/archive"
 	"github.com/saferwall/saferwall-api/internal/config"
 	"github.com/saferwall/saferwall-api/internal/db"
-	"github.com/saferwall/saferwall-api/internal/mailer"
+	"github.com/saferwall/saferwall-api/internal/mailer/smtp"
 	"github.com/saferwall/saferwall-api/internal/queue"
 	"github.com/saferwall/saferwall-api/internal/secure/password"
 	"github.com/saferwall/saferwall-api/internal/secure/token"
@@ -131,10 +131,10 @@ func run(logger log.Logger) error {
 	archiver := archive.New(zip.AES256Encryption)
 
 	// Create email client.
-	var smtpMailer mailer.SMTPMailer
+	var smtpMailer smtpmailer.SMTPMailer
 	var emailTemplates tpl.Service
 	if cfg.SMTP.Server != "" {
-		smtpMailer = mailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
+		smtpMailer = smtpmailer.New(cfg.SMTP.Server, cfg.SMTP.Port, cfg.SMTP.User,
 			cfg.SMTP.Password)
 		emailTemplates, err = tpl.New(*flagTplFiles)
 		if err != nil {

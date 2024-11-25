@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
+	"github.com/saferwall/saferwall-api/internal/mailer"
 	tpl "github.com/saferwall/saferwall-api/internal/template"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/saferwall/saferwall-api/pkg/pagination"
@@ -23,7 +24,7 @@ const (
 
 func RegisterHandlers(g *echo.Group, service Service, maxAvatarSize int,
 	requireLogin, optionalLogin, verifyUser echo.MiddlewareFunc,
-	logger log.Logger, mailer Mailer, templater tpl.Service) {
+	logger log.Logger, mailer mailer.Mailer, templater tpl.Service) {
 
 	res := resource{service, logger, mailer, templater, int64(maxAvatarSize * KB)}
 
@@ -46,15 +47,10 @@ func RegisterHandlers(g *echo.Group, service Service, maxAvatarSize int,
 	g.POST("/users/:username/avatar/", res.avatar, verifyUser, requireLogin)
 }
 
-// Mailer represents the mailer interface.
-type Mailer interface {
-	Send(body, subject, from, to string) error
-}
-
 type resource struct {
 	service       Service
 	logger        log.Logger
-	mailer        Mailer
+	mailer        mailer.Mailer
 	templater     tpl.Service
 	maxAvatarSize int64 // expressed in bytes.
 }
@@ -156,22 +152,24 @@ func (r resource) create(c echo.Context) error {
 	}
 
 	body := new(bytes.Buffer)
-	actionURL := c.Request().Host + "/v1/auth/verify-account/?token=" +
-		resp.Token + "&guid=" + resp.Guid
 	templateData := struct {
 		Username     string
-		ActionURL    string
+		Token        string
+		Guid         string
 		LoginURL     string
 		LiveChatURL  string
 		HelpURL      string
 		SupportEmail string
+		Email        string
 	}{
 		Username:     user.Username,
-		ActionURL:    actionURL,
+		Token:        resp.Token,
+		Guid:         resp.Guid,
 		LoginURL:     "https://saferwall.com/auth/login",
 		LiveChatURL:  "https://discord.gg/an37PYHeZP",
 		HelpURL:      "https://about.saferwall.com/",
 		SupportEmail: "contact@saferwall.com",
+		Email:        user.Email,
 	}
 
 	confirmAccountTpl := r.templater.EmailRequestTemplate[tpl.ConfirmAccount]
@@ -180,8 +178,15 @@ func (r resource) create(c echo.Context) error {
 	}
 
 	go func() {
-		_ = r.mailer.Send(body.String(),
-			confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email)
+		var attachments []mailer.Attachment
+		for _, attachment := range confirmAccountTpl.InlineImgs {
+			attachments = append(attachments, attachment)
+		}
+		err = r.mailer.Send(body.String(),
+			confirmAccountTpl.Subject, confirmAccountTpl.From, user.Email, attachments)
+		if err != nil {
+			r.logger.Errorf("failed to send email: %v", err)
+		}
 	}()
 
 	return c.JSON(http.StatusCreated, user)
@@ -673,6 +678,7 @@ func (r resource) email(c echo.Context) error {
 		return errors.Forbidden("")
 	}
 
+	// TODO: send a new email so we can update the previous email.
 	err := r.service.UpdateEmail(ctx, req)
 	if err != nil {
 		switch err {
