@@ -678,6 +678,7 @@ func (r resource) email(c echo.Context) error {
 		return errors.Forbidden("")
 	}
 
+	// TODO: send a new email so we can update the previous email.
 	err := r.service.UpdateEmail(ctx, req)
 	if err != nil {
 		switch err {
