@@ -298,18 +298,19 @@ func (r resource) resendConfirmation(c echo.Context) error {
 	}
 
 	body := new(bytes.Buffer)
-	link := c.Request().Host + "/v1/auth/verify-account/?token=" +
-		resp.token + "&guid=" + resp.guid
+
 	templateData := struct {
 		Username     string
-		ActionURL    string
+		Token        string
+		Guid         string
 		LoginURL     string
 		LiveChatURL  string
 		HelpURL      string
 		SupportEmail string
 	}{
 		Username:     resp.username,
-		ActionURL:    link,
+		Token:        resp.token,
+		Guid:         resp.guid,
 		LoginURL:     "https://saferwall.com/auth/login",
 		LiveChatURL:  "https://discord.gg/an37PYHeZP",
 		HelpURL:      "https://about.saferwall.com/",
