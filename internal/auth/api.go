@@ -204,8 +204,10 @@ func (r resource) resetPassword(c echo.Context) error {
 		Guid         string
 		HelpURL      string
 		SupportEmail string
+		Email        string
 	}{
 		Username:     resp.username,
+		Email:        req.Email,
 		Token:        resp.token,
 		Guid:         resp.guid,
 		HelpURL:      "https://about.saferwall.com/",
