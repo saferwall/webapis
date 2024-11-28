@@ -197,16 +197,17 @@ func (r resource) resetPassword(c echo.Context) error {
 	}
 
 	body := new(bytes.Buffer)
-	link := r.UIAddress + "/auth/forgot-password/?token=" +
-		resp.token + "&guid=" + resp.guid
+
 	templateData := struct {
 		Username     string
-		ActionURL    string
+		Token        string
+		Guid         string
 		HelpURL      string
 		SupportEmail string
 	}{
 		Username:     resp.username,
-		ActionURL:    link,
+		Token:        resp.token,
+		Guid:         resp.guid,
 		HelpURL:      "https://about.saferwall.com/",
 		SupportEmail: "contact@saferwall.com",
 	}
