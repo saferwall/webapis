@@ -305,6 +305,7 @@ func (r resource) resendConfirmation(c echo.Context) error {
 	templateData := struct {
 		Username     string
 		Token        string
+		Email        string
 		Guid         string
 		LoginURL     string
 		LiveChatURL  string
@@ -314,6 +315,7 @@ func (r resource) resendConfirmation(c echo.Context) error {
 		Username:     resp.username,
 		Token:        resp.token,
 		Guid:         resp.guid,
+		Email:        req.Email,
 		LoginURL:     "https://saferwall.com/auth/login",
 		LiveChatURL:  "https://discord.gg/an37PYHeZP",
 		HelpURL:      "https://about.saferwall.com/",
