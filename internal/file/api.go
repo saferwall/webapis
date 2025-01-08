@@ -48,6 +48,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/files/:sha256/download/", res.download, verifyHash, requireLogin)
 	g.GET("/files/:sha256/generate-presigned-url/", res.generatePresignedURL, verifyHash, requireLogin)
 	g.GET("/files/:sha256/meta-ui/", res.metaUI, verifyHash, optionalLogin)
+	g.POST("/files/search/", res.search, requireLogin)
 
 }
 
@@ -295,6 +296,38 @@ func (r resource) list(c echo.Context) error {
 		return err
 	}
 	pages.Items = files
+	return c.JSON(http.StatusOK, pages)
+}
+
+// @Summary Searches files based on files' metadata
+// @Description Search files
+// @Tags File
+// @Accept json
+// @Produce json
+// @Param per_page query uint false "Number of files per page"
+// @Param page query uint false "Specify the page number"
+// @Success 200 {object} pagination.Pages
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/search [post]
+// @Security Bearer
+func (r resource) search(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	var input FileSearchRequest
+	if err := c.Bind(&input); err != nil {
+		r.logger.With(c.Request().Context()).Info(err)
+		return errors.BadRequest("")
+	}
+
+	search, err := r.service.Search(ctx, input)
+	if err != nil {
+		return err
+	}
+
+	pages := pagination.New(input.Page, input.PerPage, int(search.TotalHits))
+	pages.Items = search.Results
 	return c.JSON(http.StatusOK, pages)
 }
 

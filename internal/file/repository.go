@@ -43,6 +43,7 @@ type Repository interface {
 		interface{}, error)
 	// MetaUI returns metadata required for the UI when loading an analysis report.
 	MetaUI(ctx context.Context, id string) (interface{}, error)
+	Search(ctx context.Context, input FileSearchRequest) (FileSearchResponse, error)
 }
 
 // repository persists files in database.
@@ -253,4 +254,16 @@ func (r repository) MetaUI(ctx context.Context, id string) (
 	}
 
 	return results.([]interface{})[0], nil
+}
+
+func (r repository) Search(ctx context.Context, input FileSearchRequest) (FileSearchResponse, error) {
+
+	resp := FileSearchResponse{}
+	err := r.db.Search(ctx, &resp.Results, &resp.TotalHits)
+	if err != nil {
+		return resp, err
+	}
+
+	resp.Results = resp.Results.([]interface{})
+	return resp, nil
 }

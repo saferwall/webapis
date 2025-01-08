@@ -8,10 +8,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"strings"
 	"time"
 
 	gocb "github.com/couchbase/gocb/v2"
+	"github.com/couchbase/gocb/v2/search"
 )
 
 const (
@@ -232,4 +234,74 @@ func (db *DB) Lookup(ctx context.Context, key string, paths []string,
 		}
 	}
 	return nil
+}
+
+var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-"
+
+func shortID(length int) string {
+	ll := len(chars)
+	b := make([]byte, length)
+	rand.Read(b) // generates len(b) random bytes
+	for i := 0; i < length; i++ {
+		b[i] = chars[int(b[i])%ll]
+	}
+	return string(b)
+}
+
+func (db *DB) Search(ctx context.Context, val *interface{}, totalHits *uint64) error {
+
+	queryOne := search.NewMatchQuery("spyware").Field("multiav.last_scan.avast.output")
+	queryTwo := search.NewTermQuery("exe").Field("file_extension")
+	query := search.NewConjunctionQuery(queryOne, queryTwo)
+
+	// sfw._default.sfw_fts
+	result, err := db.Cluster.SearchQuery(
+		"multiav_fts", query,
+		&gocb.SearchOptions{
+			Limit: 100,
+			Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scan", "tags.packer", "tags.pe",
+				"tags.avira", "tags.avast", "tags.kaspersky",
+			},
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	class := []string{"malicious", "benign", "clean"}
+	rows := []interface{}{}
+	for result.Next() {
+		row := result.Row()
+		docID := row.ID
+
+		var fields map[string]interface{}
+		err := row.Fields(&fields)
+		if err != nil {
+			return err
+		}
+		fields["id"] = docID
+		fields["class"] = class[rand.Intn(2)]
+		fields["name"] = shortID(18)
+		fields["multiav"] = map[string]interface{}{
+			"hits":  rand.Intn(5),
+			"total": 5 + rand.Intn(10),
+		}
+		rows = append(rows, fields)
+	}
+
+	meta, err := result.MetaData()
+	if err != nil {
+		return err
+	}
+
+	*totalHits = meta.Metrics.TotalRows
+
+	// always check for errors after iterating
+	err = result.Err()
+	if err != nil {
+		return err
+	}
+	*val = rows
+	return nil
+
 }
