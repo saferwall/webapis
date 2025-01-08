@@ -51,6 +51,7 @@ type Service interface {
 	Download(ctx context.Context, id string, zipFile *string) error
 	GeneratePresignedURL(ctx context.Context, id string) (string, error)
 	MetaUI(ctx context.Context, id string) (interface{}, error)
+	Search(ctx context.Context, input FileSearchRequest) (FileSearchResponse, error)
 }
 
 type UploadDownloader interface {
@@ -136,6 +137,21 @@ type UpdateFileRequest struct {
 	ByteEntropy []int                  `json:"byte_entropy,omitempty"`
 	Ml          map[string]interface{} `json:"ml,omitempty"`
 	FileType    string                 `json:"filetype,omitempty"`
+}
+
+// FileSearchRequest represents a file search request.
+type FileSearchRequest struct {
+	Query   string `json:"query" validate:"required,min=3" example:"type=pe and tag=upx"`
+	Page    int    `json:"page" validate:"omitempty,gte=0,lte=10000" example:"1"`
+	PerPage int    `json:"per_page" validate:"omitempty,gte=0,lte=1000" example:"100"`
+	SortBy  string `json:"sort_by" validate:"omitempty,alphanum,min=1,max=20,lowercase" example:"first_seen"`
+	Order   string `json:"order" validate:"omitempty,oneof=asc desc" example"asc"`
+}
+
+// FileSearchResponse represents file search response results.
+type FileSearchResponse struct {
+	Results   interface{}
+	TotalHits uint64
 }
 
 type service struct {
@@ -542,4 +558,14 @@ func (s service) MetaUI(ctx context.Context, id string) (interface{}, error) {
 	}
 
 	return res, nil
+}
+
+func (s service) Search(ctx context.Context, input FileSearchRequest) (
+	FileSearchResponse, error) {
+
+	result, err := s.repo.Search(ctx, input)
+	if err != nil {
+		return FileSearchResponse{}, err
+	}
+	return result, nil
 }
