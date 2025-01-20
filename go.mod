@@ -3,6 +3,7 @@ module github.com/saferwall/saferwall-api
 go 1.21
 
 require (
+	github.com/MicahParks/recaptcha v0.0.5
 	github.com/aws/aws-sdk-go v1.44.234
 	github.com/couchbase/gocb/v2 v2.7.2
 	github.com/go-playground/locales v0.14.1

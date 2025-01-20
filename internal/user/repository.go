@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	dbcontext "github.com/saferwall/saferwall-api/internal/db"
+	dbContext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/pkg/log"
 )
@@ -55,12 +55,12 @@ type Repository interface {
 
 // repository persists users in database.
 type repository struct {
-	db     *dbcontext.DB
+	db     *dbContext.DB
 	logger log.Logger
 }
 
 // NewRepository creates a new user repository.
-func NewRepository(db *dbcontext.DB, logger log.Logger) Repository {
+func NewRepository(db *dbContext.DB, logger log.Logger) Repository {
 	return repository{db, logger}
 }
 
@@ -178,7 +178,7 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 	params["offset"] = offset
 	params["limit"] = limit
 
-	statement := r.db.N1QLQuery[dbcontext.GetAllDocType]
+	statement := r.db.N1QLQuery[dbContext.GetAllDocType]
 	err := r.db.Query(ctx, statement, params, &res)
 	if err != nil {
 		return []entity.User{}, err
@@ -206,11 +206,11 @@ func (r repository) Activities(ctx context.Context, id string, offset,
 
 	if id == "" {
 		// For an anonymous user.
-		err = r.db.Query(ctx, r.db.N1QLQuery[dbcontext.AnoUserActivities], params, &activities)
+		err = r.db.Query(ctx, r.db.N1QLQuery[dbContext.AnoUserActivities], params, &activities)
 	} else {
 		// For a logged-in user.
 		params["user"] = id
-		err = r.db.Query(ctx, r.db.N1QLQuery[dbcontext.UserActivities], params, &activities)
+		err = r.db.Query(ctx, r.db.N1QLQuery[dbContext.UserActivities], params, &activities)
 	}
 
 	if err != nil {
@@ -236,11 +236,11 @@ func (r repository) Likes(ctx context.Context, id string, offset,
 
 	if currentUser == "" {
 		// For an anonymous user.
-		query = r.db.N1QLQuery[dbcontext.AnoUserLikes]
+		query = r.db.N1QLQuery[dbContext.AnoUserLikes]
 	} else {
 		// For a logged-in user.
 		params["loggedInUser"] = currentUser
-		query = r.db.N1QLQuery[dbcontext.UserLikes]
+		query = r.db.N1QLQuery[dbContext.UserLikes]
 	}
 
 	err := r.db.Query(ctx, query, params, &results)
@@ -266,11 +266,11 @@ func (r repository) Followers(ctx context.Context, id string, offset,
 
 	if currentUser == "" {
 		// For an anonymous user.
-		query = r.db.N1QLQuery[dbcontext.AnoUserFollowers]
+		query = r.db.N1QLQuery[dbContext.AnoUserFollowers]
 	} else {
 		// For a logged-in user.
 		params["loggedInUser"] = currentUser
-		query = r.db.N1QLQuery[dbcontext.UserFollowers]
+		query = r.db.N1QLQuery[dbContext.UserFollowers]
 	}
 
 	err := r.db.Query(ctx, query, params, &results)
@@ -296,11 +296,11 @@ func (r repository) Following(ctx context.Context, id string, offset,
 
 	if currentUser == "" {
 		// For an anonymous user.
-		query = r.db.N1QLQuery[dbcontext.AnoUserFollowing]
+		query = r.db.N1QLQuery[dbContext.AnoUserFollowing]
 	} else {
 		// For a logged-in user.
 		params["loggedInUser"] = currentUser
-		query = r.db.N1QLQuery[dbcontext.UserFollowing]
+		query = r.db.N1QLQuery[dbContext.UserFollowing]
 	}
 
 	err := r.db.Query(ctx, query, params, &results)
@@ -325,11 +325,11 @@ func (r repository) Submissions(ctx context.Context, id string, offset,
 
 	if currentUser == "" {
 		// For an anonymous user.
-		query = r.db.N1QLQuery[dbcontext.AnoUserSubmissions]
+		query = r.db.N1QLQuery[dbContext.AnoUserSubmissions]
 	} else {
 		// For a logged-in user.
 		params["loggedInUser"] = currentUser
-		query = r.db.N1QLQuery[dbcontext.UserSubmissions]
+		query = r.db.N1QLQuery[dbContext.UserSubmissions]
 	}
 
 	err := r.db.Query(ctx, query, params, &results)
@@ -355,11 +355,11 @@ func (r repository) Comments(ctx context.Context, id string, offset,
 
 	if currentUser == "" {
 		// For an anonymous user.
-		query = r.db.N1QLQuery[dbcontext.AnoUserComments]
+		query = r.db.N1QLQuery[dbContext.AnoUserComments]
 	} else {
 		// For a logged-in user.
 		params["loggedInUser"] = currentUser
-		query = r.db.N1QLQuery[dbcontext.UserComments]
+		query = r.db.N1QLQuery[dbContext.UserComments]
 	}
 
 	err := r.db.Query(ctx, query, params, &results)
@@ -383,11 +383,11 @@ func (r repository) CountActivities(ctx context.Context) (int, error) {
 
 	if currentUser == "" {
 		// For an anonymous user.
-		query = r.db.N1QLQuery[dbcontext.CountAnoUserActivities]
+		query = r.db.N1QLQuery[dbContext.CountAnoUserActivities]
 	} else {
 		// For a logged-in user.
 		params["user"] = currentUser
-		query = r.db.N1QLQuery[dbcontext.CountUserActivities]
+		query = r.db.N1QLQuery[dbContext.CountUserActivities]
 
 	}
 	err := r.db.Count(ctx, query, params, &count)
@@ -407,7 +407,7 @@ func (r repository) Like(ctx context.Context, id string, userLike entity.UserLik
 	params["ts"] = userLike.Timestamp
 	params["user"] = id
 
-	query := r.db.N1QLQuery[dbcontext.ActionLike]
+	query := r.db.N1QLQuery[dbContext.ActionLike]
 	return r.db.Query(ctx, query, params, &results)
 }
 
@@ -419,7 +419,7 @@ func (r repository) Unlike(ctx context.Context, id, sha256 string) error {
 	params["sha256"] = sha256
 	params["user"] = id
 
-	query := r.db.N1QLQuery[dbcontext.ActionUnlike]
+	query := r.db.N1QLQuery[dbContext.ActionUnlike]
 	return r.db.Query(ctx, query, params, &results)
 }
 
@@ -432,7 +432,7 @@ func (r repository) Follow(ctx context.Context, username string, userFollow enti
 	params["ts"] = userFollow.Timestamp
 	params["user"] = username
 
-	query := r.db.N1QLQuery[dbcontext.ActionFollow]
+	query := r.db.N1QLQuery[dbContext.ActionFollow]
 	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "following")
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
@@ -440,7 +440,7 @@ func (r repository) Follow(ctx context.Context, username string, userFollow enti
 	}
 
 	// As we can't chain two N1QL queries, we execute them sequentially.
-	query = r.db.N1QLQuery[dbcontext.ActionFollow]
+	query = r.db.N1QLQuery[dbContext.ActionFollow]
 	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "followers")
 	params["username"] = username
 	params["user"] = userFollow.Username
@@ -456,7 +456,7 @@ func (r repository) Unfollow(ctx context.Context, username, targetUsername strin
 	params["username"] = targetUsername
 	params["user"] = username
 
-	query := r.db.N1QLQuery[dbcontext.ActionUnfollow]
+	query := r.db.N1QLQuery[dbContext.ActionUnfollow]
 	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "following")
 	err := r.db.Query(ctx, query, params, &results)
 	if err != nil {
@@ -464,7 +464,7 @@ func (r repository) Unfollow(ctx context.Context, username, targetUsername strin
 	}
 
 	// As we can't chain two N1QL queries, we execute them sequentially.
-	query = r.db.N1QLQuery[dbcontext.ActionUnfollow]
+	query = r.db.N1QLQuery[dbContext.ActionUnfollow]
 	query = strings.ReplaceAll(query, "DYNAMIC_FIELD", "followers")
 	params["username"] = username
 	params["user"] = targetUsername
@@ -480,6 +480,6 @@ func (r repository) Submit(ctx context.Context, id string, userSubmission entity
 	params["ts"] = userSubmission.Timestamp
 	params["user"] = id
 
-	query := r.db.N1QLQuery[dbcontext.ActionSubmit]
+	query := r.db.N1QLQuery[dbContext.ActionSubmit]
 	return r.db.Query(ctx, query, params, &results)
 }

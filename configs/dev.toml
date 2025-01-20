@@ -10,6 +10,7 @@ reset_pwd_token_expiration = 10 # represents the token expiration for reset pass
 max_file_size = 64 # Maximum file size to allow for samples in MB.
 max_avatar_file_size = 1 # Maximum avatar size to allow for user profile picture in KB.
 samples_zip_password = "infected"	# represents the password used to zip the samples during file download.
+recaptcha_key = "" # Google ReCaptcha v3 secret key.
 
 [ui]
 address = "http://ui:8000" # DSN for the frontend.
