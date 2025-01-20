@@ -450,6 +450,74 @@ const docTemplate = `{
             }
         },
         "/comments/": {
+            "get": {
+                "description": "List comments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Comment"
+                ],
+                "summary": "Retrieves a paginated list of comments",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of comments  per page",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Specify the page number",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/pagination.Pages"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/entity.Comment"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -676,6 +744,73 @@ const docTemplate = `{
                 }
             }
         },
+        "/contact/": {
+            "post": {
+                "description": "Handles form-data sent via landing page.",
+                "tags": [
+                    "Support"
+                ],
+                "summary": "Contact Us",
+                "parameters": [
+                    {
+                        "description": "The user's email",
+                        "name": "email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "The subject of the email",
+                        "name": "subject",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "The content of the email",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Google Recaptcha v3 response",
+                        "name": "g-recaptcha-response",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/files/": {
             "get": {
                 "security": [
@@ -797,6 +932,66 @@ const docTemplate = `{
                     },
                     "413": {
                         "description": "Request Entity Too Large",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/files/search": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Search files",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "File"
+                ],
+                "summary": "Searches files based on files' metadata",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of files per page",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Specify the page number",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/pagination.Pages"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/errors.ErrorResponse"
                         }
@@ -1179,6 +1374,12 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
@@ -1252,6 +1453,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/files/{sha256}/meta-ui/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": [],
+                        - {}: []
+                    }
+                ],
+                "description": "Frontend metadata fields such as navbar menus.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "File"
+                ],
+                "summary": "Frontend Metadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "File SHA256",
+                        "name": "sha256",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/errors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/files/{sha256}/rescan/": {
             "post": {
                 "security": [
@@ -1277,6 +1531,12 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
@@ -1329,6 +1589,12 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Specify the page number",
                         "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Specify the string to search for",
+                        "name": "q",
                         "in": "query"
                     }
                 ],
@@ -1438,6 +1704,12 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
@@ -2580,6 +2852,9 @@ const docTemplate = `{
                 "api_trace": {},
                 "artifacts": {},
                 "capabilities": {},
+                "doc": {
+                    "$ref": "#/definitions/entity.DocMetadata"
+                },
                 "env": {},
                 "proc_tree": {},
                 "sandbox_log": {},
@@ -2591,7 +2866,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "integer"
+                    "$ref": "#/definitions/entity.FileScanProgressType"
                 },
                 "sys_events": {},
                 "timestamp": {
@@ -2608,6 +2883,14 @@ const docTemplate = `{
                 "body": {
                     "description": "Body represents the content of the comment.",
                     "type": "string"
+                },
+                "doc": {
+                    "description": "Meta represents document metadata.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entity.DocMetadata"
+                        }
+                    ]
                 },
                 "id": {
                     "description": "ID represents the activity identifier.",
@@ -2631,6 +2914,20 @@ const docTemplate = `{
                 }
             }
         },
+        "entity.DocMetadata": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer"
+                },
+                "last_updated": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
         "entity.File": {
             "type": "object",
             "properties": {
@@ -2641,13 +2938,13 @@ const docTemplate = `{
                         "type": "integer"
                     }
                 },
-                "comments_count": {
-                    "type": "integer"
-                },
                 "crc32": {
                     "type": "string"
                 },
                 "default_behavior_report": {},
+                "doc": {
+                    "$ref": "#/definitions/entity.DocMetadata"
+                },
                 "exif": {
                     "type": "object",
                     "additionalProperties": {
@@ -2709,7 +3006,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "integer"
+                    "$ref": "#/definitions/entity.FileScanProgressType"
                 },
                 "strings": {},
                 "submissions": {
@@ -2722,6 +3019,9 @@ const docTemplate = `{
                     "type": "object",
                     "additionalProperties": true
                 },
+                "tlsh": {
+                    "type": "string"
+                },
                 "trid": {
                     "type": "array",
                     "items": {
@@ -2732,6 +3032,19 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "entity.FileScanProgressType": {
+            "type": "integer",
+            "enum": [
+                1,
+                2,
+                3
+            ],
+            "x-enum-varnames": [
+                "FileScanProgressQueued",
+                "FileScanProgressProcessing",
+                "FileScanProgressFinished"
+            ]
         },
         "entity.Submission": {
             "type": "object",
@@ -2765,29 +3078,23 @@ const docTemplate = `{
                 "confirmed": {
                     "type": "boolean"
                 },
+                "doc": {
+                    "$ref": "#/definitions/entity.DocMetadata"
+                },
                 "email": {
                     "type": "string"
                 },
                 "followers": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/entity.UserFollows"
                     }
-                },
-                "followers_count": {
-                    "type": "integer"
                 },
                 "following": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/entity.UserFollows"
                     }
-                },
-                "following_count": {
-                    "type": "integer"
-                },
-                "has_avatar": {
-                    "type": "boolean"
                 },
                 "last_seen": {
                     "type": "integer"
@@ -2795,11 +3102,8 @@ const docTemplate = `{
                 "likes": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/entity.UserLike"
                     }
-                },
-                "likes_count": {
-                    "type": "integer"
                 },
                 "location": {
                     "type": "string"
@@ -2813,8 +3117,11 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
-                "submissions_count": {
-                    "type": "integer"
+                "submissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.UserSubmission"
+                    }
                 },
                 "type": {
                     "type": "string"
@@ -2824,6 +3131,39 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.UserFollows": {
+            "type": "object",
+            "properties": {
+                "ts": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.UserLike": {
+            "type": "object",
+            "properties": {
+                "sha256": {
+                    "type": "string"
+                },
+                "ts": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.UserSubmission": {
+            "type": "object",
+            "properties": {
+                "sha256": {
+                    "type": "string"
+                },
+                "ts": {
+                    "type": "integer"
                 }
             }
         },

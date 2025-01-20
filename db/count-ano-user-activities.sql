@@ -1,8 +1,8 @@
 SELECT
   RAW COUNT(*)
 FROM
-  `bucket_name` s
+  `bucket_name` activity
 WHERE
-  s.type = "activity"
+  activity.type = "activity"
   AND activity.src = "web"
   AND activity.kind != "comment"

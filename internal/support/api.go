@@ -34,6 +34,18 @@ type resource struct {
 	verifier recaptcha.VerifierV3
 }
 
+
+// @Summary Contact Us
+// @Description Handles form-data sent via landing page.
+// @Tags Support
+// @Param email body string true "The user's email"
+// @Param subject body string true "The subject of the email"
+// @Param message body string true "The content of the email"
+// @Param g-recaptcha-response body string true "Google Recaptcha v3 response"
+// @Success 200 {object} object{}
+// @Failure 400 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /contact/ [post]
 func (r resource) contact(c echo.Context) error {
 	var input SupportEmailRequest
 	ctx := c.Request().Context()
