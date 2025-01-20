@@ -36,8 +36,9 @@ type resource struct {
 
 
 // @Summary Contact Us
-// @Description Handles form-data sent via landing page.
+// @Description Handles contact us form-data sent via landing page.
 // @Tags Support
+// @Produce json
 // @Param email body string true "The user's email"
 // @Param subject body string true "The subject of the email"
 // @Param message body string true "The content of the email"

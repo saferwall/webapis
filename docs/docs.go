@@ -746,7 +746,10 @@ const docTemplate = `{
         },
         "/contact/": {
             "post": {
-                "description": "Handles form-data sent via landing page.",
+                "description": "Handles contact us form-data sent via landing page.",
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "Support"
                 ],
@@ -945,7 +948,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/files/search": {
+        "/files/search/": {
             "post": {
                 "security": [
                     {

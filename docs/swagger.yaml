@@ -848,7 +848,7 @@ paths:
         - Comment
   /contact/:
     post:
-      description: Handles form-data sent via landing page.
+      description: Handles contact us form-data sent via landing page.
       parameters:
         - description: The user's email
           in: body
@@ -874,6 +874,8 @@ paths:
           required: true
           schema:
             type: string
+      produces:
+        - application/json
       responses:
         "200":
           description: OK
@@ -1440,7 +1442,7 @@ paths:
       summary: Unlike a file
       tags:
         - File
-  /files/search:
+  /files/search/:
     post:
       consumes:
         - application/json
