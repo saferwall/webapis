@@ -103,6 +103,8 @@ type Config struct {
 	MaxAvatarSize int `mapstructure:"max_avatar_file_size"`
 	// Password used to zip the samples during file download.
 	SamplesZipPwd string `mapstructure:"samples_zip_password"`
+	// Recaptcha server-side secret key.
+	RecaptchaKey string `mapstructure:"recaptcha_key"`
 	// Database configuration.
 	DB DatabaseCfg `mapstructure:"db"`
 	// Broker server configuration.

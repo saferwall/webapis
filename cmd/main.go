@@ -20,7 +20,7 @@ import (
 	"github.com/saferwall/saferwall-api/internal/archive"
 	"github.com/saferwall/saferwall-api/internal/config"
 	"github.com/saferwall/saferwall-api/internal/db"
-	"github.com/saferwall/saferwall-api/internal/mailer/smtp"
+	smtpmailer "github.com/saferwall/saferwall-api/internal/mailer/smtp"
 	"github.com/saferwall/saferwall-api/internal/queue"
 	"github.com/saferwall/saferwall-api/internal/secure/password"
 	"github.com/saferwall/saferwall-api/internal/secure/token"
@@ -29,6 +29,7 @@ import (
 	tpl "github.com/saferwall/saferwall-api/internal/template"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/yeka/zip"
+	"github.com/MicahParks/recaptcha"
 )
 
 // Version indicates the current version of the application.
@@ -142,10 +143,12 @@ func run(logger log.Logger) error {
 		}
 	}
 
+	recaptchaVerifier := recaptcha.NewVerifierV3(cfg.RecaptchaKey, recaptcha.VerifierV3Options{})
+
 	hs := &http.Server{
 		Addr: cfg.Address,
 		Handler: server.BuildHandler(logger, dbx, sec, cfg, Version, trans,
-			updown, producer, smtpMailer, archiver, tokenGen, emailTemplates),
+			updown, producer, smtpMailer, archiver, tokenGen, emailTemplates, recaptchaVerifier),
 	}
 
 	// Start server.

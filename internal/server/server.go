@@ -22,6 +22,7 @@ import (
 	dbcontext "github.com/saferwall/saferwall-api/internal/db"
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/internal/file"
+	"github.com/saferwall/saferwall-api/internal/support"
 	"github.com/saferwall/saferwall-api/internal/healthcheck"
 	smtpmailer "github.com/saferwall/saferwall-api/internal/mailer/smtp"
 	"github.com/saferwall/saferwall-api/internal/queue"
@@ -31,6 +32,7 @@ import (
 	tpl "github.com/saferwall/saferwall-api/internal/template"
 	"github.com/saferwall/saferwall-api/internal/user"
 	"github.com/saferwall/saferwall-api/pkg/log"
+	"github.com/MicahParks/recaptcha"
 )
 
 const (
@@ -55,7 +57,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	updown storage.UploadDownloader, p queue.Producer,
 	smtpMailer smtpmailer.SMTPMailer, arch archive.Archiver,
 	tokenGen token.Service,
-	emailTpl tpl.Service) http.Handler {
+	emailTpl tpl.Service, recaptchaVerifier recaptcha.VerifierV3) http.Handler {
 
 	// Create `echo` instance.
 	e := echo.New()
@@ -145,6 +147,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 	comment.RegisterHandlers(g, commentSvc, logger, authHandler, commentMiddleware.VerifyID)
 	behavior.RegisterHandlers(g, behaviorSvc, behaviorMiddleware.CacheResponse,
 		behaviorMiddleware.VerifyID, logger)
+	support.RegisterHandlers(e, logger, smtpMailer, recaptchaVerifier)
 
 	return e
 }
