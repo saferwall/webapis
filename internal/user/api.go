@@ -323,6 +323,12 @@ func (r resource) activities(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	// If the user has just signed-up, and did not follow any user.
+	// Treat him as anonymous user, so we can show him some activities.
+	if count == 0 {
+		id = ""
+	}
 	pages := pagination.NewFromRequest(c.Request(), count)
 	activities, err := r.service.Activities(ctx, id, pages.Offset(), pages.Limit())
 	if err != nil {
