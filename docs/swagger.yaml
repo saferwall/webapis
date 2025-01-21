@@ -73,6 +73,8 @@ definitions:
       api_trace: {}
       artifacts: {}
       capabilities: {}
+      doc:
+        $ref: '#/definitions/entity.DocMetadata'
       env: {}
       proc_tree: {}
       sandbox_log: {}
@@ -82,7 +84,7 @@ definitions:
       sha256:
         type: string
       status:
-        type: integer
+        $ref: '#/definitions/entity.FileScanProgressType'
       sys_events: {}
       timestamp:
         type: integer
@@ -94,6 +96,10 @@ definitions:
       body:
         description: Body represents the content of the comment.
         type: string
+      doc:
+        allOf:
+          - $ref: '#/definitions/entity.DocMetadata'
+        description: Meta represents document metadata.
       id:
         description: ID represents the activity identifier.
         type: string
@@ -112,6 +118,15 @@ definitions:
         description: Username represents the author of the comment.
         type: string
     type: object
+  entity.DocMetadata:
+    properties:
+      created_at:
+        type: integer
+      last_updated:
+        type: integer
+      version:
+        type: integer
+    type: object
   entity.File:
     properties:
       behavior_scans: {}
@@ -119,11 +134,11 @@ definitions:
         items:
           type: integer
         type: array
-      comments_count:
-        type: integer
       crc32:
         type: string
       default_behavior_report: {}
+      doc:
+        $ref: '#/definitions/entity.DocMetadata'
       exif:
         additionalProperties:
           type: string
@@ -166,7 +181,7 @@ definitions:
       ssdeep:
         type: string
       status:
-        type: integer
+        $ref: '#/definitions/entity.FileScanProgressType'
       strings: {}
       submissions:
         items:
@@ -175,6 +190,8 @@ definitions:
       tags:
         additionalProperties: true
         type: object
+      tlsh:
+        type: string
       trid:
         items:
           type: string
@@ -182,6 +199,16 @@ definitions:
       type:
         type: string
     type: object
+  entity.FileScanProgressType:
+    enum:
+      - 1
+      - 2
+      - 3
+    type: integer
+    x-enum-varnames:
+      - FileScanProgressQueued
+      - FileScanProgressProcessing
+      - FileScanProgressFinished
   entity.Submission:
     properties:
       country:
@@ -203,30 +230,24 @@ definitions:
         type: integer
       confirmed:
         type: boolean
+      doc:
+        $ref: '#/definitions/entity.DocMetadata'
       email:
         type: string
       followers:
         items:
-          type: string
+          $ref: '#/definitions/entity.UserFollows'
         type: array
-      followers_count:
-        type: integer
       following:
         items:
-          type: string
+          $ref: '#/definitions/entity.UserFollows'
         type: array
-      following_count:
-        type: integer
-      has_avatar:
-        type: boolean
       last_seen:
         type: integer
       likes:
         items:
-          type: string
+          $ref: '#/definitions/entity.UserLike'
         type: array
-      likes_count:
-        type: integer
       location:
         type: string
       member_since:
@@ -235,14 +256,37 @@ definitions:
         type: string
       password:
         type: string
-      submissions_count:
-        type: integer
+      submissions:
+        items:
+          $ref: '#/definitions/entity.UserSubmission'
+        type: array
       type:
         type: string
       url:
         type: string
       username:
         type: string
+    type: object
+  entity.UserFollows:
+    properties:
+      ts:
+        type: integer
+      username:
+        type: string
+    type: object
+  entity.UserLike:
+    properties:
+      sha256:
+        type: string
+      ts:
+        type: integer
+    type: object
+  entity.UserSubmission:
+    properties:
+      sha256:
+        type: string
+      ts:
+        type: integer
     type: object
   errors.ErrorResponse:
     properties:
@@ -615,6 +659,48 @@ paths:
       tags:
         - Behavior
   /comments/:
+    get:
+      consumes:
+        - application/json
+      description: List comments
+      parameters:
+        - description: Number of comments  per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+              - $ref: '#/definitions/pagination.Pages'
+              - properties:
+                  items:
+                    items:
+                      $ref: '#/definitions/entity.Comment'
+                    type: array
+                type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Retrieves a paginated list of comments
+      tags:
+        - Comment
     post:
       consumes:
         - application/json
@@ -760,6 +846,52 @@ paths:
       summary: Update a comment object (full update)
       tags:
         - Comment
+  /contact/:
+    post:
+      description: Handles contact us form-data sent via landing page.
+      parameters:
+        - description: The user's email
+          in: body
+          name: email
+          required: true
+          schema:
+            type: string
+        - description: The subject of the email
+          in: body
+          name: subject
+          required: true
+          schema:
+            type: string
+        - description: The content of the email
+          in: body
+          name: message
+          required: true
+          schema:
+            type: string
+        - description: Google Recaptcha v3 response
+          in: body
+          name: g-recaptcha-response
+          required: true
+          schema:
+            type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      summary: Contact Us
+      tags:
+        - Support
   /files/:
     get:
       consumes:
@@ -1077,6 +1209,10 @@ paths:
       produces:
         - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            type: object
         "403":
           description: Forbidden
           schema:
@@ -1127,6 +1263,40 @@ paths:
       summary: Like a file
       tags:
         - File
+  /files/{sha256}/meta-ui/:
+    get:
+      description: Frontend metadata fields such as navbar menus.
+      parameters:
+        - description: File SHA256
+          in: path
+          name: sha256
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+        - {}
+        - Bearer: []
+      summary: Frontend Metadata
+      tags:
+        - File
   /files/{sha256}/rescan/:
     post:
       description: Rescan an existing file.
@@ -1139,6 +1309,10 @@ paths:
       produces:
         - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            type: object
         "403":
           description: Forbidden
           schema:
@@ -1175,6 +1349,10 @@ paths:
           in: query
           name: page
           type: integer
+        - description: Specify the string to search for
+          in: query
+          name: q
+          type: string
       produces:
         - application/json
       responses:
@@ -1243,6 +1421,10 @@ paths:
       produces:
         - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            type: object
         "403":
           description: Forbidden
           schema:
@@ -1258,6 +1440,44 @@ paths:
       security:
         - Bearer: []
       summary: Unlike a file
+      tags:
+        - File
+  /files/search/:
+    post:
+      consumes:
+        - application/json
+      description: Search files
+      parameters:
+        - description: Number of files per page
+          in: query
+          name: per_page
+          type: integer
+        - description: Specify the page number
+          in: query
+          name: page
+          type: integer
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pagination.Pages'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errors.ErrorResponse'
+      security:
+        - Bearer: []
+      summary: Searches files based on files' metadata
       tags:
         - File
   /users/:

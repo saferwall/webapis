@@ -13,6 +13,7 @@ WITH
       activity.type = 'activity'
       AND activity.src = "web"
       AND activity.kind != "comment"
+      AND activity.kind != 'follow'
     ORDER BY
       activity.timestamp DESC
     OFFSET

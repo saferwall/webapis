@@ -310,7 +310,7 @@ func (r resource) list(c echo.Context) error {
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /files/search [post]
+// @Router /files/search/ [post]
 // @Security Bearer
 func (r resource) search(c echo.Context) error {
 	ctx := c.Request().Context()
