@@ -13,7 +13,10 @@ import (
 	"time"
 
 	gocb "github.com/couchbase/gocb/v2"
-	"github.com/couchbase/gocb/v2/search"
+	"github.com/saferwall/advanced-search/gen"
+	"github.com/saferwall/advanced-search/lexer"
+	"github.com/saferwall/advanced-search/parser"
+	"github.com/saferwall/advanced-search/token"
 )
 
 const (
@@ -248,11 +251,25 @@ func shortID(length int) string {
 	return string(b)
 }
 
-func (db *DB) Search(ctx context.Context, val *interface{}, totalHits *uint64) error {
+func generate(input string) map[string]interface{} {
+	l := lexer.New(input)
+	var tokens []*token.Token
+	for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
+		tokCopy := tok
+		tokens = append(tokens, &tokCopy)
+	}
 
-	queryOne := search.NewMatchQuery("spyware").Field("multiav.last_scan.avast.output")
-	queryTwo := search.NewTermQuery("exe").Field("file_extension")
-	query := search.NewConjunctionQuery(queryOne, queryTwo)
+	p := parser.New(tokens)
+	expr, _ := p.Parse()
+	result, _ := gen.GenerateCouchbaseFTS(expr)
+	return result
+}
+
+func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, totalHits *uint64) error {
+
+	// queryOne := search.NewMatchQuery("spyware").Field("multiav.last_scan.avast.output")
+	// queryTwo := search.NewTermQuery("exe").Field("file_extension")
+	query := generate(stringQuery)
 
 	// sfw._default.sfw_fts
 	result, err := db.Cluster.SearchQuery(
