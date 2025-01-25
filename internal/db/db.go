@@ -8,15 +8,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
 
 	gocb "github.com/couchbase/gocb/v2"
-	"github.com/saferwall/advanced-search/gen"
-	"github.com/saferwall/advanced-search/lexer"
-	"github.com/saferwall/advanced-search/parser"
-	"github.com/saferwall/advanced-search/token"
+	"github.com/saferwall/saferwall-api/internal/query-parser/gen"
 )
 
 const (
@@ -251,29 +249,18 @@ func shortID(length int) string {
 	return string(b)
 }
 
-func generate(input string) map[string]interface{} {
-	l := lexer.New(input)
-	var tokens []*token.Token
-	for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-		tokCopy := tok
-		tokens = append(tokens, &tokCopy)
-	}
-
-	p := parser.New(tokens)
-	expr, _ := p.Parse()
-	result, _ := gen.GenerateCouchbaseFTS(expr)
-	return result
-}
-
 func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, totalHits *uint64) error {
 
-	// queryOne := search.NewMatchQuery("spyware").Field("multiav.last_scan.avast.output")
-	// queryTwo := search.NewTermQuery("exe").Field("file_extension")
-	query := generate(stringQuery)
+	fmt.Printf("Query: %v", stringQuery)
+	query, err := gen.Generate(stringQuery)
+	if err != nil {
+		panic(err.Error())
+		// return err
+	}
 
 	// sfw._default.sfw_fts
 	result, err := db.Cluster.SearchQuery(
-		"multiav_fts", query,
+		"sfw._default.sfw_fts", query,
 		&gocb.SearchOptions{
 			Limit: 100,
 			Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scan", "tags.packer", "tags.pe",
