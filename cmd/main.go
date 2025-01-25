@@ -13,6 +13,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/MicahParks/recaptcha"
 	"github.com/go-playground/locales/en"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
@@ -29,11 +30,10 @@ import (
 	tpl "github.com/saferwall/saferwall-api/internal/template"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/yeka/zip"
-	"github.com/MicahParks/recaptcha"
 )
 
 // Version indicates the current version of the application.
-var Version = "0.8.0"
+var Version = "0.9.0"
 
 var flagConfig = flag.String("config", "./../configs/", "path to the config file")
 var flagN1QLFiles = flag.String("db", "./../db/", "path to the n1ql files")

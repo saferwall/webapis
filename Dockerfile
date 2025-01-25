@@ -2,7 +2,7 @@
 # STEP 1 build executable binary
 ################################
 
-FROM golang:1.21-alpine AS build-stage
+FROM golang:1.23-alpine AS build-stage
 
 # Install git + SSL ca certificates.
 # Git is required for fetching the dependencies.
@@ -34,7 +34,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo \
 
 FROM alpine:latest
 LABEL maintainer="https://github.com/saferwall/saferwall-api"
-LABEL version="0.8.0"
+LABEL version="0.9.0"
 LABEL description="Saferwall web APIs service"
 
 ENV USER=saferwall
