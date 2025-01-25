@@ -14,14 +14,7 @@ import (
 	"time"
 
 	gocb "github.com/couchbase/gocb/v2"
-<<<<<<< HEAD
 	"github.com/saferwall/saferwall-api/internal/query-parser/gen"
-=======
-	"github.com/saferwall/advanced-search/gen"
-	"github.com/saferwall/advanced-search/lexer"
-	"github.com/saferwall/advanced-search/parser"
-	"github.com/saferwall/advanced-search/token"
->>>>>>> c78e1ef (integrate couchbase FTS)
 )
 
 const (
