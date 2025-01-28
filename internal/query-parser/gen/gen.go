@@ -3,6 +3,7 @@ package gen
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/couchbase/gocb/v2/search"
 	"github.com/saferwall/saferwall-api/internal/query-parser/lexer"
@@ -118,23 +119,31 @@ func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error)
 			}
 			return search.NewNumericRangeQuery().Field(field).Min(float32(v), isInclusive), nil
 		case DATE:
-			return search.NewDateRangeQuery().Field(field).Start(expr.Right, isInclusive), nil
+			date, err := parseDate(value)
+			if err != nil {
+				return nil, fmt.Errorf("unsupported type for field: %s", field)
+			}
+			return search.NewDateRangeQuery().Field(field).Start(date, isInclusive), nil
 		default:
-			return search.NewTermRangeQuery(field).Min(expr.Right, isInclusive), nil
+			return search.NewTermRangeQuery(field).Min(value, isInclusive), nil
 		}
 
 	case token.LT, token.LE:
 		switch t {
 		case NUMBER:
-			v, err := strconv.ParseFloat(value, 32)
+			num, err := strconv.ParseFloat(value, 32)
 			if err != nil {
 				return nil, fmt.Errorf("unsupported type for field: %s", field)
 			}
-			return search.NewNumericRangeQuery().Field(field).Max(float32(v), isInclusive), nil
+			return search.NewNumericRangeQuery().Field(field).Max(float32(num), isInclusive), nil
 		case DATE:
-			return search.NewDateRangeQuery().Field(field).End(expr.Right, isInclusive), nil
+			date, err := parseDate(value)
+			if err != nil {
+				return nil, fmt.Errorf("unsupported type for field: %s", field)
+			}
+			return search.NewDateRangeQuery().Field(field).End(date, isInclusive), nil
 		default:
-			return search.NewTermRangeQuery(field).Max(expr.Right, isInclusive), nil
+			return search.NewTermRangeQuery(field).Max(value, isInclusive), nil
 		}
 	}
 
@@ -153,4 +162,24 @@ func isValidF32(s string) (float32, bool) {
 		}
 	}
 	return 0, false
+}
+
+func parseDate(date string) (string, error) {
+	// Try parsing various formats
+	formats := []string{
+		"2006",
+		"2006-01",
+		"2006-01-02",                // ISO date
+		"2006-01-02T15:04:05Z07:00", // RFC3339
+		"2006-01-02T15:04:05Z",      // RFC3339 without timezone
+		time.RFC3339,
+	}
+
+	for _, format := range formats {
+		if t, err := time.Parse(format, date); err == nil {
+			return t.Format(time.RFC3339), nil
+		}
+	}
+
+	return "", fmt.Errorf("unable to parse date: %s", date)
 }
