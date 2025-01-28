@@ -8,7 +8,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -251,11 +250,18 @@ func shortID(length int) string {
 
 func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, totalHits *uint64) error {
 
-	fmt.Printf("Query: %v", stringQuery)
-	query, err := gen.Generate(stringQuery)
+	query, err := gen.Generate(stringQuery,
+		gen.Config{
+			"last_scan": {
+				Type: "date",
+			},
+			"avast": {
+				Alias: "multiav.last_scan.avast.output",
+			},
+		},
+	)
 	if err != nil {
-		panic(err.Error())
-		// return err
+		return err
 	}
 
 	// sfw._default.sfw_fts

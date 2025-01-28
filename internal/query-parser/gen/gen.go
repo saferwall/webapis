@@ -5,13 +5,19 @@ import (
 	"strconv"
 
 	"github.com/couchbase/gocb/v2/search"
-	"github.com/saferwall/advanced-search/gen"
-	"github.com/saferwall/advanced-search/parser"
-	"github.com/saferwall/advanced-search/token"
 	"github.com/saferwall/saferwall-api/internal/query-parser/lexer"
+	"github.com/saferwall/saferwall-api/internal/query-parser/parser"
+	"github.com/saferwall/saferwall-api/internal/query-parser/token"
 )
 
-func Generate(input string) (search.Query, error) {
+type Config map[string]struct {
+	Type  string
+	Alias string
+}
+
+var config Config
+
+func Generate(input string, cfg Config) (search.Query, error) {
 	l := lexer.New(input)
 	var tokens []*token.Token
 	for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
@@ -24,7 +30,9 @@ func Generate(input string) (search.Query, error) {
 	if err != nil {
 		return nil, err
 	}
-	result, err := gen.GenerateCouchbaseFTS(expr)
+
+	config = cfg
+	result, err := GenerateCouchbaseFTS(expr)
 	if err != nil {
 		return nil, err
 	}
@@ -66,12 +74,16 @@ func generateBinaryCouchbase(expr *parser.BinaryExpression) (search.Query, error
 
 func generateComparisonCouchbase(expr *parser.ComparisonExpression) (search.Query, error) {
 	// NOTE: might need to support term match query
+	field := expr.Left
+	if value, ok := config[expr.Left]; ok {
+		field = value.Alias
+	}
 
 	switch expr.Operator.Type {
 	case token.ASSIGN:
-		return search.NewMatchQuery(expr.Right).Field(expr.Left), nil
+		return search.NewMatchQuery(expr.Right).Field(field), nil
 	case token.NOT_EQ:
-		return search.NewBooleanQuery().MustNot(search.NewMatchQuery(expr.Right).Field(expr.Left)), nil
+		return search.NewBooleanQuery().MustNot(search.NewMatchQuery(expr.Right).Field(field)), nil
 	case token.GT, token.GE, token.LT, token.LE:
 		return generateRangeQuery(expr)
 	default:
@@ -80,25 +92,42 @@ func generateComparisonCouchbase(expr *parser.ComparisonExpression) (search.Quer
 }
 
 func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error) {
+	field := expr.Left
+	if v, ok := config[expr.Left]; ok {
+		field = v.Alias
+	}
+	value := expr.Right
+
+	t := config[expr.Left].Type
+
+	isInclusive := expr.Operator.Type == token.GE || expr.Operator.Type == token.LE
 	switch expr.Operator.Type {
 	case token.GT, token.GE:
-		isInclusive := expr.Operator.Type == token.GE
-		if v, ok := isValidF32(expr.Right); ok {
-			return search.NewNumericRangeQuery().Field(expr.Left).Min(v, isInclusive), nil
-		} else if lexer.IsISODate(expr.Right) {
-			return search.NewDateRangeQuery().Field(expr.Left).Start(expr.Right, isInclusive), nil
-		} else {
-			return search.NewTermRangeQuery(expr.Left).Min(expr.Right, isInclusive), nil
+		switch t {
+		case "number":
+			v, err := strconv.ParseFloat(value, 32)
+			if err != nil {
+				return nil, fmt.Errorf("unsupported type for field: %s", field)
+			}
+			return search.NewNumericRangeQuery().Field(field).Min(float32(v), isInclusive), nil
+		case "date":
+			return search.NewDateRangeQuery().Field(field).Start(expr.Right, isInclusive), nil
+		default:
+			return search.NewTermRangeQuery(field).Min(expr.Right, isInclusive), nil
 		}
 
 	case token.LT, token.LE:
-		isInclusive := expr.Operator.Type == token.LE
-		if v, ok := isValidF32(expr.Right); ok {
-			return search.NewNumericRangeQuery().Field(expr.Left).Max(v, isInclusive), nil
-		} else if lexer.IsISODate(expr.Right) {
-			return search.NewDateRangeQuery().Field(expr.Left).End(expr.Right, isInclusive), nil
-		} else {
-			return search.NewTermRangeQuery(expr.Left).Max(expr.Right, isInclusive), nil
+		switch t {
+		case "number":
+			v, err := strconv.ParseFloat(value, 32)
+			if err != nil {
+				return nil, fmt.Errorf("unsupported type for field: %s", field)
+			}
+			return search.NewNumericRangeQuery().Field(field).Max(float32(v), isInclusive), nil
+		case "date":
+			return search.NewDateRangeQuery().Field(field).End(expr.Right, isInclusive), nil
+		default:
+			return search.NewTermRangeQuery(field).Max(expr.Right, isInclusive), nil
 		}
 	}
 
