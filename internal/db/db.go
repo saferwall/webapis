@@ -252,8 +252,14 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 
 	query, err := gen.Generate(stringQuery,
 		gen.Config{
+			"first_seen": {
+				Type: gen.DATE,
+			},
 			"last_scan": {
-				Type: "date",
+				Type: gen.DATE,
+			},
+			"size": {
+				Type: gen.NUMBER,
 			},
 			"avast": {
 				Alias: "multiav.last_scan.avast.output",

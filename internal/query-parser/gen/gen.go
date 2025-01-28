@@ -10,10 +10,17 @@ import (
 	"github.com/saferwall/saferwall-api/internal/query-parser/token"
 )
 
+type Type int
+
 type Config map[string]struct {
-	Type  string
+	Type  Type
 	Alias string
 }
+
+const (
+	NUMBER Type = iota
+	DATE
+)
 
 var config Config
 
@@ -104,13 +111,13 @@ func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error)
 	switch expr.Operator.Type {
 	case token.GT, token.GE:
 		switch t {
-		case "number":
+		case NUMBER:
 			v, err := strconv.ParseFloat(value, 32)
 			if err != nil {
 				return nil, fmt.Errorf("unsupported type for field: %s", field)
 			}
 			return search.NewNumericRangeQuery().Field(field).Min(float32(v), isInclusive), nil
-		case "date":
+		case DATE:
 			return search.NewDateRangeQuery().Field(field).Start(expr.Right, isInclusive), nil
 		default:
 			return search.NewTermRangeQuery(field).Min(expr.Right, isInclusive), nil
@@ -118,13 +125,13 @@ func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error)
 
 	case token.LT, token.LE:
 		switch t {
-		case "number":
+		case NUMBER:
 			v, err := strconv.ParseFloat(value, 32)
 			if err != nil {
 				return nil, fmt.Errorf("unsupported type for field: %s", field)
 			}
 			return search.NewNumericRangeQuery().Field(field).Max(float32(v), isInclusive), nil
-		case "date":
+		case DATE:
 			return search.NewDateRangeQuery().Field(field).End(expr.Right, isInclusive), nil
 		default:
 			return search.NewTermRangeQuery(field).Max(expr.Right, isInclusive), nil
