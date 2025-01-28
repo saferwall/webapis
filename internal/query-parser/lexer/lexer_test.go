@@ -3,7 +3,7 @@ package lexer
 import (
 	"testing"
 
-	"github.com/saferwall/advanced-search/token"
+	"github.com/saferwall/saferwall-api/internal/query-parser/token"
 )
 
 var tests = []struct {

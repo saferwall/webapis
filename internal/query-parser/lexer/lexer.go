@@ -3,7 +3,7 @@ package lexer
 import (
 	"regexp"
 
-	"github.com/saferwall/advanced-search/token"
+	"github.com/saferwall/saferwall-api/internal/query-parser/token"
 )
 
 // Define a regular expression for ISO date format

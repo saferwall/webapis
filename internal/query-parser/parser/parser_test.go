@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/saferwall/advanced-search/lexer"
-	"github.com/saferwall/advanced-search/token"
+	"github.com/saferwall/saferwall-api/internal/query-parser/lexer"
+	"github.com/saferwall/saferwall-api/internal/query-parser/token"
 )
 
 func TestSimpleComparison(t *testing.T) {
