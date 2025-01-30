@@ -102,7 +102,9 @@ func generateComparisonCouchbase(expr *parser.ComparisonExpression) (search.Quer
 func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error) {
 	field := expr.Left
 	if v, ok := config[expr.Left]; ok {
-		field = v.Alias
+		if v.Alias != "" {
+			field = v.Alias
+		}
 	}
 	value := expr.Right
 
@@ -119,11 +121,11 @@ func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error)
 			}
 			return search.NewNumericRangeQuery().Field(field).Min(float32(v), isInclusive), nil
 		case DATE:
-			date, err := parseDate(value)
+			timestamp, err := parseDate(value)
 			if err != nil {
 				return nil, fmt.Errorf("unsupported type for field: %s", field)
 			}
-			return search.NewDateRangeQuery().Field(field).Start(date, isInclusive), nil
+			return search.NewNumericRangeQuery().Field(field).Min(float32(timestamp), isInclusive), nil
 		default:
 			return search.NewTermRangeQuery(field).Min(value, isInclusive), nil
 		}
@@ -137,11 +139,11 @@ func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error)
 			}
 			return search.NewNumericRangeQuery().Field(field).Max(float32(num), isInclusive), nil
 		case DATE:
-			date, err := parseDate(value)
+			timestamp, err := parseDate(value)
 			if err != nil {
 				return nil, fmt.Errorf("unsupported type for field: %s", field)
 			}
-			return search.NewDateRangeQuery().Field(field).End(date, isInclusive), nil
+			return search.NewNumericRangeQuery().Field(field).Max(float32(timestamp), isInclusive), nil
 		default:
 			return search.NewTermRangeQuery(field).Max(value, isInclusive), nil
 		}
@@ -164,7 +166,7 @@ func isValidF32(s string) (float32, bool) {
 	return 0, false
 }
 
-func parseDate(date string) (string, error) {
+func parseDate(date string) (int64, error) {
 	// Try parsing various formats
 	formats := []string{
 		"2006",
@@ -177,9 +179,9 @@ func parseDate(date string) (string, error) {
 
 	for _, format := range formats {
 		if t, err := time.Parse(format, date); err == nil {
-			return t.Format(time.RFC3339), nil
+			return t.Unix(), nil
 		}
 	}
 
-	return "", fmt.Errorf("unable to parse date: %s", date)
+	return 0, fmt.Errorf("unable to parse date: %s", date)
 }
