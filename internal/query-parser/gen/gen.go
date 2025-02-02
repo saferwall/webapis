@@ -14,8 +14,8 @@ import (
 type Type int
 
 type Config map[string]struct {
-	Type  Type
-	Alias string
+	Type Type
+	Path string
 }
 
 const (
@@ -83,8 +83,10 @@ func generateBinaryCouchbase(expr *parser.BinaryExpression) (search.Query, error
 func generateComparisonCouchbase(expr *parser.ComparisonExpression) (search.Query, error) {
 	// NOTE: might need to support term match query
 	field := expr.Left
-	if value, ok := config[expr.Left]; ok {
-		field = value.Alias
+	if v, ok := config[expr.Left]; ok {
+		if v.Path != "" {
+			field = v.Path
+		}
 	}
 
 	switch expr.Operator.Type {
@@ -102,8 +104,8 @@ func generateComparisonCouchbase(expr *parser.ComparisonExpression) (search.Quer
 func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error) {
 	field := expr.Left
 	if v, ok := config[expr.Left]; ok {
-		if v.Alias != "" {
-			field = v.Alias
+		if v.Path != "" {
+			field = v.Path
 		}
 	}
 	value := expr.Right
