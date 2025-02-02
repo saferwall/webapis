@@ -19,7 +19,7 @@ recaptcha_key = "" # Google ReCaptcha v3 secret key.
 address = "http://localhost:8000" # DSN for the frontend.
 
 [db]
-server = "couchbase://localhost" # DSN for connecting to the database
+server = "couchbase://127.0.0.1" # DSN for connecting to the database
 username = "Administrator" # Username used to access the db.
 password = "password" # Password used to access the db.
 bucket_name = "sfw" # Name of the couchbase bucket.
