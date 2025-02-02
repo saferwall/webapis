@@ -3,7 +3,7 @@
 
 services:
   couchbase:
-    image: couchbase/server:7.6.5
+    image: couchbase/server:7.6.1
     ports:
       - "8091:8091"
       - "8092:8092"

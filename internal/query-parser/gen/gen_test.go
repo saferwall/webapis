@@ -1,6 +1,12 @@
 package gen
 
-/*
+import (
+	"reflect"
+	"testing"
+
+	"github.com/couchbase/gocb/v2/search"
+)
+
 func TestGenerate(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -97,4 +103,3 @@ func TestGenerate(t *testing.T) {
 		})
 	}
 }
-*/

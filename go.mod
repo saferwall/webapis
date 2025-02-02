@@ -15,6 +15,7 @@ require (
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/minio/minio-go/v7 v7.0.73
 	github.com/nsqio/go-nsq v1.1.0
+	github.com/saferwall/advanced-search v0.0.0-20250120184926-f1a096cecd50
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/swag v1.16.3
