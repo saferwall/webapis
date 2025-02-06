@@ -14,7 +14,8 @@ import (
 type Type int
 
 // Key is the identifier which can map to one or multiple fields
-// if none is provided it's assumed that the field is the identifier
+// if none is provided it's assumed that the field is the identifier.
+// if Type is not provided it's assumed to be a string.
 type Config map[string]struct {
 	Type       Type
 	Field      string
