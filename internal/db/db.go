@@ -303,6 +303,24 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 			"fsecure": {
 				Field: "multiav.last_scan.fsecure.output",
 			},
+			"engines": {
+				FieldGroup: []string{
+					"multiav.last_scan.avast.output",
+					"multiav.last_scan.avira.output",
+					"multiav.last_scan.bitdefender.output",
+					"multiav.last_scan.clamav.output",
+					"multiav.last_scan.comodo.output",
+					"multiav.last_scan.drweb.output",
+					"multiav.last_scan.eset.output",
+					"multiav.last_scan.kaspersky.output",
+					"multiav.last_scan.mcafee.output",
+					"multiav.last_scan.sophos.output",
+					"multiav.last_scan.symantec.output",
+					"multiav.last_scan.trendmicro.output",
+					"multiav.last_scan.windefender.output",
+					"multiav.last_scan.fsecure.output",
+				},
+			},
 		},
 	)
 	if err != nil {
