@@ -1,100 +1,136 @@
 package gen
 
-/*
+import (
+	"testing"
+
+	"github.com/couchbase/gocb/v2/search"
+	"github.com/stretchr/testify/assert"
+)
+
 func TestGenerate(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		wantErr  bool
-		expected search.Query
+		name        string
+		input       string
+		config      Config
+		wantErr     bool
+		validateFn  func(t *testing.T, q search.Query)
+		errContains string
 	}{
 		{
-			name:    "simple equality",
-			input:   "size=100",
-			wantErr: false,
-			expected: search.NewMatchQuery("100").
-				Field("size"),
+			name:  "simple string equality",
+			input: "type=pe",
+			config: Config{
+				"type": {},
+			},
+			validateFn: func(t *testing.T, q search.Query) {
+				mq, ok := q.(*search.MatchQuery)
+				assert.True(t, ok, "expected MatchQuery")
+				assert.NotNil(t, mq)
+			},
 		},
 		{
-			name:    "simple inequality",
-			input:   "size!=100",
-			wantErr: false,
-			expected: search.NewBooleanQuery().
-				MustNot(search.NewMatchQuery("100").Field("size")),
+			name:  "numeric comparison with field mapping",
+			input: "size>1000",
+			config: Config{
+				"size": {
+					Type:  NUMBER,
+					Field: "file_size",
+				},
+			},
+			validateFn: func(t *testing.T, q search.Query) {
+				nq, ok := q.(*search.NumericRangeQuery)
+				assert.True(t, ok, "expected NumericRangeQuery")
+				assert.NotNil(t, nq)
+			},
 		},
 		{
-			name:    "numeric greater than",
-			input:   "size>100",
-			wantErr: false,
-			expected: search.NewNumericRangeQuery().
-				Field("size").
-				Min(float32(100), false),
+			name:  "date range with field mapping",
+			input: "first_seen>=2023-01-01",
+			config: Config{
+				"first_seen": {
+					Type: DATE,
+				},
+			},
+			validateFn: func(t *testing.T, q search.Query) {
+				nq, ok := q.(*search.NumericRangeQuery)
+				assert.True(t, ok, "expected NumericRangeQuery")
+				assert.NotNil(t, nq)
+			},
 		},
 		{
-			name:    "numeric greater than or equal",
-			input:   "size>=100",
-			wantErr: false,
-			expected: search.NewNumericRangeQuery().
-				Field("size").
-				Min(float32(100), true),
+			name:  "complex boolean expression",
+			input: "type=pe AND size>1000 OR first_seen>=2023-01-01",
+			config: Config{
+				"type": {},
+				"size": {
+					Type: NUMBER,
+				},
+				"first_seen": {
+					Type: DATE,
+				},
+			},
+			validateFn: func(t *testing.T, q search.Query) {
+				dq, ok := q.(*search.DisjunctionQuery)
+				assert.True(t, ok, "expected DisjunctionQuery")
+				assert.NotNil(t, dq)
+
+				assert.NotNil(t, q)
+			},
 		},
 		{
-			name:    "date comparison",
-			input:   "created>2024-01-01",
-			wantErr: false,
-			expected: search.NewDateRangeQuery().
-				Field("created").
-				Start("2024-01-01", false),
+			name:  "field group search",
+			input: "engines=malware",
+			config: Config{
+				"engines": {
+					FieldGroup: []string{
+						"multiav.last_scan.avast.output",
+						"multiav.last_scan.mcafee.output",
+					},
+				},
+			},
+			validateFn: func(t *testing.T, q search.Query) {
+				dq, ok := q.(*search.DisjunctionQuery)
+				assert.True(t, ok, "expected DisjunctionQuery")
+				assert.NotNil(t, dq)
+			},
 		},
 		{
-			name:    "string range",
-			input:   "name>alice",
-			wantErr: false,
-			expected: search.NewTermRangeQuery("name").
-				Min("alice", false),
+			name:  "invalid date format",
+			input: "first_seen>=invalid-date",
+			config: Config{
+				"first_seen": {
+					Type: DATE,
+				},
+			},
+			wantErr:     true,
+			errContains: "unsupported type for field",
 		},
 		{
-			name:    "AND operation",
-			input:   "size=100 AND name=test",
-			wantErr: false,
-			expected: search.NewConjunctionQuery(
-				search.NewMatchQuery("100").Field("size"),
-				search.NewMatchQuery("test").Field("name"),
-			),
-		},
-		{
-			name:    "OR operation",
-			input:   "size=100 OR name=test",
-			wantErr: false,
-			expected: search.NewDisjunctionQuery(
-				search.NewMatchQuery("100").Field("size"),
-				search.NewMatchQuery("test").Field("name"),
-			),
-		},
-		{
-			name:    "invalid syntax",
-			input:   "size=",
-			wantErr: true,
+			name:  "invalid numeric value",
+			input: "size>not-a-number",
+			config: Config{
+				"size": {
+					Type: NUMBER,
+				},
+			},
+			wantErr:     true,
+			errContains: "unsupported type for field",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			query, err := Generate(tt.input)
+			query, err := Generate(tt.input, tt.config)
 			if tt.wantErr {
-				if err == nil {
-					t.Error("expected error, got nil")
+				assert.Error(t, err)
+				if tt.errContains != "" {
+					assert.Contains(t, err.Error(), tt.errContains)
 				}
 				return
 			}
-			if err != nil {
-				t.Errorf("unexpected error: %v", err)
-				return
-			}
-			if !reflect.DeepEqual(query, tt.expected) {
-				t.Errorf("\nexpected: %#v\ngot: %#v", tt.expected, query)
-			}
+
+			assert.NoError(t, err)
+			tt.validateFn(t, query)
 		})
 	}
 }
-*/
