@@ -90,20 +90,16 @@ func generateBinaryCouchbase(expr *parser.BinaryExpression) (search.Query, error
 
 func generateComparisonCouchbase(expr *parser.ComparisonExpression) (search.Query, error) {
 	if len(config[expr.Left].FieldGroup) != 0 {
-		var queries search.Query
+		queries := []search.Query{}
 		for _, field := range config[expr.Left].FieldGroup {
 			query, err := buildComparisonQuery(field, expr.Right, expr.Operator.Type, config[expr.Left].Type)
 			if err != nil {
 				return nil, err
 			}
 
-			if queries == nil {
-				queries = query
-			} else {
-				queries = search.NewDisjunctionQuery(query, queries)
-			}
+			queries = append(queries, query)
 		}
-		return queries, nil
+		return search.NewDisjunctionQuery(queries...), nil
 	}
 
 	identifier := expr.Left
