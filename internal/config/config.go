@@ -21,6 +21,8 @@ type DatabaseCfg struct {
 	Password string `mapstructure:"password"`
 	// Name of the couchbase bucket.
 	BucketName string `mapstructure:"bucket_name"`
+	// Name of the FTS index.
+	FTSIndexName string `mapstructure:"fts_index"`
 }
 
 // BrokerCfg represents the broker producer config.

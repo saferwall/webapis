@@ -23,6 +23,7 @@ server = "couchbase://127.0.0.1" # DSN for connecting to the database
 username = "Administrator" # Username used to access the db.
 password = "password" # Password used to access the db.
 bucket_name = "sfw" # Name of the couchbase bucket.
+fts_index = "multiav_fts" # Name of the Full text search index.
 
 [nsq]
 address = "localhost:4150" # The data source name (DSN) for connecting to the broker server (NSQD).

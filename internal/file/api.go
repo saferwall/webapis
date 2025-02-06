@@ -49,7 +49,8 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/files/:sha256/generate-presigned-url/", res.generatePresignedURL, verifyHash, requireLogin)
 	g.GET("/files/:sha256/meta-ui/", res.metaUI, verifyHash, optionalLogin)
 	g.POST("/files/search/", res.search, requireLogin)
-
+	g.GET("/files/search/autocomplete?&goodware", res.search, requireLogin)
+	//
 }
 
 // @Summary Check if a file exists.
