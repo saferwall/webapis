@@ -444,13 +444,6 @@ func (s service) UnFollow(ctx context.Context, id string) error {
 		return err
 	}
 
-	if err = s.repo.Update(ctx, curUser.User); err != nil {
-		return err
-	}
-	if err = s.repo.Update(ctx, targetUser.User); err != nil {
-		return err
-	}
-
 	return nil
 }
 
