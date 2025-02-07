@@ -13,9 +13,13 @@ import (
 
 type Type int
 
+// Key is the identifier which can map to one or multiple fields
+// if none is provided it's assumed that the field is the identifier.
+// if Type is not provided it's assumed to be a string.
 type Config map[string]struct {
-	Type Type
-	Path string
+	Type       Type
+	Field      string
+	FieldGroup []string
 }
 
 const (
@@ -39,6 +43,11 @@ func Generate(input string, cfg Config) (search.Query, error) {
 		return nil, err
 	}
 
+	for _, v := range cfg {
+		if v.Field != "" && len(v.FieldGroup) != 0 {
+			panic("config can not have path and path group at the same time")
+		}
+	}
 	config = cfg
 	result, err := GenerateCouchbaseFTS(expr)
 	if err != nil {
@@ -81,41 +90,49 @@ func generateBinaryCouchbase(expr *parser.BinaryExpression) (search.Query, error
 }
 
 func generateComparisonCouchbase(expr *parser.ComparisonExpression) (search.Query, error) {
-	// NOTE: might need to support term match query
-	field := expr.Left
-	if v, ok := config[expr.Left]; ok {
-		if v.Path != "" {
-			field = v.Path
+	if len(config[expr.Left].FieldGroup) != 0 {
+		queries := []search.Query{}
+		for _, field := range config[expr.Left].FieldGroup {
+			query, err := buildComparisonQuery(field, expr.Right, expr.Operator.Type, config[expr.Left].Type)
+			if err != nil {
+				return nil, err
+			}
+
+			queries = append(queries, query)
 		}
+		return search.NewDisjunctionQuery(queries...), nil
 	}
 
-	switch expr.Operator.Type {
+	identifier := expr.Left
+	field := identifier
+	if v, ok := config[identifier]; ok && v.Field != "" {
+		field = v.Field
+	}
+
+	valueType := config[expr.Left].Type
+
+	return buildComparisonQuery(field, expr.Right, expr.Operator.Type, valueType)
+}
+
+func buildComparisonQuery(field, value string, operator token.TokenType, valueType Type) (search.Query, error) {
+	switch operator {
 	case token.ASSIGN:
-		return search.NewMatchQuery(expr.Right).Field(field), nil
+		// NOTE: might need to support term match query
+		return search.NewMatchQuery(value).Field(field), nil
 	case token.NOT_EQ:
-		return search.NewBooleanQuery().MustNot(search.NewMatchQuery(expr.Right).Field(field)), nil
+		return search.NewBooleanQuery().MustNot(search.NewMatchQuery(value).Field(field)), nil
 	case token.GT, token.GE, token.LT, token.LE:
-		return generateRangeQuery(expr)
+		return buildRangeQuery(field, value, operator, valueType)
 	default:
-		return nil, fmt.Errorf("unsupported comparison operator: %s", expr.Operator.Type)
+		return nil, fmt.Errorf("unsupported comparison operator: %s", operator)
 	}
 }
 
-func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error) {
-	field := expr.Left
-	if v, ok := config[expr.Left]; ok {
-		if v.Path != "" {
-			field = v.Path
-		}
-	}
-	value := expr.Right
-
-	t := config[expr.Left].Type
-
-	isInclusive := expr.Operator.Type == token.GE || expr.Operator.Type == token.LE
-	switch expr.Operator.Type {
+func buildRangeQuery(field, value string, operator token.TokenType, valueType Type) (search.Query, error) {
+	isInclusive := operator == token.GE || operator == token.LE
+	switch operator {
 	case token.GT, token.GE:
-		switch t {
+		switch valueType {
 		case NUMBER:
 			v, err := strconv.ParseFloat(value, 32)
 			if err != nil {
@@ -133,7 +150,7 @@ func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error)
 		}
 
 	case token.LT, token.LE:
-		switch t {
+		switch valueType {
 		case NUMBER:
 			num, err := strconv.ParseFloat(value, 32)
 			if err != nil {
@@ -151,7 +168,7 @@ func generateRangeQuery(expr *parser.ComparisonExpression) (search.Query, error)
 		}
 	}
 
-	return nil, fmt.Errorf("unsupported range operator: %s", expr.Operator.Type)
+	return nil, fmt.Errorf("unsupported range operator: %s", operator)
 }
 
 func isValidF32(s string) (float32, bool) {

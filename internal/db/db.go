@@ -257,53 +257,89 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 			"first_seen": {
 				Type: gen.DATE,
 			},
+			"fs": {
+				Type:  gen.DATE,
+				Field: "first_seen",
+			},
+
 			"last_scanned": {
 				Type: gen.DATE,
 			},
+			"ls": {
+				Type:  gen.DATE,
+				Field: "last_scanned",
+			},
+
+			"extension": {
+				Field: "file_extension",
+			},
+
+			"type": {
+				Field: "file_format",
+			},
+
 			"size": {
 				Type: gen.NUMBER,
 			},
 			"avast": {
-				Path: "multiav.last_scan.avast.output",
+				Field: "multiav.last_scan.avast.output",
 			},
 			"avira": {
-				Path: "multiav.last_scan.avira.output",
+				Field: "multiav.last_scan.avira.output",
 			},
 			"bitdefender": {
-				Path: "multiav.last_scan.bitdefender.output",
+				Field: "multiav.last_scan.bitdefender.output",
 			},
 			"clamav": {
-				Path: "multiav.last_scan.clamav.output",
+				Field: "multiav.last_scan.clamav.output",
 			},
 			"comodo": {
-				Path: "multiav.last_scan.comodo.output",
+				Field: "multiav.last_scan.comodo.output",
 			},
 			"drweb": {
-				Path: "multiav.last_scan.drweb.output",
+				Field: "multiav.last_scan.drweb.output",
 			},
 			"eset": {
-				Path: "multiav.last_scan.eset.output",
+				Field: "multiav.last_scan.eset.output",
 			},
 			"kaspersky": {
-				Path: "multiav.last_scan.kaspersky.output",
+				Field: "multiav.last_scan.kaspersky.output",
 			},
 			"mcafee": {
-				Path: "multiav.last_scan.mcafee.output",
+				Field: "multiav.last_scan.mcafee.output",
 			},
 			"sophos": {
-				Path: "multiav.last_scan.sophos.output",
+				Field: "multiav.last_scan.sophos.output",
 			},
 			"symantec": {
-				Path: "multiav.last_scan.symantec.output",
+				Field: "multiav.last_scan.symantec.output",
 			},
 			"trendmicro": {
-				Path: "multiav.last_scan.trendmicro.output",
+				Field: "multiav.last_scan.trendmicro.output",
 			},
 			"windefender": {
-				Path: "multiav.last_scan.windefender.output",
+				Field: "multiav.last_scan.windefender.output",
 			},
 			"fsecure": {
-				Path: "multiav.last_scan.fsecure.output",
+				Field: "multiav.last_scan.fsecure.output",
+			},
+			"engines": {
+				FieldGroup: []string{
+					"multiav.last_scan.avast.output",
+					"multiav.last_scan.avira.output",
+					"multiav.last_scan.bitdefender.output",
+					"multiav.last_scan.clamav.output",
+					"multiav.last_scan.comodo.output",
+					"multiav.last_scan.drweb.output",
+					"multiav.last_scan.eset.output",
+					"multiav.last_scan.kaspersky.output",
+					"multiav.last_scan.mcafee.output",
+					"multiav.last_scan.sophos.output",
+					"multiav.last_scan.symantec.output",
+					"multiav.last_scan.trendmicro.output",
+					"multiav.last_scan.windefender.output",
+					"multiav.last_scan.fsecure.output",
+				},
 			},
 		},
 	)
