@@ -591,10 +591,8 @@ func (r resource) metaUI(c echo.Context) error {
 // @Summary Returns a list of file search autocomplete data.
 // @Description File search autocomplete.
 // @Tags File
-// @Accept json
 // @Produce json
 // @Success 200 {object} FileSearchAutocomplete
-// @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
 // @Router /files/search/autocomplete/ [get]
