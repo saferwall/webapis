@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/couchbase/gocb/v2/search"
@@ -13,7 +14,7 @@ func TestGenerate(t *testing.T) {
 		input       string
 		config      Config
 		wantErr     bool
-		validateFn  func(t *testing.T, q search.Query)
+		wanted      search.Query
 		errContains string
 	}{
 		{
@@ -22,11 +23,7 @@ func TestGenerate(t *testing.T) {
 			config: Config{
 				"type": {},
 			},
-			validateFn: func(t *testing.T, q search.Query) {
-				mq, ok := q.(*search.MatchQuery)
-				assert.True(t, ok, "expected MatchQuery")
-				assert.NotNil(t, mq)
-			},
+			wanted: search.NewMatchQuery("pe").Field("type"),
 		},
 		{
 			name:  "numeric comparison with field mapping",
@@ -37,11 +34,7 @@ func TestGenerate(t *testing.T) {
 					Field: "file_size",
 				},
 			},
-			validateFn: func(t *testing.T, q search.Query) {
-				nq, ok := q.(*search.NumericRangeQuery)
-				assert.True(t, ok, "expected NumericRangeQuery")
-				assert.NotNil(t, nq)
-			},
+			wanted: search.NewNumericRangeQuery().Field("file_size").Min(float32(1000), false),
 		},
 		{
 			name:  "date range with field mapping",
@@ -51,11 +44,7 @@ func TestGenerate(t *testing.T) {
 					Type: DATE,
 				},
 			},
-			validateFn: func(t *testing.T, q search.Query) {
-				nq, ok := q.(*search.NumericRangeQuery)
-				assert.True(t, ok, "expected NumericRangeQuery")
-				assert.NotNil(t, nq)
-			},
+			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(1672531200), true), // 2023-01-01 00:00:00 UTC
 		},
 		{
 			name:  "complex boolean expression",
@@ -69,13 +58,13 @@ func TestGenerate(t *testing.T) {
 					Type: DATE,
 				},
 			},
-			validateFn: func(t *testing.T, q search.Query) {
-				dq, ok := q.(*search.DisjunctionQuery)
-				assert.True(t, ok, "expected DisjunctionQuery")
-				assert.NotNil(t, dq)
-
-				assert.NotNil(t, q)
-			},
+			wanted: search.NewDisjunctionQuery(
+				search.NewConjunctionQuery(
+					search.NewMatchQuery("pe").Field("type"),
+					search.NewNumericRangeQuery().Field("size").Min(float32(1000), false),
+				),
+				search.NewNumericRangeQuery().Field("first_seen").Min(float32(1672531200), true),
+			),
 		},
 		{
 			name:  "field group search",
@@ -88,11 +77,10 @@ func TestGenerate(t *testing.T) {
 					},
 				},
 			},
-			validateFn: func(t *testing.T, q search.Query) {
-				dq, ok := q.(*search.DisjunctionQuery)
-				assert.True(t, ok, "expected DisjunctionQuery")
-				assert.NotNil(t, dq)
-			},
+			wanted: search.NewDisjunctionQuery(
+				search.NewMatchQuery("malware").Field("multiav.last_scan.avast.output"),
+				search.NewMatchQuery("malware").Field("multiav.last_scan.mcafee.output"),
+			),
 		},
 		{
 			name:  "invalid date format",
@@ -116,6 +104,148 @@ func TestGenerate(t *testing.T) {
 			wantErr:     true,
 			errContains: "unsupported type for field",
 		},
+		{
+			name:  "multiple field groups",
+			input: "all_engines=trojan",
+			config: Config{
+				"all_engines": {
+					FieldGroup: []string{
+						"multiav.last_scan.avast.output",
+						"multiav.last_scan.mcafee.output",
+						"multiav.last_scan.kaspersky.output",
+						"multiav.last_scan.symantec.output",
+					},
+				},
+			},
+			wanted: search.NewDisjunctionQuery(
+				search.NewMatchQuery("trojan").Field("multiav.last_scan.avast.output"),
+				search.NewMatchQuery("trojan").Field("multiav.last_scan.mcafee.output"),
+				search.NewMatchQuery("trojan").Field("multiav.last_scan.kaspersky.output"),
+				search.NewMatchQuery("trojan").Field("multiav.last_scan.symantec.output"),
+			),
+		},
+		{
+			name:  "not equals operator",
+			input: "type!=pe",
+			config: Config{
+				"type": {},
+			},
+			wanted: search.NewBooleanQuery().MustNot(search.NewMatchQuery("pe").Field("type")),
+		},
+		{
+			name:  "complex nested expression with parentheses",
+			input: "(type=pe AND size>1000) OR (first_seen>=2023-01-01 AND engines=malware)",
+			config: Config{
+				"type": {},
+				"size": {
+					Type: NUMBER,
+				},
+				"first_seen": {
+					Type: DATE,
+				},
+				"engines": {
+					FieldGroup: []string{
+						"multiav.last_scan.avast.output",
+						"multiav.last_scan.mcafee.output",
+					},
+				},
+			},
+			wanted: search.NewDisjunctionQuery(
+				search.NewConjunctionQuery(
+					search.NewMatchQuery("pe").Field("type"),
+					search.NewNumericRangeQuery().Field("size").Min(float32(1000), false),
+				),
+				search.NewConjunctionQuery(
+					search.NewNumericRangeQuery().Field("first_seen").Min(float32(1672531200), true),
+					search.NewDisjunctionQuery(
+						search.NewMatchQuery("malware").Field("multiav.last_scan.avast.output"),
+						search.NewMatchQuery("malware").Field("multiav.last_scan.mcafee.output"),
+					),
+				),
+			),
+		},
+		{
+			name:    "empty input",
+			input:   "",
+			config:  Config{"type": {}},
+			wantErr: true,
+		},
+		{
+			name:    "whitespace only input",
+			input:   "   ",
+			config:  Config{"type": {}},
+			wantErr: true,
+		},
+		{
+			name:  "multiple numeric comparisons",
+			input: "size>=1000 AND size<=5000",
+			config: Config{
+				"size": {
+					Type: NUMBER,
+				},
+			},
+			wanted: search.NewConjunctionQuery(
+				search.NewNumericRangeQuery().Field("size").Min(float32(1000), true),
+				search.NewNumericRangeQuery().Field("size").Max(float32(5000), true),
+			),
+		},
+		{
+			name:  "multiple date comparisons",
+			input: "first_seen>=2023-01-01 AND first_seen<=2023-12-31",
+			config: Config{
+				"first_seen": {
+					Type: DATE,
+				},
+			},
+			wanted: search.NewConjunctionQuery(
+				search.NewNumericRangeQuery().Field("first_seen").Min(float32(1672531200), true), // 2023-01-01
+				search.NewNumericRangeQuery().Field("first_seen").Max(float32(1703980800), true), // 2023-12-31 23:59:59
+			),
+		},
+		{
+			name:  "invalid operator",
+			input: "type>pe",
+			config: Config{
+				"type": {},
+			},
+			wantErr: true,
+		},
+		{
+			name:  "missing field in config",
+			input: "unknown_field=value",
+			config: Config{
+				"type": {},
+			},
+			wanted: search.NewMatchQuery("value").Field("unknown_field"),
+		},
+		{
+			name:  "multiple field groups with complex expression",
+			input: "(engines=trojan OR engines=virus) AND size>1000",
+			config: Config{
+				"engines": {
+					FieldGroup: []string{
+						"multiav.last_scan.avast.output",
+						"multiav.last_scan.mcafee.output",
+					},
+				},
+				"size": {
+					Type: NUMBER,
+				},
+			},
+			wanted: search.NewConjunctionQuery(
+				search.NewDisjunctionQuery(
+					search.NewDisjunctionQuery(
+						search.NewMatchQuery("trojan").Field("multiav.last_scan.avast.output"),
+						search.NewMatchQuery("trojan").Field("multiav.last_scan.mcafee.output"),
+					),
+					search.NewDisjunctionQuery(
+						search.NewMatchQuery("virus").Field("multiav.last_scan.avast.output"),
+						search.NewMatchQuery("virus").Field("multiav.last_scan.mcafee.output"),
+					),
+				),
+				search.NewNumericRangeQuery().Field("size").Min(float32(1000), false),
+			),
+		},
 	}
 
 	for _, tt := range tests {
@@ -130,7 +260,11 @@ func TestGenerate(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			tt.validateFn(t, query)
+			current, err := json.Marshal(query)
+			assert.NoError(t, err)
+			wanted, err := json.Marshal(tt.wanted)
+			assert.NoError(t, err)
+			assert.Equal(t, string(wanted), string(current), "query mismatch")
 		})
 	}
 }
