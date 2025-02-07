@@ -255,9 +255,27 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 			"first_seen": {
 				Type: gen.DATE,
 			},
+			"fs": {
+				Type:  gen.DATE,
+				Field: "first_seen",
+			},
+
 			"last_scanned": {
 				Type: gen.DATE,
 			},
+			"ls": {
+				Type:  gen.DATE,
+				Field: "last_scanned",
+			},
+
+			"extension": {
+				Field: "file_extension",
+			},
+
+			"type": {
+				Field: "file_format",
+			},
+
 			"size": {
 				Type: gen.NUMBER,
 			},

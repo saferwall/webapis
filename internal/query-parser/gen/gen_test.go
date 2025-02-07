@@ -246,6 +246,17 @@ func TestGenerate(t *testing.T) {
 				search.NewNumericRangeQuery().Field("size").Min(float32(1000), false),
 			),
 		},
+		{
+			name:  "field alias",
+			input: "fs>=2023-01-01",
+			config: Config{
+				"fs": {
+					Type:  DATE,
+					Field: "first_seen",
+				},
+			},
+			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(1672531200), true),
+		},
 	}
 
 	for _, tt := range tests {
