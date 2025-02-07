@@ -49,7 +49,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/files/:sha256/generate-presigned-url/", res.generatePresignedURL, verifyHash, requireLogin)
 	g.GET("/files/:sha256/meta-ui/", res.metaUI, verifyHash, optionalLogin)
 	g.POST("/files/search/", res.search, requireLogin)
-	g.GET("/files/search/autocomplete?&goodware", res.search, requireLogin)
+	g.GET("/files/search/autocomplete/", res.autocomplete)
 	//
 }
 
@@ -586,4 +586,70 @@ func (r resource) metaUI(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, fileSummary)
+}
+
+// @Summary Returns a list of file search autocomplete data.
+// @Description File search autocomplete.
+// @Tags File
+// @Accept json
+// @Produce json
+// @Success 200 {object} FileSearchAutocomplete
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/search/autocomplete/ [get]
+func (r resource) autocomplete(c echo.Context) error {
+
+	fileAutocomplete := FileSearchAutocomplete{
+		Examples: []AutoCompleteEntry{
+			{
+				"fs >= 2025 and tag=upx and type=pe",
+				"PE binaries packed by upx seen after 2025",
+			},
+			{
+				"extension=sys and positives>=10",
+				"Driver files that are detected at least by 10 AV engines",
+			},
+			{
+				"(engines=ransom or engines=filecoder) and fs >= 2d and type=elf",
+				"Recent linux ransomware",
+			},
+		},
+		SearchModifiers: []AutoCompleteEntry{
+			{
+				"size",
+				"File size",
+			},
+			{
+				"name",
+				"File name",
+			},
+			{
+				"extension",
+				"File extension: example:{ps1, exe, dll, html}",
+			},
+			{
+				"type",
+				"File type. Example:{pe, elf, macho, pdf, ooxml, ole}",
+			},
+			{
+				"extension",
+				"File extension. Example:{ps1, exe, dll, html}",
+			},
+			{
+				"fs",
+				"First time we have seen this file. Example: 2020-01-30",
+			},
+			{
+				"ls",
+				"Last scanned: example: 2012-08-21T16:59}",
+			},
+			{
+				"extension",
+				"File extension: example:{ps1, exe, dll, html}",
+			},
+		},
+	}
+
+	return c.JSON(http.StatusOK, fileAutocomplete)
 }
