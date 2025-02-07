@@ -87,7 +87,7 @@ func run(logger log.Logger) error {
 
 	// Connect to the database.
 	dbx, err := db.Open(cfg.DB.Server, cfg.DB.Username,
-		cfg.DB.Password, cfg.DB.BucketName)
+		cfg.DB.Password, cfg.DB.BucketName, cfg.DB.FTSIndexName)
 	if err != nil {
 		return err
 	}

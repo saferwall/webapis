@@ -30,14 +30,15 @@ var (
 
 // DB represents the database connection.
 type DB struct {
-	Bucket     *gocb.Bucket
-	Cluster    *gocb.Cluster
-	Collection *gocb.Collection
-	N1QLQuery  map[n1qlQuery]string
+	Bucket       *gocb.Bucket
+	Cluster      *gocb.Cluster
+	Collection   *gocb.Collection
+	N1QLQuery    map[n1qlQuery]string
+	FTSIndexName string
 }
 
 // Open opens a connection to the database.
-func Open(server, username, password, bucketName string) (*DB, error) {
+func Open(server, username, password, bucketName, ftsIndexName string) (*DB, error) {
 
 	// Get a couchbase cluster instance.
 	cluster, err := gocb.Connect(
@@ -71,9 +72,10 @@ func Open(server, username, password, bucketName string) (*DB, error) {
 	}
 
 	return &DB{
-		Bucket:     bucket,
-		Cluster:    cluster,
-		Collection: collection,
+		Bucket:       bucket,
+		Cluster:      cluster,
+		Collection:   collection,
+		FTSIndexName: ftsIndexName,
 	}, nil
 }
 
@@ -309,9 +311,8 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		return err
 	}
 
-	// sfw._default.sfw_fts
 	result, err := db.Cluster.SearchQuery(
-		"sfw._default.sfw_fts", query,
+		db.FTSIndexName, query,
 		&gocb.SearchOptions{
 			Limit: 100,
 			Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scanned", "tags.packer", "tags.pe",

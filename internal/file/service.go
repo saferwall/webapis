@@ -145,13 +145,25 @@ type FileSearchRequest struct {
 	Page    int    `json:"page" validate:"omitempty,gte=0,lte=10000" example:"1"`
 	PerPage int    `json:"per_page" validate:"omitempty,gte=0,lte=1000" example:"100"`
 	SortBy  string `json:"sort_by" validate:"omitempty,alphanum,min=1,max=20,lowercase" example:"first_seen"`
-	Order   string `json:"order" validate:"omitempty,oneof=asc desc" example"asc"`
+	Order   string `json:"order" validate:"omitempty,oneof=asc desc" example:"asc"`
 }
 
 // FileSearchResponse represents file search response results.
 type FileSearchResponse struct {
 	Results   interface{}
 	TotalHits uint64
+}
+
+// AutoCompleteEntry represents a file search autocomplete entry.
+type AutoCompleteEntry struct {
+	Query   string `json:"query"`
+	Comment string `json:"comment"`
+}
+
+// FileSearchAutocomplete represents the autocomplete example when using file search.
+type FileSearchAutocomplete struct {
+	Examples        []AutoCompleteEntry `json:"examples"`
+	SearchModifiers []AutoCompleteEntry `json:"search_modifiers"`
 }
 
 type service struct {
