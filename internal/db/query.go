@@ -84,7 +84,7 @@ func walk(dir string) ([]string, error) {
 		}
 
 		// check if it is a regular file (not dir)
-		if info.Mode().IsRegular() {
+		if info.Mode().IsRegular() && filepath.Ext(info.Name()) == ".sql" {
 			fileList = append(fileList, path)
 		}
 		return nil
