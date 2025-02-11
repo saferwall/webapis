@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -393,7 +394,44 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 	if err != nil {
 		return err
 	}
+
+	nest(rows)
+
 	*val = rows
 	return nil
 
+}
+
+func nest(rows []interface{}) {
+
+	for _, row := range rows {
+		if row, ok := row.(map[string]interface{}); ok {
+
+			for k, col := range row {
+
+				if strings.Contains(k, ".") { // checks if the field is flattened
+					parts := strings.Split(k, ".")
+					current := row
+					for i := 0; i < len(parts)-1; i++ {
+						subkey := parts[i]
+						if next, exits := current[subkey]; exits {
+							if nextMap, ok := next.(map[string]interface{}); ok {
+								current = nextMap
+							} else {
+								newMap := make(map[string]interface{})
+								current[subkey] = newMap
+								current = newMap
+							}
+						} else {
+							newMap := make(map[string]interface{})
+							current[subkey] = newMap
+							current = newMap
+						}
+					}
+					current[parts[len(parts)-1]] = col
+					delete(row, k)
+				}
+			}
+		}
+	}
 }
