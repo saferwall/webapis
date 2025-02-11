@@ -257,6 +257,17 @@ func TestGenerate(t *testing.T) {
 			},
 			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(1672531200), true),
 		},
+		{
+			name:  "test value with year only",
+			input: "fs >= 2024",
+			config: Config{
+				"fs": {
+					Type:  DATE,
+					Field: "first_seen",
+				},
+			},
+			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(1704067200), true),
+		},
 	}
 
 	for _, tt := range tests {
