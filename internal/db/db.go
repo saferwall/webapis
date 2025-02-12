@@ -352,7 +352,7 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		&gocb.SearchOptions{
 			Limit: 100,
 			Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scanned", "tags.packer", "tags.pe",
-				"tags.avira", "tags.avast", "tags.kaspersky",
+				"tags.avira", "tags.eset", "tags.windefender",
 			},
 		},
 	)
