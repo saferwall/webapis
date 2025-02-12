@@ -378,6 +378,7 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 			"hits":  rand.Intn(5),
 			"total": 5 + rand.Intn(10),
 		}
+		unflattenFields(fields)
 		rows = append(rows, fields)
 	}
 
@@ -393,6 +394,7 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 	if err != nil {
 		return err
 	}
+
 	*val = rows
 	return nil
 
