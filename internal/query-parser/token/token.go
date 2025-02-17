@@ -52,6 +52,12 @@ var sizeUnits = map[string]TokenType{
 	"mb": UNIT,
 	"gb": UNIT,
 	"tb": UNIT,
+
+	// date units
+	"m": UNIT,
+	"h": UNIT,
+	"d": UNIT,
+	"y": UNIT,
 }
 
 // Update LookupIdent to return both token type and value type

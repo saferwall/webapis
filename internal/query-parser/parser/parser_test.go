@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/saferwall/saferwall-api/internal/query-parser/lexer"
 	"github.com/saferwall/saferwall-api/internal/query-parser/token"
@@ -158,6 +159,68 @@ func TestAndOrPrecedence(t *testing.T) {
 			equal, errMsg := compareExpressionsWithErrors(expr, tt.expected)
 			if !equal {
 				t.Errorf("wrong expression: %s", errMsg)
+			}
+		})
+	}
+}
+
+func TestDateUnits(t *testing.T) {
+	tests := []struct {
+		input     string
+		wantLeft  string
+		wantOp    token.TokenType
+		wantRight string
+	}{
+		{"fs<1h", "fs", token.LT, time.Now().Add(-1 * time.Hour).Format(time.RFC3339)},
+		{"ls>24h", "ls", token.GT, time.Now().Add(-24 * time.Hour).Format(time.RFC3339)},
+		{"fs<=7d", "fs", token.LE, time.Now().Add(-7 * 24 * time.Hour).Format(time.RFC3339)},
+		{"ls>=30d", "ls", token.GE, time.Now().Add(-30 * 24 * time.Hour).Format(time.RFC3339)},
+		{"fs<1y", "fs", token.LT, time.Now().Add(-365 * 24 * time.Hour).Format(time.RFC3339)},
+		{"ls>2y", "ls", token.GT, time.Now().Add(-2 * 365 * 24 * time.Hour).Format(time.RFC3339)},
+		{"fs<=15m", "fs", token.LE, time.Now().Add(-15 * time.Minute).Format(time.RFC3339)},
+		{"ls>=45m", "ls", token.GE, time.Now().Add(-45 * time.Minute).Format(time.RFC3339)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			l := lexer.New(tt.input)
+			var tokens []*token.Token
+			for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
+				tokCopy := tok
+				tokens = append(tokens, &tokCopy)
+			}
+
+			p := New(tokens)
+			expr, err := p.ParseExpression()
+			if err != nil {
+				t.Fatalf("parse error: %v", err)
+			}
+
+			compExpr, ok := expr.(*ComparisonExpression)
+			if !ok {
+				t.Fatalf("expected ComparisonExpression, got %T", expr)
+			}
+
+			if compExpr.Left != tt.wantLeft {
+				t.Errorf("wrong left value: got %q, want %q", compExpr.Left, tt.wantLeft)
+			}
+			if compExpr.Operator.Type != tt.wantOp {
+				t.Errorf("wrong operator: got %q, want %q", compExpr.Operator.Type, tt.wantOp)
+			}
+
+			// Parse the timestamps and compare them with a small tolerance
+			gotTime, err := time.Parse(time.RFC3339, compExpr.Right)
+			if err != nil {
+				t.Errorf("failed to parse got time: %v", err)
+			}
+			wantTime, err := time.Parse(time.RFC3339, tt.wantRight)
+			if err != nil {
+				t.Errorf("failed to parse want time: %v", err)
+			}
+
+			// Allow for a small difference (1 second) since the times are generated at slightly different moments
+			if diff := gotTime.Sub(wantTime).Abs(); diff > time.Second {
+				t.Errorf("wrong right value: got %q, want %q (diff: %v)", compExpr.Right, tt.wantRight, diff)
 			}
 		})
 	}
