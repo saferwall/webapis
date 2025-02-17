@@ -3,6 +3,7 @@ package gen
 import (
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/couchbase/gocb/v2/search"
 	"github.com/stretchr/testify/assert"
@@ -267,6 +268,50 @@ func TestGenerate(t *testing.T) {
 				},
 			},
 			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(1704067200), true),
+		},
+		{
+			name:  "test relative time with hours",
+			input: "fs <= 24h",
+			config: Config{
+				"fs": {
+					Type:  DATE,
+					Field: "first_seen",
+				},
+			},
+			wanted: search.NewNumericRangeQuery().Field("first_seen").Max(float32(time.Now().Add(-24*time.Hour).Unix()), true),
+		},
+		{
+			name:  "test relative time with days",
+			input: "fs >= 7d",
+			config: Config{
+				"fs": {
+					Type:  DATE,
+					Field: "first_seen",
+				},
+			},
+			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(time.Now().Add(-7*24*time.Hour).Unix()), true),
+		},
+		{
+			name:  "test relative time with minutes",
+			input: "ls <= 30m",
+			config: Config{
+				"ls": {
+					Type:  DATE,
+					Field: "last_seen",
+				},
+			},
+			wanted: search.NewNumericRangeQuery().Field("last_seen").Max(float32(time.Now().Add(-30*time.Minute).Unix()), true),
+		},
+		{
+			name:  "test relative time with years",
+			input: "fs >= 1y",
+			config: Config{
+				"fs": {
+					Type:  DATE,
+					Field: "first_seen",
+				},
+			},
+			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(time.Now().Add(-365*24*time.Hour).Unix()), true),
 		},
 	}
 

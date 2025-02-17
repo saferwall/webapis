@@ -5,6 +5,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/saferwall/saferwall-api/internal/query-parser/token"
 )
@@ -212,11 +213,23 @@ func (p *Parser) applyUnitIfExist(ident token.Token) string {
 		return strconv.Itoa(math.MaxInt32)
 	}
 
-	units := map[string]int{
+	sizeUnits := map[string]int{
 		"kb": 1000,
 		"mb": 1000_000,
 		"gb": 1000_000_000,
 		"tb": 1000_000_000_000,
 	}
-	return strconv.Itoa(num * units[strings.ToLower(unit.Literal)])
+
+	dateUnits := map[string]time.Duration{
+		"m": time.Minute,
+		"h": time.Hour,
+		"d": 24 * time.Hour,
+		"y": 365 * 24 * time.Hour,
+	}
+
+	if v, ok := dateUnits[strings.ToLower(unit.Literal)]; ok {
+		return time.Now().Add(-time.Duration(num) * v).Format(time.RFC3339)
+	}
+
+	return strconv.Itoa(num * sizeUnits[strings.ToLower(unit.Literal)])
 }
