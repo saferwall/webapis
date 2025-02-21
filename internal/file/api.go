@@ -602,7 +602,7 @@ func (r resource) autocomplete(c echo.Context) error {
 		Examples: []AutoCompleteEntry{
 			{
 				"fs >= 2025 and tag=upx and type=pe",
-				"PE binaries packed by upx seen after 2025",
+				"PE binaries packed by upx seen after 2025 inclusive",
 			},
 			{
 				"extension=sys and positives>=10",
@@ -636,15 +636,95 @@ func (r resource) autocomplete(c echo.Context) error {
 			},
 			{
 				"fs",
-				"First time we have seen this file. Example: 2020-01-30",
+				"First time we have seen the file. Example: 2020-01-30",
 			},
 			{
 				"ls",
-				"Last scanned: example: 2012-08-21T16:59}",
+				"Last time we have scanned the file: example: 2012-08-21T16:59}",
 			},
 			{
-				"extension",
-				"File extension: example:{ps1, exe, dll, html}",
+				"positives",
+				"The number of anti-virus engines that flagged the file as malicious",
+			},
+			{
+				"engines",
+				"Search for a detection in any anti-virus vendor",
+			},
+			{
+				"avast",
+				"Search inside Avast detection name",
+			},
+			{
+				"avira",
+				"Search inside Avira detection name",
+			},
+			{
+				"bitdefender",
+				"Search inside Bitdefender detection name",
+			},
+			{
+				"clamav",
+				"Search inside ClamAV detection name",
+			},
+			{
+				"comodo",
+				"Search inside Comodo detection name",
+			},
+			{
+				"drweb",
+				"Search inside DrWeb detection name",
+			},
+			{
+				"eset",
+				"Search inside Eset detection name",
+			},
+			{
+				"kaspersky",
+				"Search inside Kaspersky detection name",
+			},
+			{
+				"mcafee",
+				"Search inside McAfee detection name",
+			},
+			{
+				"sophos",
+				"Search inside Sophos detection name",
+			},
+			{
+				"symantec",
+				"Search inside Symantec detection name",
+			},
+			{
+				"trendmicro",
+				"Search inside TrendMicro detection name",
+			},
+			{
+				"windefender",
+				"Search inside Microsoft detection name",
+			},
+			{
+				"ssdeep",
+				"SSDeep fuzzy hash",
+			},
+			{
+				"tlsh",
+				"TLSH fuzzy hash",
+			},
+			{
+				"crc32",
+				"CRC32 checksum of the file",
+			},
+			{
+				"trid",
+				"Search inside TrID File Identifier output",
+			},
+			{
+				"packer",
+				"Search inside Detect it Easy output",
+			},
+			{
+				"tags",
+				"Search tags, the full list of supported tags is available in the doc page",
 			},
 		},
 	}

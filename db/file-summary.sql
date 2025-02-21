@@ -26,13 +26,8 @@ SELECT
     "signature": f.pe.signature,
     "default_behavior_report": f.default_behavior_report,
     "multiav": {
-      "value": ARRAY_COUNT(
-        ARRAY_FLATTEN(
-          ARRAY i.infected FOR i IN OBJECT_VALUES(f.multiav.last_scan) WHEN i.infected = TRUE END,
-          1
-        )
-      ),
-      "count": OBJECT_LENGTH(f.multiav.last_scan)
+      "value": f.multiav.last_scan.stats.positives,
+      "count": f.multiav.last_scan.stats.engines_count
     }
   }.*
 FROM

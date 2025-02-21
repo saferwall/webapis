@@ -261,7 +261,6 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 				Type:  gen.DATE,
 				Field: "first_seen",
 			},
-
 			"last_scanned": {
 				Type: gen.DATE,
 			},
@@ -269,76 +268,80 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 				Type:  gen.DATE,
 				Field: "last_scanned",
 			},
-
 			"extension": {
 				Field: "file_extension",
 			},
-
 			"type": {
 				Field: "file_format",
 			},
-
 			"size": {
 				Type: gen.NUMBER,
 			},
+			"name": {
+				Field: "submissions.filename",
+			},
+			"positives": {
+				Type:  gen.NUMBER,
+				Field: "multiav.last_scan.stats.positives",
+			},
 			"avast": {
-				Field: "multiav.last_scan.avast.output",
+				Field: "multiav.last_scan.detections.avast.output",
 			},
 			"avira": {
-				Field: "multiav.last_scan.avira.output",
+				Field: "multiav.last_scan.detections.avira.output",
 			},
 			"bitdefender": {
-				Field: "multiav.last_scan.bitdefender.output",
+				Field: "multiav.last_scan.detections.bitdefender.output",
 			},
 			"clamav": {
-				Field: "multiav.last_scan.clamav.output",
+				Field: "multiav.last_scan.detections.clamav.output",
 			},
 			"comodo": {
-				Field: "multiav.last_scan.comodo.output",
+				Field: "multiav.last_scan.detections.comodo.output",
 			},
 			"drweb": {
-				Field: "multiav.last_scan.drweb.output",
+				Field: "multiav.last_scan.detections.drweb.output",
 			},
 			"eset": {
-				Field: "multiav.last_scan.eset.output",
+				Field: "multiav.last_scan.detections.eset.output",
 			},
 			"kaspersky": {
-				Field: "multiav.last_scan.kaspersky.output",
+				Field: "multiav.last_scan.detections.kaspersky.output",
 			},
 			"mcafee": {
-				Field: "multiav.last_scan.mcafee.output",
+				Field: "multiav.last_scan.detections.mcafee.output",
 			},
 			"sophos": {
-				Field: "multiav.last_scan.sophos.output",
+				Field: "multiav.last_scan.detections.sophos.output",
 			},
 			"symantec": {
-				Field: "multiav.last_scan.symantec.output",
+				Field: "multiav.last_scan.detections.symantec.output",
 			},
 			"trendmicro": {
-				Field: "multiav.last_scan.trendmicro.output",
+				Field: "multiav.last_scan.detections.trendmicro.output",
 			},
 			"windefender": {
-				Field: "multiav.last_scan.windefender.output",
+				Field: "multiav.last_scan.detections.windefender.output",
 			},
 			"fsecure": {
-				Field: "multiav.last_scan.fsecure.output",
+				Field: "multiav.last_scan.detections.fsecure.output",
 			},
 			"engines": {
 				FieldGroup: []string{
-					"multiav.last_scan.avast.output",
-					"multiav.last_scan.avira.output",
-					"multiav.last_scan.bitdefender.output",
-					"multiav.last_scan.clamav.output",
-					"multiav.last_scan.comodo.output",
-					"multiav.last_scan.drweb.output",
-					"multiav.last_scan.eset.output",
-					"multiav.last_scan.kaspersky.output",
-					"multiav.last_scan.mcafee.output",
-					"multiav.last_scan.sophos.output",
-					"multiav.last_scan.symantec.output",
-					"multiav.last_scan.trendmicro.output",
-					"multiav.last_scan.windefender.output",
-					"multiav.last_scan.fsecure.output",
+					"multiav.last_scan.detections.avast.output",
+					"multiav.last_scan.detections.avira.output",
+					"multiav.last_scan.detections.bitdefender.output",
+					"multiav.last_scan.detections.clamav.output",
+					"multiav.last_scan.detections.comodo.output",
+					"multiav.last_scan.detections.drweb.output",
+					"multiav.last_scan.detections.eset.output",
+					"multiav.last_scan.detections.kaspersky.output",
+					"multiav.last_scan.detections.mcafee.output",
+					"multiav.last_scan.detections.sophos.output",
+					"multiav.last_scan.detections.symantec.output",
+					"multiav.last_scan.detections.trendmicro.output",
+					"multiav.last_scan.detections.windefender.output",
+					"multiav.last_scan.detections.fsecure.output",
 				},
 			},
 		},
@@ -352,7 +355,8 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		&gocb.SearchOptions{
 			Limit: 100,
 			Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scanned", "tags.packer", "tags.pe",
-				"tags.avira", "tags.eset", "tags.windefender",
+				"tags.avira", "tags.eset", "tags.windefender", "submissions.filename",
+				"multiav.last_scan.stats.positives", "multiav.last_scan.stats.engines_count",
 			},
 		},
 	)
@@ -373,11 +377,14 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		}
 		fields["id"] = docID
 		fields["class"] = class[rand.Intn(2)]
-		fields["name"] = shortID(18)
+		fields["name"] = fields["submissions.filename"]
 		fields["multiav"] = map[string]interface{}{
-			"hits":  rand.Intn(5),
-			"total": 5 + rand.Intn(10),
+			"hits":  fields["multiav.last_scan.stats.positives"],
+			"total": fields["multiav.last_scan.stats.engines_count"],
 		}
+		delete(fields, "multiav.last_scan.stats.positives")
+		delete(fields, "multiav.last_scan.stats.engines_count")
+		delete(fields, "submissions.filename")
 		unflattenFields(fields)
 		rows = append(rows, fields)
 	}
