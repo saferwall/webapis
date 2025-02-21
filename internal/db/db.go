@@ -95,7 +95,7 @@ func (db *DB) Query(ctx context.Context, statement string,
 	args map[string]interface{}, val *interface{}) error {
 
 	results, err := db.Cluster.Query(statement, &gocb.QueryOptions{
-		NamedParameters: args, Adhoc: true, Timeout: 10 * time.Hour})
+		NamedParameters: args, Adhoc: true})
 	if err != nil {
 		return err
 	}
