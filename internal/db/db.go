@@ -261,7 +261,6 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 				Type:  gen.DATE,
 				Field: "first_seen",
 			},
-
 			"last_scanned": {
 				Type: gen.DATE,
 			},
@@ -269,24 +268,22 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 				Type:  gen.DATE,
 				Field: "last_scanned",
 			},
-
 			"extension": {
 				Field: "file_extension",
 			},
-
 			"type": {
 				Field: "file_format",
 			},
-
 			"size": {
 				Type: gen.NUMBER,
 			},
-
+			"name": {
+				Field: "submissions.filename",
+			},
 			"positives": {
 				Type:  gen.NUMBER,
 				Field: "multiav.last_scan.stats.positives",
 			},
-
 			"avast": {
 				Field: "multiav.last_scan.detections.avast.output",
 			},
@@ -358,7 +355,8 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		&gocb.SearchOptions{
 			Limit: 100,
 			Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scanned", "tags.packer", "tags.pe",
-				"tags.avira", "tags.eset", "tags.windefender", "multiav.last_scan.stats.positives", "multiav.last_scan.stats.engines_count",
+				"tags.avira", "tags.eset", "tags.windefender", "submissions.filename",
+				"multiav.last_scan.stats.positives", "multiav.last_scan.stats.engines_count",
 			},
 		},
 	)
@@ -379,13 +377,14 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		}
 		fields["id"] = docID
 		fields["class"] = class[rand.Intn(2)]
-		fields["name"] = shortID(18)
+		fields["name"] = fields["submissions.filename"]
 		fields["multiav"] = map[string]interface{}{
 			"hits":  fields["multiav.last_scan.stats.positives"],
 			"total": fields["multiav.last_scan.stats.engines_count"],
 		}
 		delete(fields, "multiav.last_scan.stats.positives")
 		delete(fields, "multiav.last_scan.stats.engines_count")
+		delete(fields, "submissions.filename")
 		unflattenFields(fields)
 		rows = append(rows, fields)
 	}
