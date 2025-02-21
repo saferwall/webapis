@@ -34,267 +34,291 @@
                                     "dynamic": false,
                                     "enabled": true,
                                     "properties": {
-                                        "avast": {
+                                        "detections": {
                                             "dynamic": false,
                                             "enabled": true,
                                             "properties": {
-                                                "output": {
-                                                    "enabled": true,
+                                                "avast": {
                                                     "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
                                                         }
-                                                    ]
+                                                    }
+                                                },
+                                                "avira": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "bitdefender": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "clamav": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "comodo": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "drweb": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "eset": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "fsecure": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "kaspersky": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "mcafee": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "sophos": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "symantec": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "trendmicro": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                },
+                                                "windefender": {
+                                                    "dynamic": false,
+                                                    "enabled": true,
+                                                    "properties": {
+                                                        "output": {
+                                                            "enabled": true,
+                                                            "dynamic": false,
+                                                            "fields": [
+                                                                {
+                                                                    "index": true,
+                                                                    "name": "output",
+                                                                    "store": true,
+                                                                    "type": "text"
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
                                                 }
                                             }
                                         },
-                                        "avira": {
+                                        "stats": {
                                             "dynamic": false,
                                             "enabled": true,
                                             "properties": {
-                                                "output": {
+                                                "engines_count": {
                                                     "enabled": true,
                                                     "dynamic": false,
                                                     "fields": [
                                                         {
-                                                            "include_term_vectors": true,
+                                                            "docvalues": true,
                                                             "index": true,
-                                                            "name": "output",
+                                                            "name": "engines_count",
                                                             "store": true,
-                                                            "type": "text"
+                                                            "type": "number"
                                                         }
                                                     ]
-                                                }
-                                            }
-                                        },
-                                        "bitdefender": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
+                                                },
+                                                "positives": {
                                                     "enabled": true,
                                                     "dynamic": false,
                                                     "fields": [
                                                         {
-                                                            "include_term_vectors": true,
+                                                            "docvalues": true,
                                                             "index": true,
-                                                            "name": "output",
+                                                            "name": "positives",
                                                             "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "clamav": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "comodo": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "drweb": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "eset": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "fsecure": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "kaspersky": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "mcafee": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "sophos": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "symantec": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "trendmicro": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        },
-                                        "windefender": {
-                                            "dynamic": false,
-                                            "enabled": true,
-                                            "properties": {
-                                                "output": {
-                                                    "enabled": true,
-                                                    "dynamic": false,
-                                                    "fields": [
-                                                        {
-                                                            "include_term_vectors": true,
-                                                            "index": true,
-                                                            "name": "output",
-                                                            "store": true,
-                                                            "type": "text"
+                                                            "type": "number"
                                                         }
                                                     ]
                                                 }
@@ -304,16 +328,35 @@
                                 }
                             }
                         },
-                        "tags": {
-                            "dynamic": true,
+                        "submissions": {
+                            "dynamic": false,
                             "enabled": true,
                             "properties": {
-                                "tags.*": {
+                                "filename": {
                                     "enabled": true,
                                     "dynamic": false,
                                     "fields": [
                                         {
-                                            "docvalues": true,
+                                            "include_term_vectors": true,
+                                            "index": true,
+                                            "name": "filename",
+                                            "store": true,
+                                            "type": "text"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "tags": {
+                            "dynamic": true,
+                            "enabled": true,
+                            "properties": {
+                                "*": {
+                                    "enabled": true,
+                                    "dynamic": false,
+                                    "fields": [
+                                        {
+                                            "include_in_all": true,
                                             "include_term_vectors": true,
                                             "index": true,
                                             "name": "tags",
@@ -323,6 +366,19 @@
                                     ]
                                 }
                             }
+                        },
+                        "crc32": {
+                            "enabled": true,
+                            "dynamic": false,
+                            "fields": [
+                                {
+                                    "analyzer": "keyword",
+                                    "index": true,
+                                    "name": "crc32",
+                                    "store": true,
+                                    "type": "text"
+                                }
+                            ]
                         },
                         "file_extension": {
                             "enabled": true,
@@ -363,16 +419,28 @@
                                 }
                             ]
                         },
-                        "last_scan": {
+                        "last_scanned": {
                             "enabled": true,
                             "dynamic": false,
                             "fields": [
                                 {
                                     "docvalues": true,
                                     "index": true,
-                                    "name": "last_scan",
+                                    "name": "last_scanned",
                                     "store": true,
                                     "type": "number"
+                                }
+                            ]
+                        },
+                        "packer": {
+                            "enabled": true,
+                            "dynamic": false,
+                            "fields": [
+                                {
+                                    "index": true,
+                                    "name": "packer",
+                                    "store": true,
+                                    "type": "text"
                                 }
                             ]
                         },
@@ -388,6 +456,32 @@
                                     "type": "number"
                                 }
                             ]
+                        },
+                        "ssdeep": {
+                            "enabled": true,
+                            "dynamic": false,
+                            "fields": [
+                                {
+                                    "analyzer": "keyword",
+                                    "index": true,
+                                    "name": "ssdeep",
+                                    "store": true,
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "tlsh": {
+                            "enabled": true,
+                            "dynamic": false,
+                            "fields": [
+                                {
+                                    "analyzer": "keyword",
+                                    "index": true,
+                                    "name": "tlsh",
+                                    "store": true,
+                                    "type": "text"
+                                }
+                            ]
                         }
                     }
                 }
@@ -400,12 +494,12 @@
     },
     "sourceType": "gocbcore",
     "sourceName": "sfw",
-    "sourceUUID": "9ecfc2c2bd3a97255c38da2c48789947",
+    "sourceUUID": "3d520cb196e20834114a5bcab273bafa",
     "sourceParams": {},
     "planParams": {
-        "maxPartitionsPerPIndex": 1024,
-        "indexPartitions": 1,
+        "maxPartitionsPerPIndex": 342,
+        "indexPartitions": 3,
         "numReplicas": 0
     },
-    "uuid": "1c1af708a32cbba5"
+    "uuid": "302254b0550e0b47"
 }
