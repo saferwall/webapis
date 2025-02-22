@@ -9,7 +9,7 @@ SELECT
       "hash": f.sha256,
       "tags": f.tags,
       "filename": f.submissions[0].filename,
-      "class": f.ml.pe.predicted_class,
+      "class": f.classification,
       "default_behavior_id": f.default_behavior_report.id,
       "multiav": {
         "value": f.multiav.last_scan.stats.positives,

@@ -35,6 +35,7 @@ type File struct {
 	ByteEntropy      []int                  `json:"byte_entropy,omitempty"`
 	Ml               map[string]interface{} `json:"ml,omitempty"`
 	Format           string                 `json:"file_format,omitempty"`
+	Classification   string                 `json:"classification,omitempty"`
 	Extension        string                 `json:"file_extension,omitempty"`
 	DefaultBhvReport interface{}            `json:"default_behavior_report,omitempty"`
 	BhvScans         interface{}            `json:"behavior_scans,omitempty"`

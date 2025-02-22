@@ -8,7 +8,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -238,18 +237,6 @@ func (db *DB) Lookup(ctx context.Context, key string, paths []string,
 	return nil
 }
 
-var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-"
-
-func shortID(length int) string {
-	ll := len(chars)
-	b := make([]byte, length)
-	rand.Read(b) // generates len(b) random bytes
-	for i := 0; i < length; i++ {
-		b[i] = chars[int(b[i])%ll]
-	}
-	return string(b)
-}
-
 func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, totalHits *uint64) error {
 
 	query, err := gen.Generate(stringQuery,
@@ -355,7 +342,7 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		&gocb.SearchOptions{
 			Limit: 100,
 			Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scanned", "tags.packer", "tags.pe",
-				"tags.avira", "tags.eset", "tags.windefender", "submissions.filename",
+				"tags.avira", "tags.eset", "tags.windefender", "submissions.filename", "classification",
 				"multiav.last_scan.stats.positives", "multiav.last_scan.stats.engines_count",
 			},
 		},
@@ -364,7 +351,6 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		return err
 	}
 
-	class := []string{"malicious", "benign", "clean"}
 	rows := []interface{}{}
 	for result.Next() {
 		row := result.Row()
@@ -376,7 +362,7 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 			return err
 		}
 		fields["id"] = docID
-		fields["class"] = class[rand.Intn(2)]
+		fields["class"] = fields["classification"]
 		fields["name"] = fields["submissions.filename"]
 		fields["multiav"] = map[string]interface{}{
 			"hits":  fields["multiav.last_scan.stats.positives"],
@@ -385,6 +371,7 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		delete(fields, "multiav.last_scan.stats.positives")
 		delete(fields, "multiav.last_scan.stats.engines_count")
 		delete(fields, "submissions.filename")
+		delete(fields, "classification")
 		unflattenFields(fields)
 		rows = append(rows, fields)
 	}
