@@ -121,7 +121,7 @@ func (r repository) Query(ctx context.Context, offset, limit int) (
 			"hash": f.sha256,
 			"tags": f.tags,
 			"filename": f.submissions[0].filename,
-			"class": f.ml.pe.predicted_class,
+			"class": f.classification,
 			"multiav": CONCAT ( TOSTRING ( ARRAY_COUNT (
 				array_flatten(array i.infected
 				for i in OBJECT_VALUES(f.multiav.last_scan)

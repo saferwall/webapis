@@ -20,7 +20,7 @@ SELECT
     "last_scanned": f.last_scanned,
     "exif": f.exif,
     "submissions": f.submissions,
-    "class": f.ml.pe.predicted_class,
+    "class": f.classification,
     "file_format": f.file_format,
     "file_extension": f.file_extension,
     "signature": f.pe.signature,
