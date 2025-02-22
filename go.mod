@@ -17,7 +17,7 @@ require (
 	github.com/nsqio/go-nsq v1.1.0
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
-	github.com/swaggo/swag v1.16.3
+	github.com/swaggo/swag v1.16.4
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	github.com/yeka/zip v0.0.0-20180914125537-d046722c6feb
 	go.uber.org/zap v1.27.0
