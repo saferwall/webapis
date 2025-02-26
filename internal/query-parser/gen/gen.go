@@ -27,6 +27,14 @@ const (
 	DATE
 )
 
+type ErrInvalidSearchQueryInput struct {
+	Message string
+}
+
+func (e *ErrInvalidSearchQueryInput) Error() string {
+	return e.Message
+}
+
 var config Config
 
 func Generate(input string, cfg Config) (search.Query, error) {
@@ -40,7 +48,7 @@ func Generate(input string, cfg Config) (search.Query, error) {
 	p := parser.New(tokens)
 	expr, err := p.Parse()
 	if err != nil {
-		return nil, err
+		return nil, &ErrInvalidSearchQueryInput{Message: err.Error()}
 	}
 
 	for _, v := range cfg {
@@ -51,7 +59,7 @@ func Generate(input string, cfg Config) (search.Query, error) {
 	config = cfg
 	result, err := GenerateCouchbaseFTS(expr)
 	if err != nil {
-		return nil, err
+		return nil, &ErrInvalidSearchQueryInput{Message: err.Error()}
 	}
 	return result, nil
 }
