@@ -13,6 +13,7 @@ import (
 	validator "github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/db"
+	"github.com/saferwall/saferwall-api/internal/query-parser/gen"
 )
 
 // ErrorResponse is the response that represents an error.
@@ -141,6 +142,10 @@ func BuildErrorResponse(err error, trans ut.Translator) ErrorResponse {
 		return NotFound("")
 	} else if errors.Is(err, db.ErrSubDocNotFound) {
 		return BadRequest("field not found")
+	}
+
+	if _, ok := err.(*gen.ErrInvalidSearchQueryInput); ok {
+		return BadRequest("search query input is invalid: " + err.Error())
 	}
 	return InternalServerError("")
 }
