@@ -12,6 +12,7 @@ import (
 	"time"
 
 	gocb "github.com/couchbase/gocb/v2"
+	"github.com/couchbase/gocb/v2/search"
 	"github.com/saferwall/saferwall-api/internal/query-parser/gen"
 )
 
@@ -237,7 +238,7 @@ func (db *DB) Lookup(ctx context.Context, key string, paths []string,
 	return nil
 }
 
-func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, totalHits *uint64) error {
+func (db *DB) Search(ctx context.Context, stringQuery string, page uint32, perPage uint32, sortBy string, order string, val *interface{}, totalHits *uint64) error {
 
 	query, err := gen.Generate(stringQuery,
 		gen.Config{
@@ -337,15 +338,23 @@ func (db *DB) Search(ctx context.Context, stringQuery string, val *interface{}, 
 		return err
 	}
 
+	searchOptions := gocb.SearchOptions{
+		Limit: perPage,
+		Skip:  perPage * (page - 1),
+		Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scanned", "tags.packer", "tags.pe",
+			"tags.avira", "tags.eset", "tags.windefender", "submissions.filename", "classification",
+			"multiav.last_scan.stats.positives", "multiav.last_scan.stats.engines_count",
+		},
+	}
+
+	if sortBy != "" {
+		searchOptions.Sort =
+			[]search.Sort{search.NewSearchSortField(sortBy).Descending(order == "desc" || order == "")}
+	}
+
 	result, err := db.Cluster.SearchQuery(
 		db.FTSIndexName, query,
-		&gocb.SearchOptions{
-			Limit: 100,
-			Fields: []string{"size", "file_extension", "file_format", "first_seen", "last_scanned", "tags.packer", "tags.pe",
-				"tags.avira", "tags.eset", "tags.windefender", "submissions.filename", "classification",
-				"multiav.last_scan.stats.positives", "multiav.last_scan.stats.engines_count",
-			},
-		},
+		&searchOptions,
 	)
 	if err != nil {
 		return err
