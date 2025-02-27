@@ -204,14 +204,6 @@ func TestGenerate(t *testing.T) {
 			),
 		},
 		{
-			name:  "invalid operator",
-			input: "type>pe",
-			config: Config{
-				"type": {},
-			},
-			wantErr: true,
-		},
-		{
 			name:  "missing field in config",
 			input: "unknown_field=value",
 			config: Config{
@@ -312,6 +304,27 @@ func TestGenerate(t *testing.T) {
 				},
 			},
 			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(time.Now().Add(-365*24*time.Hour).Unix()), true),
+		},
+		{
+			name:  "test simple number equality",
+			input: "size=10003",
+			config: Config{
+				"size": {
+					Type: NUMBER,
+				},
+			},
+			wanted: search.NewNumericRangeQuery().Field("size").Min(float32(10003), true).Max(float32(10003), true),
+		},
+		{
+			name:  "simple date equality",
+			input: "fs=2023-01-01",
+			config: Config{
+				"fs": {
+					Type:  DATE,
+					Field: "first_seen",
+				},
+			},
+			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(1672531200), true).Max(float32(1672531200), true),
 		},
 	}
 

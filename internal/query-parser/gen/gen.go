@@ -23,7 +23,8 @@ type Config map[string]struct {
 }
 
 const (
-	NUMBER Type = iota
+	STRING Type = iota
+	NUMBER
 	DATE
 )
 
@@ -126,7 +127,22 @@ func buildComparisonQuery(field, value string, operator token.TokenType, valueTy
 	switch operator {
 	case token.ASSIGN:
 		// NOTE: might need to support term match query
-		return search.NewMatchQuery(value).Field(field), nil
+		switch valueType {
+		case NUMBER:
+			v, err := strconv.ParseFloat(value, 32)
+			if err != nil {
+				return nil, fmt.Errorf("unsupported type for field: %s", field)
+			}
+			return search.NewNumericRangeQuery().Field(field).Min(float32(v), true).Max(float32(v), true), nil
+		case DATE:
+			timestamp, err := parseDate(value)
+			if err != nil {
+				return nil, fmt.Errorf("unsupported type for field: %s", field)
+			}
+			return search.NewNumericRangeQuery().Field(field).Min(float32(timestamp), true).Max(float32(timestamp), true), nil
+		default:
+			return search.NewMatchQuery(value).Field(field), nil
+		}
 	case token.NOT_EQ:
 		return search.NewBooleanQuery().MustNot(search.NewMatchQuery(value).Field(field)), nil
 	case token.GT, token.GE, token.LT, token.LE:
