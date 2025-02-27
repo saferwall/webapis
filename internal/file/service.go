@@ -144,7 +144,7 @@ type FileSearchRequest struct {
 	Query   string `json:"query" validate:"required,min=3" example:"type=pe and tag=upx"`
 	Page    int    `json:"page" validate:"omitempty,gte=0,lte=10000" example:"1"`
 	PerPage int    `json:"per_page" validate:"omitempty,gte=0,lte=1000" example:"100"`
-	SortBy  string `json:"sort_by" validate:"omitempty,alphanum,min=1,max=20,lowercase" example:"first_seen"`
+	SortBy  string `json:"sort_by" validate:"omitempty,printascii,min=1,max=20,lowercase" example:"first_seen"`
 	Order   string `json:"order" validate:"omitempty,oneof=asc desc" example:"asc"`
 }
 

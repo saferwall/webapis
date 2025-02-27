@@ -259,7 +259,7 @@ func (r repository) MetaUI(ctx context.Context, id string) (
 func (r repository) Search(ctx context.Context, input FileSearchRequest) (FileSearchResponse, error) {
 
 	resp := FileSearchResponse{}
-	err := r.db.Search(ctx, input.Query, &resp.Results, &resp.TotalHits)
+	err := r.db.Search(ctx, input.Query, uint32(input.Page), uint32(input.PerPage), input.SortBy, input.Order, &resp.Results, &resp.TotalHits)
 	if err != nil {
 		return resp, err
 	}
