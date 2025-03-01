@@ -523,7 +523,7 @@ func (r resource) download(c echo.Context) error {
 			return err
 		}
 	}
-	return c.File(zippedFile)
+	return c.Attachment(zippedFile, c.Param("sha256")+".zip")
 }
 
 // @Summary Generate a pre-signed URL for downloading samples.
