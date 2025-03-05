@@ -49,6 +49,7 @@ type Service interface {
 	CountComments(ctx context.Context, id string) (int, error)
 	Strings(ctx context.Context, id string, queryString string, offset, limit int) (interface{}, error)
 	Download(ctx context.Context, id string, zipFile *string) error
+	DownloadRaw(ctx context.Context, id string, file io.Writer) (int64, error)
 	GeneratePresignedURL(ctx context.Context, id string) (string, error)
 	MetaUI(ctx context.Context, id string) (interface{}, error)
 	Search(ctx context.Context, input FileSearchRequest) (FileSearchResponse, error)
@@ -56,7 +57,7 @@ type Service interface {
 
 type UploadDownloader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
-	Download(ctx context.Context, bucket, key string, file io.Writer) error
+	Download(ctx context.Context, bucket, key string, file io.Writer) (int64, error)
 	Exists(ctx context.Context, bucket, key string) (bool, error)
 	GeneratePresignedURL(ctx context.Context, bucket, key string) (string, error)
 }
@@ -474,6 +475,32 @@ func (s service) ReScan(ctx context.Context, sha256 string, input FileScanReques
 	return nil
 }
 
+func (s service) DownloadRaw(ctx context.Context, sha256 string, file io.Writer) (size int64, err error) {
+
+	// Create a context with a timeout that will abort the download if it takes
+	// more than the passed in timeout.
+	downloadCtx, cancelFn := context.WithTimeout(
+		context.Background(), time.Duration(time.Second*30))
+	defer cancelFn()
+
+	found, err := s.objSto.Exists(ctx, s.bucket, sha256)
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return
+	}
+
+	if !found {
+		return size, ErrObjectNotFound
+	}
+
+	size, err = s.objSto.Download(downloadCtx, s.bucket, sha256, file)
+	if err != nil {
+		s.logger.With(ctx).Error(err)
+		return size, err
+	}
+	return size, nil
+}
+
 func (s service) Download(ctx context.Context, sha256 string, zipFile *string) error {
 
 	// Create a context with a timeout that will abort the download if it takes
@@ -493,7 +520,7 @@ func (s service) Download(ctx context.Context, sha256 string, zipFile *string) e
 	}
 
 	buf := new(bytes.Buffer)
-	err = s.objSto.Download(downloadCtx, s.bucket, sha256, buf)
+	_, err = s.objSto.Download(downloadCtx, s.bucket, sha256, buf)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err
