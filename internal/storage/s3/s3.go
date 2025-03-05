@@ -91,7 +91,7 @@ func (s Service) Upload(ctx context.Context, bucket, key string,
 
 // Download downloads an object from s3.
 func (s Service) Download(ctx context.Context, bucket, key string,
-	file io.Writer) error {
+	file io.Writer) (int64, error) {
 
 	// Download input parameters.
 	input := &awss3.GetObjectInput{
@@ -100,9 +100,9 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 	}
 
 	// Perform the download.
-	_, err := s.downloader.DownloadWithContext(ctx, FakeWriterAt{file}, input)
+	size, err := s.downloader.DownloadWithContext(ctx, FakeWriterAt{file}, input)
 
-	return err
+	return size, err
 }
 
 // MakeBucket creates a new bucket in s2.
