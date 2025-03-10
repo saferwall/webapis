@@ -326,6 +326,14 @@ func TestGenerate(t *testing.T) {
 			},
 			wanted: search.NewNumericRangeQuery().Field("first_seen").Min(float32(1672531200), true).Max(float32(1672531200), true),
 		},
+		{
+			name:  "wildcard values",
+			input: "type=p*",
+			config: Config{
+				"type": {},
+			},
+			wanted: search.NewMatchQuery("p*").Field("type"),
+		},
 	}
 
 	for _, tt := range tests {
