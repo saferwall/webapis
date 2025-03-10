@@ -51,22 +51,50 @@ func (s Service) Upload(ctx context.Context, bucket, key string,
 
 // Download downloads an object from the local file system.
 func (s Service) Download(ctx context.Context, bucket, key string,
-	dst io.Writer) (int64, error) {
+	dst io.Writer) error {
 
 	// Create new file.
 	name := filepath.Join(s.root, bucket, key)
 	src, err := os.Open(name)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer src.Close()
 
 	// Perform the copy.
 	if _, err := io.Copy(dst, src); err != nil {
-		return 0, err
+		return err
 	}
 
-	return 0, nil
+	return nil
+}
+
+// Download downloads an object from the local file system.
+func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
+	dst io.Writer) (size int64, err error) {
+
+	// Create new file.
+	name := filepath.Join(s.root, bucket, key)
+	src, err := os.Open(name)
+
+	if err != nil {
+		return
+	}
+
+	defer src.Close()
+
+	fileInfo, err := src.Stat()
+
+	if err != nil {
+		return
+	}
+
+	// Perform the copy.
+	if _, err = io.Copy(dst, src); err != nil {
+		return
+	}
+
+	return fileInfo.Size(), err
 }
 
 // MakeBucket creates a new folder in the local file system that acts like

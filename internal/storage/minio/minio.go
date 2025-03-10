@@ -63,23 +63,43 @@ func (s Service) Upload(ctx context.Context, bucket, key string,
 }
 
 func (s Service) Download(ctx context.Context, bucket, key string,
-	file io.Writer) (int64, error) {
+	file io.Writer) error {
 
 	reader, err := s.client.GetObject(ctx, bucket, key, mio.GetObjectOptions{})
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	stat, err := reader.Stat()
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	_, err = io.CopyN(file, reader, stat.Size)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return 0, nil
+	return nil
+}
+
+func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
+	file io.Writer) (size int64, err error) {
+
+	reader, err := s.client.GetObject(ctx, bucket, key, mio.GetObjectOptions{})
+	if err != nil {
+		return
+	}
+
+	stat, err := reader.Stat()
+	if err != nil {
+		return
+	}
+
+	_, err = io.CopyN(file, reader, stat.Size)
+	if err != nil {
+		return
+	}
+	return stat.Size, err
 }
 
 // MakeBucket creates a new bucket with bucketName with a context to control

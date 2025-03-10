@@ -27,7 +27,9 @@ type UploadDownloader interface {
 	// Upload uploads a file to an object storage.
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
 	// Download downloads a file from a remote object storage location.
-	Download(ctx context.Context, bucket, key string, file io.Writer) (int64, error)
+	Download(ctx context.Context, bucket, key string, file io.Writer) error
+	// DownloadWithSize downloads a file from a remote object storage location and returns it's size.
+	DownloadWithSize(ctx context.Context, bucket, key string, file io.Writer) (int64, error)
 	// MakeBucket creates a new bucket.
 	MakeBucket(ctx context.Context, bucket, location string) error
 	// Exists checks whether an object exists.

@@ -57,7 +57,8 @@ type Service interface {
 
 type UploadDownloader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
-	Download(ctx context.Context, bucket, key string, file io.Writer) (int64, error)
+	Download(ctx context.Context, bucket, key string, file io.Writer) error
+	DownloadWithSize(ctx context.Context, bucket, key string, file io.Writer) (int64, error)
 	Exists(ctx context.Context, bucket, key string) (bool, error)
 	GeneratePresignedURL(ctx context.Context, bucket, key string) (string, error)
 }
@@ -493,7 +494,7 @@ func (s service) DownloadRaw(ctx context.Context, sha256 string, file io.Writer)
 		return size, ErrObjectNotFound
 	}
 
-	size, err = s.objSto.Download(downloadCtx, s.bucket, sha256, file)
+	size, err = s.objSto.DownloadWithSize(downloadCtx, s.bucket, sha256, file)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return size, err
@@ -520,7 +521,7 @@ func (s service) Download(ctx context.Context, sha256 string, zipFile *string) e
 	}
 
 	buf := new(bytes.Buffer)
-	_, err = s.objSto.Download(downloadCtx, s.bucket, sha256, buf)
+	err = s.objSto.Download(downloadCtx, s.bucket, sha256, buf)
 	if err != nil {
 		s.logger.With(ctx).Error(err)
 		return err
