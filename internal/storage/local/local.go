@@ -7,6 +7,7 @@ package local
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -71,7 +72,7 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 
 // Download downloads an object from the local file system.
 func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
-	dst io.Writer) (size int64, err error) {
+	dst io.Writer, done func()) (size int64, err error) {
 
 	// Create new file.
 	name := filepath.Join(s.root, bucket, key)
@@ -81,8 +82,6 @@ func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
 		return
 	}
 
-	defer src.Close()
-
 	fileInfo, err := src.Stat()
 
 	if err != nil {
@@ -90,9 +89,13 @@ func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
 	}
 
 	// Perform the copy.
-	if _, err = io.Copy(dst, src); err != nil {
-		return
-	}
+	go func() {
+		defer src.Close()
+		defer done()
+		if _, err = io.Copy(dst, src); err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	return fileInfo.Size(), err
 }

@@ -83,7 +83,7 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 }
 
 func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
-	file io.Writer) (size int64, err error) {
+	file io.Writer, done func()) (size int64, err error) {
 
 	reader, err := s.client.GetObject(ctx, bucket, key, mio.GetObjectOptions{})
 	if err != nil {
@@ -95,10 +95,14 @@ func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
 		return
 	}
 
-	_, err = io.CopyN(file, reader, stat.Size)
-	if err != nil {
-		return
-	}
+	go func() {
+		defer reader.Close()
+		defer done()
+		_, err := io.CopyN(file, reader, stat.Size)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
 	return stat.Size, err
 }
 

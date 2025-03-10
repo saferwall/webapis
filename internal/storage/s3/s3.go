@@ -107,7 +107,9 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 
 // Download downloads an object from s3.
 func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
-	file io.Writer) (int64, error) {
+	file io.Writer, done func()) (int64, error) {
+
+	defer done()
 
 	// Download input parameters.
 	input := &awss3.GetObjectInput{

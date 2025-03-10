@@ -5,17 +5,16 @@
 package file
 
 import (
-	"github.com/yeka/zip"
-	"io"
 	"net/http"
 	"strings"
+
+	"fmt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
 	"github.com/saferwall/saferwall-api/pkg/log"
 	"github.com/saferwall/saferwall-api/pkg/pagination"
-	"fmt"
 )
 
 const (
@@ -517,26 +516,7 @@ func (r resource) rescan(c echo.Context) error {
 func (r resource) download(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	filePath := c.Param("sha256")
-	fileName := filePath + ".zip"
-
-	pr, pw := io.Pipe();
-	defer pw.Close()
-	zipCtx := zip.NewWriter(pw);
-	zipFileHeader := &zip.FileHeader{
-		Name: filePath,
-		Method: zip.Store, // no compression
-	}
-	zipFileHeader.SetPassword("infected");
-	zipFileHeader.SetEncryptionMethod(zip.AES256Encryption);
-	zipWriteEnd, err := zipCtx.CreateHeader(zipFileHeader)
-	defer zipCtx.Close()
-	
-	if err != nil {
-		return errors.InternalServerError("couldn't initialize zip header");
-	}
-
-	size, err := r.service.DownloadRaw(ctx, c.Param("sha256"), zipWriteEnd); // write to the zipper
+	size, wait, err := r.service.DownloadRaw(ctx, c.Param("sha256"), c.Response().Writer)
 	if err != nil {
 		switch err {
 		case ErrObjectNotFound:
@@ -546,12 +526,15 @@ func (r resource) download(c echo.Context) error {
 		}
 	}
 
-	fileSize := size + 164 + int64(len(filePath)) * 2;
+	fileName := c.Param("sha256")
+	zipFileName := fileName + ".zip"
+	zipFileSize := size + 164 + int64(len(fileName))*2
 
-	c.Response().Header().Set("Content-Length", fmt.Sprint(fileSize));
-	c.Response().Header().Set("Content-Type", "application/zip");
-	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fileName));
-	_, err = io.Copy(c.Response().Writer, pr);
+	c.Response().Header().Set("Content-Length", fmt.Sprint(zipFileSize))
+	c.Response().Header().Set("Content-Type", "application/zip")
+	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", zipFileName))
+
+	<- wait
 	return err
 }
 
