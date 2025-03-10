@@ -109,7 +109,6 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
 	file io.Writer, done func()) (int64, error) {
 
-	defer done()
 
 	// Download input parameters.
 	input := &awss3.GetObjectInput{
@@ -118,8 +117,17 @@ func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
 	}
 
 	// Perform the download.
-	size, err := s.downloader.DownloadWithContext(ctx, FakeWriterAt{file}, input)
 
+	obj, err := s.downloader.S3.GetObject(input)
+	if err != nil {
+		return 0, err
+	}
+	size := *obj.ContentLength
+	go func () {
+		defer obj.Body.Close()
+		defer done()
+		io.CopyN(file, obj.Body, size)
+	}()
 	return size, err
 }
 
