@@ -82,6 +82,30 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 	return nil
 }
 
+func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
+	file io.Writer, done func()) (size int64, err error) {
+
+	reader, err := s.client.GetObject(ctx, bucket, key, mio.GetObjectOptions{})
+	if err != nil {
+		return
+	}
+
+	stat, err := reader.Stat()
+	if err != nil {
+		return
+	}
+
+	go func() {
+		defer reader.Close()
+		defer done()
+		_, err := io.CopyN(file, reader, stat.Size)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
+	return stat.Size, err
+}
+
 // MakeBucket creates a new bucket with bucketName with a context to control
 // cancellations and timeouts.
 func (s Service) MakeBucket(ctx context.Context, bucketName,

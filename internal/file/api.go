@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
 	"github.com/saferwall/saferwall-api/internal/errors"
@@ -513,8 +515,8 @@ func (r resource) rescan(c echo.Context) error {
 // @Security Bearer
 func (r resource) download(c echo.Context) error {
 	ctx := c.Request().Context()
-	var zippedFile string
-	err := r.service.Download(ctx, c.Param("sha256"), &zippedFile)
+
+	size, wait, err := r.service.DownloadRaw(ctx, c.Param("sha256"), c.Response().Writer)
 	if err != nil {
 		switch err {
 		case ErrObjectNotFound:
@@ -523,7 +525,17 @@ func (r resource) download(c echo.Context) error {
 			return err
 		}
 	}
-	return c.Attachment(zippedFile, c.Param("sha256")+".zip")
+
+	fileName := c.Param("sha256")
+	zipFileName := fileName + ".zip"
+	zipFileSize := size + 164 + int64(len(fileName))*2
+
+	c.Response().Header().Set("Content-Length", fmt.Sprint(zipFileSize))
+	c.Response().Header().Set("Content-Type", "application/zip")
+	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", zipFileName))
+
+	<- wait
+	return err
 }
 
 // @Summary Generate a pre-signed URL for downloading samples.

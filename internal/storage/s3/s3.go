@@ -105,6 +105,24 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 	return err
 }
 
+// Download downloads an object from s3.
+func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
+	file io.Writer, done func()) (int64, error) {
+
+	defer done()
+
+	// Download input parameters.
+	input := &awss3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	}
+
+	// Perform the download.
+	size, err := s.downloader.DownloadWithContext(ctx, FakeWriterAt{file}, input)
+
+	return size, err
+}
+
 // MakeBucket creates a new bucket in s2.
 func (s Service) MakeBucket(ctx context.Context, bucketName, location string) error {
 

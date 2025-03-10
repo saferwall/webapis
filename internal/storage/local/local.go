@@ -7,6 +7,7 @@ package local
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -67,6 +68,36 @@ func (s Service) Download(ctx context.Context, bucket, key string,
 	}
 
 	return nil
+}
+
+// Download downloads an object from the local file system.
+func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
+	dst io.Writer, done func()) (size int64, err error) {
+
+	// Create new file.
+	name := filepath.Join(s.root, bucket, key)
+	src, err := os.Open(name)
+
+	if err != nil {
+		return
+	}
+
+	fileInfo, err := src.Stat()
+
+	if err != nil {
+		return
+	}
+
+	// Perform the copy.
+	go func() {
+		defer src.Close()
+		defer done()
+		if _, err = io.Copy(dst, src); err != nil {
+			fmt.Println(err)
+		}
+	}()
+
+	return fileInfo.Size(), err
 }
 
 // MakeBucket creates a new folder in the local file system that acts like
