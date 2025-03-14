@@ -30,6 +30,8 @@ type UploadDownloader interface {
 	Download(ctx context.Context, bucket, key string, file io.Writer) error
 	// DownloadWithSize downloads a file from a remote object storage location and returns it's size.
 	DownloadWithSize(ctx context.Context, bucket, key string, file io.Writer, done func ()) (int64, error)
+	// GetFileSize returns a file's size from a remote object storage location.
+	GetFileSize(ctx context.Context, bucket, key string, done func ()) (int64, error)
 	// MakeBucket creates a new bucket.
 	MakeBucket(ctx context.Context, bucket, location string) error
 	// Exists checks whether an object exists.

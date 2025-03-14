@@ -106,6 +106,19 @@ func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
 	return stat.Size, err
 }
 
+// GetFileSize gets an object's size from the local file system.
+func (s Service) GetFileSize(ctx context.Context, bucket, key string, done func()) (size int64, err error) {
+
+	attr, err := s.client.GetObjectAttributes(ctx, bucket, key, mio.ObjectAttributesOptions{})
+	if err != nil {
+		return
+	}
+
+	defer done()
+
+	return int64(attr.ObjectSize), err
+}
+
 // MakeBucket creates a new bucket with bucketName with a context to control
 // cancellations and timeouts.
 func (s Service) MakeBucket(ctx context.Context, bucketName,

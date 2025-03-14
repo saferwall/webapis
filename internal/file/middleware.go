@@ -7,8 +7,11 @@ package file
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"maps"
 	"net/http"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -63,6 +66,34 @@ func (m middleware) VerifyHash(next echo.HandlerFunc) echo.HandlerFunc {
 		if !docExists {
 			return db.ErrDocumentNotFound
 		}
+
+		return next(c)
+	}
+}
+
+// Middleware function that verifies that body is in the json form { hashes: ["<sha256>", ...] }.
+func (m middleware) VerifyHashes(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var jsonData struct { Hashes []string `json:"hashes"` }
+		if err := c.Bind(&jsonData); err != nil {
+			m.logger.Errorf("invalid request: %v", err);
+			return e.BadRequest(`invalid request body`)
+		}
+		uniqueHashes := make(map[string]bool)
+		for _, hash := range jsonData.Hashes {
+			sha256 := strings.ToLower(hash)
+			if !sha256reg.MatchString(sha256) {
+				m.logger.Errorf("failed to match sha256 regex for doc %v", sha256)
+				return e.BadRequest("invalid sha256 hash")
+			}
+			uniqueHashes[sha256] = true
+		}
+		jsonData.Hashes = slices.Collect(maps.Keys(uniqueHashes));
+		modifiedData, err := json.Marshal(jsonData);
+		if err != nil {
+			return e.InternalServerError("unable to marshall modified json request");
+		}
+		c.Request().Body = io.NopCloser(bytes.NewReader(modifiedData));
 
 		return next(c)
 	}
