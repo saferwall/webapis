@@ -47,7 +47,7 @@ compose/up:	## Start docker-compose (args: SVC: name of the service to exclude)
 
 compose/up/min:	## Start docker-compose (args: SVC: name of the service to exclude)
 	@echo "${YELLOW} [*] =============== Docker Compose Up Minimum =============== ${RESET}"
-	docker compose config --services | grep -v 'clamav\|sandbox\|meta\|orchestrator\|postprocessor\|aggregator\|pe\|ui' \
+	docker compose config --services | grep -v 'clamav\|sandbox\|meta\|orchestrator\|postprocessor\|aggregator\|pe' \
 		| xargs docker compose up
 
 docker/build:	## Build in a docker container.
@@ -82,7 +82,7 @@ endif
 
 couchbase/init:	## Init couchbase database by creating the cluster and required buckets.
 	# Init the cluster.
-	echo "${GREEN} [*] =============== Creating Cluster =============== ${RESET}"
+	@echo "${GREEN} [*] =============== Creating Cluster =============== ${RESET}"
 	docker compose start couchbase
 	docker exec $(COUCHBASE_CONTAINER_NAME) \
 		couchbase-cli cluster-init \

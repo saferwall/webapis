@@ -100,6 +100,19 @@ func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
 	return fileInfo.Size(), err
 }
 
+// GetFileSize gets an object's size from the local file system.
+func (s Service) GetFileSize(ctx context.Context, bucket, key string, done func()) (size int64, err error) {
+
+	name := filepath.Join(s.root, bucket, key)
+	fileInfo, err := os.Stat(name)
+
+	if err != nil {
+		return
+	}
+	defer done()
+	return fileInfo.Size(), err
+}
+
 // MakeBucket creates a new folder in the local file system that acts like
 // a bucket or a container in a object storage.
 func (s Service) MakeBucket(ctx context.Context, bucketName, location string) error {

@@ -11,6 +11,7 @@ import (
 	"errors"
 	"io"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/saferwall/saferwall-api/internal/activity"
@@ -50,7 +51,8 @@ type Service interface {
 	CountComments(ctx context.Context, id string) (int, error)
 	Strings(ctx context.Context, id string, queryString string, offset, limit int) (interface{}, error)
 	Download(ctx context.Context, id string, zipFile *string) error
-	DownloadRaw(ctx context.Context, id string, file io.Writer) (int64, chan struct {}, error)
+	DownloadRaw(ctx context.Context, id string, file io.Writer) (int64, chan struct{}, error)
+	DownloadMany(ctx context.Context, ids []string, file io.Writer) (int64, chan struct{}, error)
 	GeneratePresignedURL(ctx context.Context, id string) (string, error)
 	MetaUI(ctx context.Context, id string) (interface{}, error)
 	Search(ctx context.Context, input FileSearchRequest) (FileSearchResponse, error)
@@ -60,6 +62,7 @@ type UploadDownloader interface {
 	Upload(ctx context.Context, bucket, key string, file io.Reader) error
 	Download(ctx context.Context, bucket, key string, file io.Writer) error
 	DownloadWithSize(ctx context.Context, bucket, key string, file io.Writer, done func()) (int64, error)
+	GetFileSize(ctx context.Context, bucket, key string, done func()) (int64, error)
 	Exists(ctx context.Context, bucket, key string) (bool, error)
 	GeneratePresignedURL(ctx context.Context, bucket, key string) (string, error)
 }
@@ -477,8 +480,63 @@ func (s service) ReScan(ctx context.Context, sha256 string, input FileScanReques
 	return nil
 }
 
-func (s service) DownloadRaw(ctx context.Context, sha256 string, file io.Writer) (size int64, wait chan struct {}, err error) {
-	wait = make(chan struct {})
+func (s service) DownloadMany(ctx context.Context, hashes []string, file io.Writer) (totalSize int64, wait chan struct{}, err error) {
+	wait = make(chan struct{})
+	totalSize = 22
+	var wg sync.WaitGroup
+	validHashes := make([]string, 0)
+	for _, sha256 := range hashes {
+		wg.Add(1)
+		go func() {
+			size, err := s.objSto.GetFileSize(ctx, s.bucket, sha256, func() {})
+			if err == nil {
+				totalSize += 142 + size + int64(len(sha256))*2
+				validHashes = append(validHashes, sha256)
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	go func() {
+		zipCtx := zip.NewWriter(file)
+		for _, sha256 := range validHashes {
+			filePath := sha256
+			zipFileHeader := &zip.FileHeader{
+				Name:   filePath,
+				Method: zip.Store, // no compression
+			}
+			zipFileHeader.SetPassword(s.samplesZipPwd)
+			zipFileHeader.SetEncryptionMethod(zip.AES256Encryption)
+			zipWriteEnd, _err := zipCtx.CreateHeader(zipFileHeader)
+			if _err != nil {
+				return
+			}
+			downloadCtx, cancelFn := context.WithTimeout(
+				context.Background(), time.Duration(time.Second*30))
+			wait := make(chan struct{})
+			_, err := s.objSto.DownloadWithSize(downloadCtx, s.bucket, sha256, zipWriteEnd,
+				func() {
+					cancelFn()
+					close(wait)
+				},
+			)
+			if err == nil {
+				<-wait
+			} else {
+				s.logger.With(ctx).Error(err)
+				cancelFn()
+				return
+			}
+		}
+		zipCtx.Close()
+		close(wait)
+	}()
+
+	return totalSize, wait, nil
+}
+
+func (s service) DownloadRaw(ctx context.Context, sha256 string, file io.Writer) (size int64, wait chan struct{}, err error) {
+	wait = make(chan struct{})
 	found, err := s.objSto.Exists(ctx, s.bucket, sha256)
 	if err != nil {
 		s.logger.With(ctx).Error(err)

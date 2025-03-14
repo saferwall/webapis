@@ -141,7 +141,7 @@ func BuildHandler(logger log.Logger, db *dbcontext.DB, sec password.Service,
 		optAuthHandler, userMiddleware.VerifyUser, logger, smtpMailer, emailTpl)
 	auth.RegisterHandlers(g, authSvc, logger, smtpMailer, emailTpl, cfg.UI.Address)
 	file.RegisterHandlers(g, fileSvc, logger, cfg.MaxFileSize, authHandler,
-		optAuthHandler, fileMiddleware.VerifyHash, fileMiddleware.CacheResponse,
+		optAuthHandler, fileMiddleware.VerifyHash, fileMiddleware.VerifyHashes, fileMiddleware.CacheResponse,
 		fileMiddleware.ModifyResponse)
 	activity.RegisterHandlers(g, actSvc, authHandler, logger)
 	comment.RegisterHandlers(g, commentSvc, logger, authHandler, commentMiddleware.VerifyID)

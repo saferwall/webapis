@@ -131,6 +131,25 @@ func (s Service) DownloadWithSize(ctx context.Context, bucket, key string,
 	return size, err
 }
 
+// GetFileSize gets an object's size from s3.
+func (s Service) GetFileSize(ctx context.Context, bucket, key string, done func()) (int64, error) {
+
+	// GetAttributes input parameters.
+	input := &awss3.GetObjectAttributesInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	}
+
+	// Perform the GetAttributes request.
+
+	obj, err := s.downloader.S3.GetObjectAttributes(input)
+	if err != nil {
+		return 0, err
+	}
+	defer done()
+	return *obj.ObjectSize, err
+}
+
 // MakeBucket creates a new bucket in s2.
 func (s Service) MakeBucket(ctx context.Context, bucketName, location string) error {
 

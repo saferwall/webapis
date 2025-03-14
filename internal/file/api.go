@@ -5,10 +5,10 @@
 package file
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
-
-	"fmt"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/saferwall/saferwall-api/internal/entity"
@@ -30,7 +30,7 @@ type resource struct {
 
 func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	maxFileSize int,
-	requireLogin, optionalLogin, verifyHash, cacheResponse, modifyResponse echo.MiddlewareFunc) {
+	requireLogin, optionalLogin, verifyHash, verifyHashes, cacheResponse, modifyResponse echo.MiddlewareFunc) {
 
 	res := resource{service, logger, int64(maxFileSize * MB)}
 
@@ -52,6 +52,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/files/:sha256/meta-ui/", res.metaUI, verifyHash, optionalLogin)
 	g.POST("/files/search/", res.search, requireLogin)
 	g.GET("/files/search/autocomplete/", res.autocomplete)
+	g.POST("/files/bulk-download/", res.bulkDownload, verifyHashes, requireLogin)
 	//
 }
 
@@ -503,6 +504,34 @@ func (r resource) rescan(c echo.Context) error {
 	}{"ok", http.StatusOK})
 }
 
+// @Summary Download many files
+// @Description Download a binary file. Files are in zip format and password protected.
+// @Tags File
+// @Produce mpfd
+// @Failure 403 {object} errors.ErrorResponse
+// @Failure 404 {object} errors.ErrorResponse
+// @Failure 500 {object} errors.ErrorResponse
+// @Router /files/bulk-download/ [post]
+// @Security Bearer
+func (r resource) bulkDownload(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	var data struct {
+		Hashes []string `json:"hashes"`
+	}
+	c.Bind(&data)
+	hashes := data.Hashes
+	size, wait, err := r.service.DownloadMany(ctx, hashes, c.Response().Writer)
+
+	if err == nil {
+		c.Response().Header().Set("Content-Length", fmt.Sprint(size))
+		c.Response().Header().Set("Content-Type", "application/zip")
+		c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", fmt.Sprint(time.Now().Unix())+".zip"))
+		<-wait
+	}
+	return err
+}
+
 // @Summary Download a file
 // @Description Download a binary file. Files are in zip format and password protected.
 // @Tags File
@@ -534,7 +563,7 @@ func (r resource) download(c echo.Context) error {
 	c.Response().Header().Set("Content-Type", "application/zip")
 	c.Response().Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", zipFileName))
 
-	<- wait
+	<-wait
 	return err
 }
 
