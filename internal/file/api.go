@@ -52,7 +52,7 @@ func RegisterHandlers(g *echo.Group, service Service, logger log.Logger,
 	g.GET("/files/:sha256/meta-ui/", res.metaUI, verifyHash, optionalLogin)
 	g.POST("/files/search/", res.search, requireLogin)
 	g.GET("/files/search/autocomplete/", res.autocomplete)
-	g.POST("/files/bulk-download/", res.bulkDownload, verifyHashes, requireLogin)
+	g.POST("/files/download/", res.bulkDownload, verifyHashes, requireLogin)
 	//
 }
 
@@ -511,7 +511,7 @@ func (r resource) rescan(c echo.Context) error {
 // @Failure 403 {object} errors.ErrorResponse
 // @Failure 404 {object} errors.ErrorResponse
 // @Failure 500 {object} errors.ErrorResponse
-// @Router /files/bulk-download/ [post]
+// @Router /files/download/ [post]
 // @Security Bearer
 func (r resource) bulkDownload(c echo.Context) error {
 	ctx := c.Request().Context()

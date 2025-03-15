@@ -482,6 +482,7 @@ func (s service) ReScan(ctx context.Context, sha256 string, input FileScanReques
 
 func (s service) DownloadMany(ctx context.Context, hashes []string, file io.Writer) (totalSize int64, wait chan struct{}, err error) {
 	wait = make(chan struct{})
+	// base header size for the zip we're creating
 	totalSize = 22
 	var wg sync.WaitGroup
 	validHashes := make([]string, 0)
@@ -490,6 +491,7 @@ func (s service) DownloadMany(ctx context.Context, hashes []string, file io.Writ
 		go func() {
 			size, err := s.objSto.GetFileSize(ctx, s.bucket, sha256, func() {})
 			if err == nil {
+				// each file included adds: a constant header size of 142 bytes + it's size + it's file path length * 2
 				totalSize += 142 + size + int64(len(sha256))*2
 				validHashes = append(validHashes, sha256)
 			}
