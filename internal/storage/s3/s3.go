@@ -138,10 +138,10 @@ func (s Service) GetFileSize(ctx context.Context, bucket, key string, done func(
 	input := &awss3.GetObjectAttributesInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
+		ObjectAttributes: aws.StringSlice([]string{awss3.ObjectAttributesObjectSize}),
 	}
 
 	// Perform the GetAttributes request.
-
 	obj, err := s.downloader.S3.GetObjectAttributes(input)
 	if err != nil {
 		return 0, err

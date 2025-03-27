@@ -481,22 +481,31 @@ func (s service) ReScan(ctx context.Context, sha256 string, input FileScanReques
 }
 
 func (s service) DownloadMany(ctx context.Context, hashes []string, file io.Writer) (totalSize int64, wait chan struct{}, err error) {
-	wait = make(chan struct{})
-	// base header size for the zip we're creating
-	totalSize = 22
+	var validHashes = make([]string, 0)
+	var mu sync.Mutex
 	var wg sync.WaitGroup
-	validHashes := make([]string, 0)
+	wait = make(chan struct{})
+	totalSize = int64(22)       // base header size
+	fixedOverhead := int64(142) // represents the fixed overhead per file in a ZIP
+	// archive's structure. This is an approximation of the combined size of the local
+	// file header and central directory entry for a file in a standard ZIP archive.
+
+	//TODO: switch to a worker pool.
 	for _, sha256 := range hashes {
 		wg.Add(1)
-		go func() {
-			size, err := s.objSto.GetFileSize(ctx, s.bucket, sha256, func() {})
-			if err == nil {
-				// each file included adds: a constant header size of 142 bytes + it's size + it's file path length * 2
-				totalSize += 142 + size + int64(len(sha256))*2
-				validHashes = append(validHashes, sha256)
+		go func(key string) {
+			size, err := s.objSto.GetFileSize(ctx, s.bucket, key, func() {})
+			if err != nil {
+				s.logger.With(ctx).Errorf("failed to perform bulk download for object: %s: %v", key, err)
+			} else {
+				mu.Lock()
+				defer mu.Unlock()
+				// each file included adds: a fixedOverhead + it's size + it's file path length * 2
+				totalSize += fixedOverhead + size + int64(len(key))*2
+				validHashes = append(validHashes, key)
 			}
 			wg.Done()
-		}()
+		}(sha256)
 	}
 	wg.Wait()
 	go func() {
