@@ -516,12 +516,15 @@ func (r resource) rescan(c echo.Context) error {
 func (r resource) bulkDownload(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	var data struct {
+	var input struct {
 		Hashes []string `json:"hashes"`
 	}
-	c.Bind(&data)
-	hashes := data.Hashes
-	size, wait, err := r.service.DownloadMany(ctx, hashes, c.Response().Writer)
+	if err := c.Bind(&input); err != nil {
+		r.logger.With(c.Request().Context()).Info(err)
+		return errors.BadRequest("")
+	}
+
+	size, wait, err := r.service.DownloadMany(ctx, input.Hashes, c.Response().Writer)
 
 	if err == nil {
 		c.Response().Header().Set("Content-Length", fmt.Sprint(size))
